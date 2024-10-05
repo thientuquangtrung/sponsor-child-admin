@@ -9,13 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { CustomCalendar } from '@/components/ui/customcalendar';
 import { Upload, X } from 'lucide-react';
-import QuillEditor from '@/components/guarantee/QuillEditor';
+import QuillEditor from '@/pages/guarantee/QuillEditor';
 import { toast } from 'sonner'
 import { useUploadImageMutation } from '@/redux/cloudinary/cloudinaryApi';
 // import { useDispatch, useSelector } from 'react-redux';
 // import { setProgress, setIsUploading } from '@/redux/slices/uploadProgressSlice';
 
-const addCampaignSchema = z.object({
+const AddFundrasingSchema = z.object({
     title: z.string().min(1, "Bạn vui lòng nhập Tiêu Đề chiến dịch"),
     story: z.string().min(1, "Bạn vui lòng nhập thông tin chi tiết về chiến dịch"),
     targetAmount: z.string().min(1, "Bạn vui lòng nhập số tiền mục tiêu lớn hơn 0"),
@@ -46,13 +46,13 @@ const CustomDropzone = ({ onDrop, multiple, children }) => {
     );
 };
 
-const AddCampaign = () => {
+const AddFundrasing = () => {
     const [imagesFolder, setImagesFolder] = useState([]);
     const [thumbnail, setThumbnail] = useState(null);
     const [uploadImage] = useUploadImageMutation();
 
     const form = useForm({
-        resolver: zodResolver(addCampaignSchema),
+        resolver: zodResolver(AddFundrasingSchema),
         defaultValues: {
             title: '',
             story: '',
@@ -118,18 +118,18 @@ const AddCampaign = () => {
     const onSubmit = async (data) => {
         try {
             const userFolder = 'user_001'; // test with user_001
-            const tempCampaignId = `c_001`; //test with c_001
+            const tempFundrasingId = `c_001`; //test with c_001
 
             // Upload thumbnail
             const thumbnailUrl = await uploadToCloudinary(
                 data.thumbnailUrl,
-                `${userFolder}/campaign/${tempCampaignId}/thumbnail`
+                `${userFolder}/fundrasing/${tempFundrasingId}/thumbnail`
             );
 
             // Upload images-supported
             const imageUrls = await Promise.all(
                 data.imagesFolder.map(file =>
-                    uploadToCloudinary(file, `${userFolder}/campaign/${tempCampaignId}/images-supported`)
+                    uploadToCloudinary(file, `${userFolder}/fundrasing/${tempFundrasingId}/images-supported`)
                 )
             );
 
@@ -138,20 +138,18 @@ const AddCampaign = () => {
                 ...data,
                 thumbnailUrl,
                 imagesFolder: imageUrls,
-                tempCampaignId
+                tempFundrasingId
             };
 
-            console.log('Final data to be sent to backend:', finalData);
 
             // Reset form or navigate to a success page
             form.reset();
             setThumbnail(null);
             setImagesFolder([]);
 
-            toast.success('Campaign created successfully!');
+            toast.success('Fundrasing created successfully!');
         } catch (error) {
-            console.error('Submission failed:', error);
-            toast.error('Failed to create campaign. Please try again.');
+            toast.error('Failed to create fundrasing. Please try again.');
         }
     };
 
@@ -361,4 +359,4 @@ const AddCampaign = () => {
     );
 };
 
-export default AddCampaign;
+export default AddFundrasing;

@@ -24,8 +24,10 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { DataTablePagination } from '@/components/datatable/DataTablePagination';
-import { DataTableToolbar } from '@/components/datatable/DataTableToolbar';
 import { DataTableColumnHeader } from '@/components/datatable/DataTableColumnHeader';
+import { DataTableToolbarAdmin } from '@/components/datatable/DataTableToolbarAdmin';
+import Breadcrumb from '@/pages/admin/Breadcrumb';
+
 import {
     AlertDialog,
     AlertDialogAction,
@@ -47,6 +49,10 @@ const data = [
         budget: 200,
         startDate: new Date(2024, 5, 1).toISOString(),
         endDate: new Date(2025, 7, 31).toISOString(),
+        guaranteeId: 'Nguyễn A',
+        targetAmount: 5000,
+        raisedAmount: 1500,
+        thumbnailUrl: 'https://image.nhandan.vn/w800/Uploaded/2024/vowsxrdrei/2023_12_25/z5008015677689-d8950e8f203de9ef9dab802edd72b70b-1-3956.jpg.webp',
     },
     {
         id: 'ct002',
@@ -56,16 +62,13 @@ const data = [
         budget: 30,
         startDate: new Date(2024, 8, 1).toISOString(),
         endDate: new Date(2024, 8, 30).toISOString(),
+        guaranteeId: null,
+        targetAmount: 3000,
+        raisedAmount: 0,
+        thumbnailUrl: 'https://image.nhandan.vn/w800/Uploaded/2024/vowsxrdrei/2023_12_25/z5008015677689-d8950e8f203de9ef9dab802edd72b70b-1-3956.jpg.webp',
     },
-    {
-        id: 'ct003',
-        name: 'Chiến dịch C',
-        status: 'Dã kết thúc',
-        join: 10,
-        budget: 50,
-        startDate: new Date(2024, 3, 1).toISOString(),
-        endDate: new Date(2024, 2, 31).toISOString(),
-    },
+
+
 ];
 
 const columns = [
@@ -89,8 +92,15 @@ const columns = [
         enableHiding: false,
     },
     {
+        accessorKey: 'thumbnailUrl',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Ảnh " />,
+        cell: ({ row }) => (
+            <img src={row.getValue('thumbnailUrl')} alt="Thumbnail" className="w-16 h-16 object-cover" />
+        ),
+    },
+    {
         accessorKey: 'name',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Tên chiến dịch" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Tên quỹ" />,
         cell: ({ row }) => <div className="font-medium">{row.getValue('name')}</div>,
     },
     {
@@ -129,6 +139,26 @@ const columns = [
         header: ({ column }) => <DataTableColumnHeader column={column} title="Ngày kết thúc" />,
         cell: ({ row }) => <div>{new Date(row.getValue('endDate')).toLocaleDateString('vi-VN')}</div>,
     },
+
+    {
+        accessorKey: 'targetAmount',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Số tiền mục tiêu" />,
+        cell: ({ row }) => <div>{row.getValue('targetAmount').toLocaleString('vi-VN')} ₫</div>,
+    },
+    {
+        accessorKey: 'raisedAmount',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Số tiền quyên góp" />,
+        cell: ({ row }) => <div>{row.getValue('raisedAmount').toLocaleString('vi-VN')} ₫</div>,
+    },
+    {
+        accessorKey: 'guaranteeId',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Người bảo lãnh" />,
+        cell: ({ row }) => (
+            row.getValue('status') === 'Đang hoạt động' || row.getValue('status') === 'Dã kết thúc'
+                ? <div>{row.getValue('guaranteeId') || 'Chưa có'}</div>
+                : <div>Chưa có</div>
+        ),
+    },
     {
         id: 'actions',
         cell: ({ row }) => <ActionMenu row={row} />,
@@ -137,7 +167,6 @@ const columns = [
 
 const ActionMenu = ({ row }) => {
     const handleDelete = () => {
-        console.log('Xóa chiến dịch:', row.original);
     };
 
     return (
@@ -176,7 +205,7 @@ const ActionMenu = ({ row }) => {
     );
 };
 
-export function SponsorCampaigns() {
+export function AdminFundrasing() {
     const navigate = useNavigate();
     const [sorting, setSorting] = React.useState([]);
     const [columnFilters, setColumnFilters] = React.useState([]);
@@ -203,54 +232,51 @@ export function SponsorCampaigns() {
     });
 
     return (
-        <div className="w-full space-y-4 mx-3">
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold ml-6 mt-6">Quản lý Chiến dịch</h1>
-                <Button className="mr-2 mt-3" onClick={() => navigate('/guarantee/campaigns/add')}>
-                    Tạo Chiến dịch
-                    <Plus className="ml-2 h-4 w-4" />
-                </Button>
-            </div>
-            <DataTableToolbar table={table} />
-            <div className="rounded-md border">
-                <Table>
-                    <TableHeader>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(header.column.columnDef.header, header.getContext())}
-                                    </TableHead>
-                                ))}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-                    <TableBody>
-                        {table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </TableCell>
+        <>      <Breadcrumb pageName="Chiến dịch gây quỹ" />
+
+            <div className="w-full space-y-4 mx-3">
+
+                <DataTableToolbarAdmin table={table} type="Fundraising" />
+                <div className="rounded-md border">
+                    <Table>
+                        <TableHeader>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <TableRow key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => (
+                                        <TableHead key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(header.column.columnDef.header, header.getContext())}
+                                        </TableHead>
                                     ))}
                                 </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    Không có kết quả.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+                            ))}
+                        </TableHeader>
+                        <TableBody>
+                            {table.getRowModel().rows?.length ? (
+                                table.getRowModel().rows.map((row) => (
+                                    <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell key={cell.id}>
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                                        Không có kết quả.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+                <DataTablePagination table={table} />
             </div>
-            <DataTablePagination table={table} />
-        </div>
+        </>
     );
 }
 
-export default SponsorCampaigns;
+export default AdminFundrasing;

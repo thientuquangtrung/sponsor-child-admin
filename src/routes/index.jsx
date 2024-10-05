@@ -2,19 +2,16 @@ import { Suspense, lazy } from 'react';
 import { Navigate, useRoutes } from 'react-router-dom';
 
 // layouts
-import { Applayout } from '@/components/layouts/AppLayout';
 import { AuthLayout } from '@/components/layouts/AuthLayout';
-import { GuaranteeLayout } from '@/components/layouts/GuaranteeLayout';
+import { AdminLayout } from '@/components/layouts/AdminLayout';
 
 
 
 // config
-import { DEFAULT_PATH } from '../config/app';
+// import { DEFAULT_PATH } from '../config/app';
 import LoadingScreen from '@/components/common/LoadingScreen';
-import CampaignDetail from '@/components/landingpage/CampaignDetail';
-import DonateTarget from '@/components/landingpage/DonateTarget';
-import PageIntroduction from '@/components/landingpage/PageIntroduction';
-import RegistrationPage from '@/components/landingpage/RegistrationPage';
+
+
 
 const Loadable = (Component) => {
     const LoadableComponent = (props) => {
@@ -44,76 +41,23 @@ export default function Router() {
                 { element: <NewPasswordPage />, path: 'new-password' },
             ],
         },
-        {
-            path: '/guarantee',
-            element: <GuaranteeLayout />,
-            children: [
-                { element: <GuaranteeHome />, index: true },
-                { element: <GuaranteeCampaigns />, path: 'campaigns' },
-                { element: <DonationHistory />, path: 'donation-history' },
-                { element: <AddCampaign />, path: 'campaigns/add' },
 
-
-
-            ],
-        },
         {
             path: '/',
-            element: <Applayout />,
+            element: <AdminLayout />,
             children: [
-                // { element: <Navigate to={DEFAULT_PATH} replace />, index: true },
-
-                { element: <HomePage />, index: true },
-
-                {
-                    path: 'campaign-detail/:id',
-                    element: <CampaignDetail />,
-                },
-                {
-                    path: 'donate-target',
-                    element: <DonateTarget />,
-                },
-                {
-                    path: 'introduction',
-                    element: <PageIntroduction />,
-                },
-                {
-                    path: 'register',
-                    element: <RegistrationPage />,
-                },
-                {
-                    path: 'about',
-                    element: <AboutPage />,
-                },
-
-                {
-                    path: 'home',
-                    element: <HomePage />,
-                },
-                {
-                    path: 'assets',
-                    element: <PageMyAssets />,
-                },
-                {
-                    path: 'assets/add',
-                    element: <PageAddAsset />,
-                },
-                {
-                    path: 'assetshub',
-                    element: <PageAssetsHub />,
-                },
-                {
-                    path: 'profile',
-                    element: <PageMyProfile />,
-                },
-                {
-                    path: 'empty',
-                    element: <PageEmpty />,
-                },
-                { path: '404', element: <Page404 /> },
-                { path: '*', element: <Navigate to="/404" replace /> },
+                { element: <AdminDashboard />, index: true },
+                { element: <UserManagement />, path: 'users' },
+                { element: <AdminFundrasing />, path: 'fundrasings' },
+                { element: <AddFundrasing />, path: 'fundrasings/add' },
+                { element: <FinanceTransaction />, path: 'finance/transactions' },
+                { element: <FinanceReport />, path: 'finance/reports' },
+                { element: <FundDisbursement />, path: 'finance/disbursement' },
+                { element: <Visit />, path: 'visit' },
+                { element: <VisitForm />, path: 'visit/add-visit-form' },
             ],
         },
+
         { path: '*', element: <Navigate to="/404" replace /> },
     ]);
 }
@@ -123,20 +67,22 @@ const RegisterPage = Loadable(lazy(() => import('../pages/auth/Register')));
 const ResetPasswordPage = Loadable(lazy(() => import('../pages/auth/ResetPassword')));
 const NewPasswordPage = Loadable(lazy(() => import('../pages/auth/NewPassword')));
 
-const PageMyProfile = Loadable(lazy(() => import('../pages/asset-pages/MyProfile')));
-const PageMyAssets = Loadable(lazy(() => import('../pages/asset-pages/MyAssets')));
-const PageAddAsset = Loadable(lazy(() => import('../pages/asset-pages/AddAsset')));
-const PageAssetsHub = Loadable(lazy(() => import('../pages/asset-pages/AssetsHub')));
 
-const PageEmpty = Loadable(lazy(() => import('../pages/Empty')));
-const Page404 = Loadable(lazy(() => import('../pages/NoMatch')));
 
-const HomePage = Loadable(lazy(() => import('../pages/HomePage')));
-const AboutPage = Loadable(lazy(() => import('../pages/AboutPage')));
 
-//guarantee
-const GuaranteeHome = Loadable(lazy(() => import('@/components/guarantee/GuaranteeHome')));
-const GuaranteeCampaigns = Loadable(lazy(() => import('@/components/guarantee/GuaranteeCampaigns')));
-const DonationHistory = Loadable(lazy(() => import('@/components/guarantee/DonationHistory')));
-const AddCampaign = Loadable(lazy(() => import('@/components/guarantee/AddCampaign')));
+//admin
+const AdminDashboard = Loadable(lazy(() => import('@/pages/admin/AdminDashboard')));
+const UserManagement = Loadable(lazy(() => import('@/pages/admin/UserManagement')));
+const AdminFundrasing = Loadable(lazy(() => import('@/pages/admin/AdminFundrasing')));
+const AddFundrasing = Loadable(lazy(() => import('@/pages/admin/AddFundrasing')));
+const FinanceTransaction = Loadable(lazy(() => import('@/pages/admin/finance/FinanceTransaction')));
+const FinanceReport = Loadable(lazy(() => import('@/pages/admin/finance/FinanceReport')));
+const FundDisbursement = Loadable(lazy(() => import('@/pages/admin/finance/FundDisbursement')));
+//children-manager
+const Visit = Loadable(lazy(() => import('@/pages/children-manager/Visit')));
+const VisitForm = Loadable(lazy(() => import('@/pages/children-manager/VisitForm')));
+
+
+
+
 

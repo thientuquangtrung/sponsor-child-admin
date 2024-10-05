@@ -20,11 +20,13 @@
     --secondary-foreground: 0 0% 100%;
     --accent: 181.54 30.71% 50.2%;
     --accent-foreground: 0 0% 0%;
+    --stroke: 210 36% 92%;
     /* --destructive: 12 80% 32%; */
     --destructive: 0 99% 40%; /*-red*/
     --destructive-foreground: 12 80% 92%;
     --ring: 39.07 87.76% 71.18%;
     --radius: 0.75rem;
+    
   }
 
   .dark {
@@ -47,6 +49,8 @@
     --destructive: 12 80% 57%;
     --destructive-foreground: 0 0% 0%;
     --ring: 125 46% 59%;
+    --box: 201 36% 20%;
+    --stroke: 200 20% 24%;
   }
 }
 

@@ -141,9 +141,9 @@ export function Header() {
                                     mainMenu.findIndex((item) =>
                                         item.items !== undefined
                                             ? item.items
-                                                  .filter((subitem) => subitem.to !== undefined)
-                                                  .map((subitem) => subitem.to)
-                                                  .includes(location.pathname)
+                                                .filter((subitem) => subitem.to !== undefined)
+                                                .map((subitem) => subitem.to)
+                                                .includes(location.pathname)
                                             : false,
                                     )
                                 }
