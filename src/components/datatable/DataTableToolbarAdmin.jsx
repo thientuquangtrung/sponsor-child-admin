@@ -4,7 +4,7 @@ import SearchIcon from '@/assets/icons/SearchIcon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DataTableViewOptions } from '@/components/datatable/DataTableViewOptions';
-import { DataTableFacetedFilter } from './DataTableFacetedFilter';
+import { DataTableFacetedFilter } from '@/components/datatable/DataTableFacetedFilter';
 
 export function DataTableToolbarAdmin({
     table,

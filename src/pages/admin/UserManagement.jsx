@@ -204,6 +204,10 @@ export function UserManagement() {
     const [columnFilters, setColumnFilters] = React.useState([]);
     const [columnVisibility, setColumnVisibility] = React.useState({});
     const [rowSelection, setRowSelection] = React.useState({});
+    const breadcrumbs = [
+        { name: 'Bảng điều khiển', path: '/' },
+        { name: 'Người dùng', path: null },
+    ];
 
     const table = useReactTable({
         data,
@@ -225,7 +229,8 @@ export function UserManagement() {
     });
 
     return (
-        <>      <Breadcrumb pageName="Người dùng" />
+        <>
+            <Breadcrumb breadcrumbs={breadcrumbs} />
 
             <div className="w-full space-y-4 mx-3">
 

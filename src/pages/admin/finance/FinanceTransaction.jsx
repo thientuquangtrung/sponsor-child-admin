@@ -115,7 +115,10 @@ export function FinanceTransaction() {
     const [columnFilters, setColumnFilters] = React.useState([]);
     const [columnVisibility, setColumnVisibility] = React.useState({});
     const [rowSelection, setRowSelection] = React.useState({});
-
+    const breadcrumbs = [
+        { name: 'Bảng điều khiển', path: '/' },
+        { name: 'Giao dịch', path: null },
+    ];
     const table = useReactTable({
         data: transactionData,
         columns,
@@ -136,7 +139,8 @@ export function FinanceTransaction() {
     });
 
     return (
-        <>      <Breadcrumb pageName="Giao dịch" />
+        <>
+            <Breadcrumb breadcrumbs={breadcrumbs} />
 
             <div className="w-full space-y-4">
                 <div className="flex justify-end">

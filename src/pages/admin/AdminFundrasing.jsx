@@ -7,9 +7,8 @@ import {
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table';
-import { useNavigate } from 'react-router-dom';
 
-import { MoreHorizontal, Plus } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -206,12 +205,15 @@ const ActionMenu = ({ row }) => {
 };
 
 export function AdminFundrasing() {
-    const navigate = useNavigate();
+
     const [sorting, setSorting] = React.useState([]);
     const [columnFilters, setColumnFilters] = React.useState([]);
     const [columnVisibility, setColumnVisibility] = React.useState({});
     const [rowSelection, setRowSelection] = React.useState({});
-
+    const breadcrumbs = [
+        { name: 'Bảng điều khiển', path: '/' },
+        { name: 'Chiến dịch gây quỹ', path: null },
+    ];
     const table = useReactTable({
         data,
         columns,
@@ -232,7 +234,8 @@ export function AdminFundrasing() {
     });
 
     return (
-        <>      <Breadcrumb pageName="Chiến dịch gây quỹ" />
+        <>                 <Breadcrumb breadcrumbs={breadcrumbs} />
+
 
             <div className="w-full space-y-4 mx-3">
 

@@ -103,6 +103,10 @@ const Visit = () => {
     const [selectedStatus, setSelectedStatus] = useState('all');
     const [selectedProvince, setSelectedProvince] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
+    const breadcrumbs = [
+        { name: 'Bảng điều khiển', path: '/' },
+        { name: 'Chuyến thăm', path: null },
+    ];
 
     useEffect(() => {
         filterVisits();
@@ -146,11 +150,9 @@ const Visit = () => {
     };
 
     return (
-        <>      <Breadcrumb pageName="Chuyến thăm" />
-
+        <>
+            <Breadcrumb breadcrumbs={breadcrumbs} />
             <div className="p-6 space-y-6">
-
-
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4  p-6 rounded-lg shadow-sm">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />

@@ -55,6 +55,12 @@ export default function Router() {
                 { element: <FundDisbursement />, path: 'finance/disbursement' },
                 { element: <Visit />, path: 'visit' },
                 { element: <VisitForm />, path: 'visit/add-visit-form' },
+                { element: <AdminCenter />, path: 'center' },
+                { element: <GuaranteeRequests />, path: 'center/guarantee-requests' },
+                { element: <GuaranteeRequestsDetail />, path: 'center/guarantee-requests/:id' },
+
+
+
             ],
         },
 
@@ -78,6 +84,13 @@ const AddFundrasing = Loadable(lazy(() => import('@/pages/admin/AddFundrasing'))
 const FinanceTransaction = Loadable(lazy(() => import('@/pages/admin/finance/FinanceTransaction')));
 const FinanceReport = Loadable(lazy(() => import('@/pages/admin/finance/FinanceReport')));
 const FundDisbursement = Loadable(lazy(() => import('@/pages/admin/finance/FundDisbursement')));
+const AdminCenter = Loadable(lazy(() => import('@/pages/admin/center/AdminCenter')));
+const GuaranteeRequests = Loadable(lazy(() => import('@/pages/admin/center/GuaranteeRequests')));
+const GuaranteeRequestsDetail = Loadable(lazy(() => import('@/pages/admin/center/GuaranteeRequestsDetail')));
+
+
+
+
 //children-manager
 const Visit = Loadable(lazy(() => import('@/pages/children-manager/Visit')));
 const VisitForm = Loadable(lazy(() => import('@/pages/children-manager/VisitForm')));

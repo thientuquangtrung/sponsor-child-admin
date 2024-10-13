@@ -7,10 +7,7 @@ import {
     LayoutDashboard,
     SquareUser,
     Settings,
-    Calendar,
-    FileText,
-    Layout,
-    Bell,
+    Heater,
     BarChart2,
     ReceiptText,
     LandPlot,
@@ -18,28 +15,29 @@ import {
     LogOut,
     Leaf,
     ChevronDown,
-    ChevronUp
+    ChevronUp,
+    Telescope
 } from "lucide-react";
 
 const menuItems = [
-    { icon: LayoutDashboard, label: "Analytics Dashboard", path: "/" },
-    { icon: Leaf, label: 'Fundraising', path: '/fundrasings' },
+    { icon: LayoutDashboard, label: "Bảng điều khiển", path: "/" },
+    { icon: Leaf, label: 'Gây quỹ', path: '/fundrasings' },
     {
         icon: BarChart2,
-        label: 'Finance',
+        label: 'Tài chính',
         path: '/finance',
         subItems: [
-            { icon: ReceiptText, label: 'Transaction', path: '/finance/transactions' },
-            { icon: LandPlot, label: 'Disbursement', path: '/finance/disbursement' },
-            { icon: MessageSquareDot, label: 'Report', path: '/finance/reports' }
+            { icon: ReceiptText, label: 'Giao dịch', path: '/finance/transactions' },
+            { icon: LandPlot, label: 'Giải ngân', path: '/finance/disbursement' },
+            { icon: MessageSquareDot, label: 'Báo cáo', path: '/finance/reports' }
         ]
     },
-    { icon: SquareUser, label: "Users", path: "/users" },
-    { icon: Bell, label: "Notifications", path: "/notifications" },
-    { icon: Settings, label: "Settings", path: "/settings" },
-    { icon: Settings, label: "Visits", path: "/visit" },
+    { icon: SquareUser, label: "Người dùng", path: "/users" },
+    { icon: Heater, label: "Trung tâm Quản trị", path: "/center" },
+    { icon: Settings, label: "Cài đặt", path: "/settings" },
+    { icon: Telescope, label: "Chuyến thăm", path: "/visit" },
 
-    { icon: LogOut, label: 'Logout', path: '/logout' },
+    { icon: LogOut, label: 'Đăng xuất', path: '/logout' },
 ];
 
 const SidebarAdmin = () => {
@@ -71,7 +69,7 @@ const SidebarAdmin = () => {
             {!isSidebarOpen && (
                 <button
                     onClick={toggleSidebar}
-                    className="fixed top-4 left-4 z-[999] md:hidden bg-white dark:bg-gray-950 p-2 rounded-md shadow-md"
+                    className="fixed top-4 left-4 md:hidden z-50 bg-white dark:bg-gray-950 p-2 rounded-md shadow-md"
                 >
                     <Menu size={24} />
                 </button>
@@ -80,7 +78,7 @@ const SidebarAdmin = () => {
             <div
                 ref={sideBarRef}
                 className={`fixed top-0 left-0 h-screen w-64 bg-white dark:bg-gray-950 border-r border-gray-300 dark:border-gray-700 p-6 
-                    shadow-xl transition-all duration-300 ease-in-out z-[99]
+                    shadow-xl transition-all duration-300 ease-in-out z-40
                     ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     md:translate-x-0 md:top-16 md:h-[calc(100vh-4rem)]
                 `}
@@ -93,7 +91,7 @@ const SidebarAdmin = () => {
                     </div>
 
                     <div className="space-y-6">
-                        <p className="uppercase text-xs text-gray-600 mb-4 mt-4 tracking-wider">Apps</p>
+                        <p className="uppercase text-xs text-gray-600 mb-4 mt-4 tracking-wider">Quản lý</p>
                         {menuItems.map((item, index) => (
                             <div key={index}>
                                 {item.subItems ? (

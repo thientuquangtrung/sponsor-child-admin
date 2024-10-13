@@ -4,9 +4,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CreditCard, DollarSign, Download, User2, Wallet } from 'lucide-react';
 import Breadcrumb from '@/pages/admin/Breadcrumb';
-import CardDataStats from '../CardDataStats';
+import CardDataStats from '@/pages/admin/CardDataStats';
 
 const FinanceReport = () => {
+    const breadcrumbs = [
+        { name: 'Bảng điều khiển', path: '/' },
+        { name: 'Báo cáo tài chính', path: null }
+    ];
     const revenueData = {
         options: {
             chart: {
@@ -65,7 +69,7 @@ const FinanceReport = () => {
 
     return (
         <div className="space-y-6">
-            <Breadcrumb pageName="Báo cáo Tài chính" />
+            <Breadcrumb breadcrumbs={breadcrumbs} />
 
             <div className="flex justify-end">
                 <Button

@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { DataTableViewOptions } from '@/components/datatable/DataTableViewOptions';
 
 // import { priorities, statuses } from '../data/data';
-import { DataTableFacetedFilter } from './DataTableFacetedFilter';
+import { DataTableFacetedFilter } from '@/components/datatable/DataTableFacetedFilter';
 
 export function DataTableToolbar({
     table,

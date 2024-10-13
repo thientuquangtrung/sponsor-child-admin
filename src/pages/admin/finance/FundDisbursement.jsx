@@ -156,7 +156,10 @@ export function FundDisbursement() {
     const [columnFilters, setColumnFilters] = useState([]);
     const [columnVisibility, setColumnVisibility] = useState({});
     const [rowSelection, setRowSelection] = useState({});
-
+    const breadcrumbs = [
+        { name: 'Bảng điều khiển', path: '/' },
+        { name: 'Giải ngân', path: null },
+    ];
     const table = useReactTable({
         data,
         columns,
@@ -177,7 +180,9 @@ export function FundDisbursement() {
     });
 
     return (
-        <>      <Breadcrumb pageName="Giải ngân" />
+        <>
+            <Breadcrumb breadcrumbs={breadcrumbs} />
+
 
             <div className="w-full space-y-4 mx-3">
 

@@ -15,7 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { LogoutUser } from '@/redux/auth/authActionCreators';
 import { useLogoutMutation } from '@/redux/auth/authApi';
 import DropdownNotification from '@/pages/admin/DropdownNotification';
-import { Logo } from '../logo';
+import { Logo } from '@/components/logo';
 
 const HeaderSidebar = () => {
     const [logout] = useLogoutMutation();
@@ -30,7 +30,7 @@ const HeaderSidebar = () => {
     };
 
     return (
-        <header className="sticky top-0 z-[99] flex w-full drop-shadow bg-white dark:bg-gray-950 md:fixed md:left-0 md:right-0 md:h-16">
+        <header className="sticky top-0 z-10 flex w-full drop-shadow bg-white dark:bg-gray-950 md:fixed md:left-0 md:right-0 md:h-16">
             <div className="flex w-full items-center justify-between px-4 py-4 shadow-md md:px-6 2xl:px-11">
                 <div className="flex items-center gap-4 ">
                     <Link to="/" className="flex items-center">

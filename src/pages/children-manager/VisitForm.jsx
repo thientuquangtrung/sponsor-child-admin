@@ -29,6 +29,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import Breadcrumb from '@/pages/admin/Breadcrumb';
 
 const PROVINCES = [
     { id: 1, name: "Hà Nội" },
@@ -86,6 +87,12 @@ const visitFormSchema = z.object({
 });
 
 const VisitForm = () => {
+    const breadcrumbs = [
+        { name: 'Bảng điều khiển', path: '/' },
+        { name: 'Chuyến thăm', path: '/visit' },
+        { name: 'Tạo chuyến thăm', path: null },
+
+    ];
     const form = useForm({
         resolver: zodResolver(visitFormSchema),
         defaultValues: {
@@ -128,224 +135,230 @@ const VisitForm = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen py-6">
-            <h1 className="text-3xl font-bold mb-6 text-center text-primary">TẠO CHUYẾN THĂM</h1>
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 w-full max-w-2xl">
-                    <FormField
-                        control={form.control}
-                        name="visitName"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Tên chuyến thăm</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Nhập tên chuyến thăm" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="provinceId"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Tỉnh/Thành phố</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Chọn tỉnh/thành" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {PROVINCES.map((province) => (
-                                            <SelectItem key={province.id} value={province.id.toString()}>
-                                                {province.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-4">
+        <>
+            <Breadcrumb breadcrumbs={breadcrumbs} />
+            <div className="flex flex-col items-center  min-h-screen">
+                <div className="w-full max-w-2xl bg-gradient-to-b from-blue-100 to-green-100 p-8 rounded-lg shadow-md">
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                             <FormField
                                 control={form.control}
-                                name="visitDateStart"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col">
-                                        <FormLabel>Ngày bắt đầu</FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button
-                                                        variant={"outline"}
-                                                        className={cn(
-                                                            "pl-3 text-left font-normal",
-                                                            !field.value && "text-muted-foreground"
-                                                        )}
-                                                    >
-                                                        {field.value ? (
-                                                            format(field.value, "dd/MM/yyyy")
-                                                        ) : (
-                                                            <span>Chọn ngày</span>
-                                                        )}
-                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0" align="start">
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={field.value}
-                                                    onSelect={field.onChange}
-                                                    disabled={(date) => date < new Date()}
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="visitTimeStart"
+                                name="visitName"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Giờ bắt đầu</FormLabel>
+                                        <FormLabel>Tên chuyến thăm</FormLabel>
                                         <FormControl>
-                                            <Input type="time" {...field} />
+                                            <Input placeholder="Nhập tên chuyến thăm" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
-                        </div>
-
-                        <div className="space-y-4">
                             <FormField
                                 control={form.control}
-                                name="visitDateEnd"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col">
-                                        <FormLabel>Ngày kết thúc</FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button
-                                                        variant={"outline"}
-                                                        className={cn(
-                                                            "pl-3 text-left font-normal",
-                                                            !field.value && "text-muted-foreground"
-                                                        )}
-                                                    >
-                                                        {field.value ? (
-                                                            format(field.value, "dd/MM/yyyy")
-                                                        ) : (
-                                                            <span>Chọn ngày</span>
-                                                        )}
-                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0" align="start">
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={field.value}
-                                                    onSelect={field.onChange}
-                                                    disabled={(date) =>
-                                                        date < new Date() ||
-                                                        (form.getValues("visitDateStart") && date < form.getValues("visitDateStart"))
-                                                    }
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="visitTimeEnd"
+                                name="provinceId"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Giờ kết thúc</FormLabel>
-                                        <FormControl>
-                                            <Input type="time" {...field} />
-                                        </FormControl>
+                                        <FormLabel>Tỉnh/Thành phố</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Chọn tỉnh/thành" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {PROVINCES.map((province) => (
+                                                    <SelectItem key={province.id} value={province.id.toString()}>
+                                                        {province.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
-                        </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField
-                            control={form.control}
-                            name="numberOfVisitors"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Số lượng người thăm</FormLabel>
-                                    <FormControl>
-                                        <Input type="number" min="1" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="visitCost"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Chi phí (VNĐ)</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            type="number"
-                                            min="0"
-                                            step="1000"
-                                            placeholder="0"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
-
-                    <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Mô tả chi tiết</FormLabel>
-                                <FormControl>
-                                    <Textarea
-                                        placeholder="Nhập mô tả chi tiết về chuyến thăm..."
-                                        className="min-h-[100px]"
-                                        {...field}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="visitDateStart"
+                                        render={({ field }) => (
+                                            <FormItem className="flex flex-col">
+                                                <FormLabel>Ngày bắt đầu</FormLabel>
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <FormControl>
+                                                            <Button
+                                                                variant={"outline"}
+                                                                className={cn(
+                                                                    "pl-3 text-left font-normal",
+                                                                    !field.value && "text-muted-foreground"
+                                                                )}
+                                                            >
+                                                                {field.value ? (
+                                                                    format(field.value, "dd/MM/yyyy")
+                                                                ) : (
+                                                                    <span>Chọn ngày</span>
+                                                                )}
+                                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                            </Button>
+                                                        </FormControl>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-auto p-0" align="start">
+                                                        <Calendar
+                                                            mode="single"
+                                                            selected={field.value}
+                                                            onSelect={field.onChange}
+                                                            disabled={(date) => date < new Date()}
+                                                        />
+                                                    </PopoverContent>
+                                                </Popover>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
                                     />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
 
-                    <div className="flex justify-center">
+                                    <FormField
+                                        control={form.control}
+                                        name="visitTimeStart"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Giờ bắt đầu</FormLabel>
+                                                <FormControl>
+                                                    <Input type="time" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
 
-                        <Button className="w-2/4 bg-[#25a5a7] text-white" type="submit">Tạo chuyến thăm</Button>
-                    </div>
-                </form>
-            </Form>
-        </div>
+                                <div className="space-y-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="visitDateEnd"
+                                        render={({ field }) => (
+                                            <FormItem className="flex flex-col">
+                                                <FormLabel>Ngày kết thúc</FormLabel>
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <FormControl>
+                                                            <Button
+                                                                variant={"outline"}
+                                                                className={cn(
+                                                                    "pl-3 text-left font-normal",
+                                                                    !field.value && "text-muted-foreground"
+                                                                )}
+                                                            >
+                                                                {field.value ? (
+                                                                    format(field.value, "dd/MM/yyyy")
+                                                                ) : (
+                                                                    <span>Chọn ngày</span>
+                                                                )}
+                                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                            </Button>
+                                                        </FormControl>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-auto p-0" align="start">
+                                                        <Calendar
+                                                            mode="single"
+                                                            selected={field.value}
+                                                            onSelect={field.onChange}
+                                                            disabled={(date) =>
+                                                                date < new Date() ||
+                                                                (form.getValues("visitDateStart") && date < form.getValues("visitDateStart"))
+                                                            }
+                                                        />
+                                                    </PopoverContent>
+                                                </Popover>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        control={form.control}
+                                        name="visitTimeEnd"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Giờ kết thúc</FormLabel>
+                                                <FormControl>
+                                                    <Input type="time" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="numberOfVisitors"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Số lượng người thăm</FormLabel>
+                                            <FormControl>
+                                                <Input type="number" min="1" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="visitCost"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Chi phí (VNĐ)</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="number"
+                                                    min="0"
+                                                    step="1000"
+                                                    placeholder="0"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+
+                            <FormField
+                                control={form.control}
+                                name="description"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Mô tả chi tiết</FormLabel>
+                                        <FormControl>
+                                            <Textarea
+                                                placeholder="Nhập mô tả chi tiết về chuyến thăm..."
+                                                className="min-h-[100px]"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <div className="flex justify-center mt-6">
+                                <Button className="bg-[#25a5a7] text-white hover:bg-[#1c7d7f]" type="submit">
+                                    Tạo chuyến thăm
+                                </Button>
+                            </div>
+
+                        </form>
+                    </Form>
+                </div>
+            </div>
+        </>
     );
 };
 
