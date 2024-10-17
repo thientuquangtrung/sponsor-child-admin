@@ -7,32 +7,25 @@ import {
     CardHeader,
     CardTitle
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileText, FileSignature, UserCheck } from 'lucide-react';
 import Breadcrumb from '@/pages/admin/Breadcrumb';
 
-const FilterButton = ({ title, to }) => (
+const StatusCard = ({ title, count, icon, color, to }) => (
     <Link to={to}>
-        <Button variant="outline" className="px-4 py-2 h-auto">
-            {title}
-        </Button>
+        <Card className={`${color} text-white cursor-pointer transition-colors duration-200`}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xl font-bold">
+                    {title}
+                </CardTitle>
+                {React.cloneElement(icon, { className: "h-6 w-6" })}
+            </CardHeader>
+            <CardContent>
+                <div className="text-3xl font-extrabold">{count}</div>
+                <p className="text-sm">đang chờ xử lý</p>
+            </CardContent>
+        </Card>
     </Link>
-);
-
-const StatusCard = ({ title, count, icon, color }) => (
-    <Card className={`${color} text-white`}>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xl font-bold">
-                {title}
-            </CardTitle>
-            {React.cloneElement(icon, { className: "h-6 w-6" })}
-        </CardHeader>
-        <CardContent>
-            <div className="text-3xl font-extrabold">{count}</div>
-            <p className="text-sm">đang chờ xử lý</p>
-        </CardContent>
-    </Card>
 );
 
 const RecentNotification = ({ icon, title, description, date }) => (
@@ -56,7 +49,7 @@ const AdminCenter = () => {
         { id: 4, type: 'report', title: 'Báo cáo Giải ngân của Người bảo lãnh', description: 'Báo cáo chi tiết về việc giải ngân tháng 9', date: '2 ngày trước' },
     ];
     const breadcrumbs = [
-        { name: 'Bảng điều khiển', path: '/' },
+        { name: 'Bảng điều khiển', path: '/' },
         { name: 'Trung tâm Quản trị', path: null },
     ];
 
@@ -65,30 +58,27 @@ const AdminCenter = () => {
             <Breadcrumb breadcrumbs={breadcrumbs} />
 
             <div className="w-full space-y-4 mx-3">
-                <div className="flex space-x-4 mb-8">
-                    <FilterButton title="Báo cáo" to="reports" />
-                    <FilterButton title="Yêu cầu" to="guarantee-requests" />
-                    <FilterButton title="Hợp đồng" to="contracts" />
-                </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                     <StatusCard
                         title="Báo cáo"
                         count={3}
                         icon={<FileText />}
                         color="bg-[#54C392] hover:bg-green-600"
+                        to="reports"
                     />
                     <StatusCard
                         title="Yêu cầu"
                         count={5}
                         icon={<UserCheck />}
                         color="bg-[#4aba75] hover:bg-green-600"
+                        to="guarantee-requests"
                     />
                     <StatusCard
                         title="Hợp đồng"
                         count={4}
                         icon={<FileSignature />}
                         color="bg-[#1b8048] hover:bg-green-600"
+                        to="contracts"
                     />
                 </div>
 

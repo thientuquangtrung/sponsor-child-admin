@@ -1,71 +1,58 @@
-import React from 'react';
-import Chart from 'react-apexcharts';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CreditCard, DollarSign, Download, User2, Wallet } from 'lucide-react';
+import { Download } from 'lucide-react';
 import Breadcrumb from '@/pages/admin/Breadcrumb';
-import CardDataStats from '@/pages/admin/CardDataStats';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 const FinanceReport = () => {
     const breadcrumbs = [
-        { name: 'Bảng điều khiển', path: '/' },
-        { name: 'Báo cáo tài chính', path: null }
+        { name: 'Bảng điều khiển', path: '/' },
+        { name: 'Báo cáo tài chính', path: null }
     ];
-    const revenueData = {
-        options: {
-            chart: {
-                id: 'revenue-chart'
-            },
-            xaxis: {
-                categories: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12']
-            },
-            yaxis: {
-                title: {
-                    text: 'Số tiền (VNĐ)'
-                }
-            },
-            colors: ['#25a5a7', '#f59e0b'],
-            stroke: {
-                curve: 'smooth'
-            },
-            title: {
-                text: 'Biểu đồ Tài trợ - Giải ngân theo tháng',
-                align: 'center'
-            },
-        },
-        series: [
-            {
-                name: 'Tài trợ',
-                data: [30000000, 40000000, 35000000, 50000000, 49000000, 60000000, 70000000, 91000000, 125000000, 150000000, 180000000, 210000000]
-            },
-            {
-                name: 'Giải ngân',
-                data: [20000000, 35000000, 25000000, 40000000, 45000000, 50000000, 60000000, 75000000, 100000000, 120000000, 150000000, 180000000]
-            }
-        ]
-    };
 
-    const donationDistribution = {
-        options: {
-            chart: {
-                type: 'donut',
-            },
-            labels: ['Chiến dịch A', 'Chiến dịch B', 'Chiến dịch C', 'Chiến dịch D'],
-            colors: ['#25a5a7', '#f59e0b', '#ef4444', '#8b5cf6'],
-            title: {
-                text: 'Phân bổ quyên góp theo chiến dịch',
-                align: 'center'
-            },
-        },
-        series: [44, 55, 41, 17],
-    };
+    const [financeData] = useState([
+        { month: 'T1', sponsorship: 30000000, disbursement: 20000000 },
+        { month: 'T2', sponsorship: 40000000, disbursement: 35000000 },
+        { month: 'T3', sponsorship: 35000000, disbursement: 25000000 },
+        { month: 'T4', sponsorship: 50000000, disbursement: 40000000 },
+        { month: 'T5', sponsorship: 49000000, disbursement: 45000000 },
+        { month: 'T6', sponsorship: 60000000, disbursement: 50000000 },
+        { month: 'T7', sponsorship: 70000000, disbursement: 60000000 },
+        { month: 'T8', sponsorship: 91000000, disbursement: 75000000 },
+        { month: 'T9', sponsorship: 125000000, disbursement: 100000000 },
+        { month: 'T10', sponsorship: 150000000, disbursement: 120000000 },
+        { month: 'T11', sponsorship: 180000000, disbursement: 150000000 },
+        { month: 'T12', sponsorship: 210000000, disbursement: 180000000 },
+    ]);
 
-    const overviewData = [
-        { title: 'Tổng tài trợ', value: '1,500,000,000 VNĐ', rate: '12.5%', levelUp: true, icon: <DollarSign size={22} className="text-[#25a5a7]" /> },
-        { title: 'Tổng giải ngân', value: '1,200,000,000 VNĐ', rate: '8.2%', levelUp: true, icon: <CreditCard size={22} className="text-[#f59e0b]" /> },
-        { title: 'Số dư', value: '300,000,000 VNĐ', rate: '4.3%', levelUp: true, icon: <Wallet size={22} className="text-[#ef4444]" /> },
-        { title: 'Tổng số quyên góp', value: '1,000', rate: '2.5%', levelDown: true, icon: <User2 size={22} className="text-[#8b5cf6]" /> },
-    ];
+    const exportToExcel = () => {
+        const excelData = financeData.map(row => ({
+            'Tháng': row.month,
+            'Quỹ Quyên góp (VNĐ)': row.sponsorship,
+            'Giải ngân (VNĐ)': row.disbursement,
+            'Chênh lệch (VNĐ)': row.sponsorship - row.disbursement
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Báo cáo tài chính");
+
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
+
+        saveAs(data, 'bao_cao_tai_chinh.xlsx');
+    };
 
     return (
         <div className="space-y-6">
@@ -74,49 +61,36 @@ const FinanceReport = () => {
             <div className="flex justify-end">
                 <Button
                     className="border-2 border-[#25a5a7] bg-transparent text-[#25a5a7] hover:bg-[#25a5a7] hover:text-white"
+                    onClick={exportToExcel}
                 >
-                    <Download className="mr-2 h-4 w-4" /> Tải xuống báo cáo
+                    <Download className="mr-2 h-4 w-4" /> Xuất Excel
                 </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {overviewData.map((item, index) => (
-                    <CardDataStats
-                        key={index}
-                        title={item.title}
-                        total={item.value}
-                        rate={item.rate}
-                        levelUp={item.levelUp}
-                        levelDown={item.levelDown}
-                    >
-                        {item.icon}
-                    </CardDataStats>
-                ))}
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                    <CardContent>
-                        <Chart
-                            options={revenueData.options}
-                            series={revenueData.series}
-                            type="line"
-                            height={350}
-                        />
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardContent>
-                        <Chart
-                            options={donationDistribution.options}
-                            series={donationDistribution.series}
-                            type="donut"
-                            height={350}
-                        />
-                    </CardContent>
-                </Card>
-            </div>
+            <Card>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Tháng</TableHead>
+                                <TableHead>Quỹ Quyên góp (VNĐ)</TableHead>
+                                <TableHead>Giải ngân (VNĐ)</TableHead>
+                                <TableHead>Chênh lệch (VNĐ)</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {financeData.map((row) => (
+                                <TableRow key={row.month}>
+                                    <TableCell>{row.month}</TableCell>
+                                    <TableCell>{row.sponsorship.toLocaleString()}</TableCell>
+                                    <TableCell>{row.disbursement.toLocaleString()}</TableCell>
+                                    <TableCell>{(row.sponsorship - row.disbursement).toLocaleString()}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
         </div>
     );
 };
