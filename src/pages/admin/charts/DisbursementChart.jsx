@@ -1,63 +1,6 @@
 import React, { useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 
-const options = {
-  colors: ['#37ae5f', '#9ee0b4'],
-  chart: {
-    fontFamily: 'Satoshi, sans-serif',
-    type: 'bar',
-    height: 335,
-    stacked: true,
-    toolbar: {
-      show: false,
-    },
-    zoom: {
-      enabled: false,
-    },
-  },
-  responsive: [
-    {
-      breakpoint: 1536,
-      options: {
-        plotOptions: {
-          bar: {
-            borderRadius: 0,
-            columnWidth: '25%',
-          },
-        },
-      },
-    },
-  ],
-  plotOptions: {
-    bar: {
-      horizontal: false,
-      borderRadius: 0,
-      columnWidth: '25%',
-      borderRadiusApplication: 'end',
-      borderRadiusWhenStacked: 'last',
-    },
-  },
-  dataLabels: {
-    enabled: false,
-  },
-  xaxis: {
-    categories: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Dự án A', 'Dự án B', 'Dự án C'],
-  },
-  legend: {
-    position: 'top',
-    horizontalAlign: 'left',
-    fontFamily: 'Satoshi',
-    fontWeight: 500,
-    fontSize: '14px',
-    markers: {
-      radius: 99,
-    },
-  },
-  fill: {
-    opacity: 1,
-  },
-};
-
 const DisbursementChart = () => {
   const [state, setState] = useState({
     series: [
@@ -66,11 +9,67 @@ const DisbursementChart = () => {
         data: [5000, 10000, 15000, 8000, 12000, 20000, 30000],
       },
       {
-        name: 'Khoản dư',
+        name: 'Khoản dư',
         data: [3000, 7000, 5000, 6000, 9000, 10000, 12000],
       },
     ],
   });
+
+  const options = {
+    colors: ['#37ae5f', '#9ee0b4'],
+    chart: {
+      fontFamily: 'Satoshi, sans-serif',
+      type: 'bar',
+      height: 335,
+      toolbar: {
+        show: false,
+      },
+      zoom: {
+        enabled: false,
+      },
+    },
+    responsive: [
+      {
+        breakpoint: 1536,
+        options: {
+          plotOptions: {
+            bar: {
+              borderRadius: 0,
+              columnWidth: '45%',
+            },
+          },
+        },
+      },
+    ],
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        borderRadius: 0,
+        columnWidth: '45%',
+        borderRadiusApplication: 'end',
+        borderRadiusWhenStacked: 'last',
+      },
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    xaxis: {
+      categories: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Dự án A', 'Dự án B', 'Dự án C'],
+    },
+    legend: {
+      position: 'top',
+      horizontalAlign: 'left',
+      fontFamily: 'Satoshi',
+      fontWeight: 500,
+      fontSize: '14px',
+      markers: {
+        radius: 99,
+      },
+    },
+    fill: {
+      opacity: 1,
+    },
+  };
 
   return (
     <div className="col-span-12 rounded-sm border border-[#e2e8f0] bg-white p-7 shadow-lg dark:border-[#2e3a47] dark:bg-[#2e3a47] xl:col-span-4">
@@ -109,7 +108,7 @@ const DisbursementChart = () => {
       </div>
 
       <div>
-        <div id="disbursementChart" className="-ml-5 -mb-9 ">
+        <div id="disbursementChart" className="-ml-5 -mb-9">
           <ReactApexChart
             options={options}
             series={state.series}

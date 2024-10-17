@@ -16,8 +16,7 @@ const GuaranteeRequestsDetail = () => {
     const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
     const [rejectReason, setRejectReason] = useState('');
     const breadcrumbs = [
-        { name: 'Bảng điều khiển', path: '/' },
-        { name: 'Trung tâm Quản trị', path: '/notifications' },
+        { name: 'Trung tâm Quản trị', path: '/center' },
         { name: 'Đơn đăng ký bảo lãnh', path: '/center/guarantee-requests' },
         { name: 'Chi tiết yêu cầu bảo lãnh', path: null },
     ];
@@ -222,7 +221,6 @@ const GuaranteeRequestsDetail = () => {
                             </Button>
                         </div>
 
-                        {/* Reject Reason Dialog */}
                         <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
                             <DialogContent>
                                 <DialogHeader>

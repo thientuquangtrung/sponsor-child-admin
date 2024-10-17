@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     flexRender,
@@ -24,10 +24,7 @@ import { DataTablePagination } from '@/components/datatable/DataTablePagination'
 import { DataTableColumnHeader } from '@/components/datatable/DataTableColumnHeader';
 import { DataTableToolbarAdmin } from '@/components/datatable/DataTableToolbarAdmin';
 import Breadcrumb from '@/pages/admin/Breadcrumb';
-
-
-
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const data = [
     {
@@ -38,6 +35,7 @@ const data = [
         logo: 'https://doanthanhnien.vn/Uploads/logo.jpg',
         groupName: 'CLB Tình Nguyện A',
         status: 'pending',
+        registrationDate: '2024-03-15',
     },
     {
         id: 'gr002',
@@ -47,20 +45,30 @@ const data = [
         logo: 'https://doanthanhnien.vn/Uploads/logo.jpg',
         groupName: 'Đội Thiện Nguyện B',
         status: 'pending',
+        registrationDate: '2024-04-02',
     },
 ];
 
 export function GuaranteeRequests() {
     const navigate = useNavigate();
     const [requests, setRequests] = useState(data);
+    const [selectedMonth, setSelectedMonth] = useState('all');
 
     const breadcrumbs = [
-        { name: 'Bảng điều khiển', path: '/' },
-        { name: 'Trung tâm Quản trị', path: '/center' },
-        { name: 'Đơn đăng ký bảo lãnh', path: null },
-
+        { name: 'Bảng điều khiển', path: '/' },
+        { name: 'Trung tâm Quản trị', path: '/center' },
+        { name: 'Đơn đăng ký bảo lãnh', path: null },
     ];
 
+    const filteredRequests = useMemo(() => {
+        if (selectedMonth === 'all') {
+            return requests;
+        }
+        return requests.filter(request => {
+            const requestMonth = new Date(request.registrationDate).getMonth() + 1;
+            return requestMonth === parseInt(selectedMonth);
+        });
+    }, [requests, selectedMonth]);
 
     const columns = [
         {
@@ -101,6 +109,11 @@ export function GuaranteeRequests() {
             ),
         },
         {
+            accessorKey: 'registrationDate',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Ngày đăng ký" />,
+            cell: ({ row }) => <div>{new Date(row.getValue('registrationDate')).toLocaleDateString('vi-VN')}</div>,
+        },
+        {
             id: 'actions',
             cell: ({ row }) => (
                 <DropdownMenu>
@@ -116,7 +129,6 @@ export function GuaranteeRequests() {
                             <Eye className="mr-2 h-4 w-4" />
                             Xem chi tiết
                         </DropdownMenuItem>
-
                     </DropdownMenuContent>
                 </DropdownMenu>
             ),
@@ -124,7 +136,7 @@ export function GuaranteeRequests() {
     ];
 
     const table = useReactTable({
-        data: requests,
+        data: filteredRequests,
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
@@ -137,7 +149,22 @@ export function GuaranteeRequests() {
             <Breadcrumb breadcrumbs={breadcrumbs} />
 
             <div className="w-full space-y-4 mx-3">
-                <DataTableToolbarAdmin table={table} type="GuaranteeRequests" />
+                <div className="flex justify-between items-center">
+                    <DataTableToolbarAdmin table={table} type="GuaranteeRequests" />
+                    <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Chọn tháng" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">Tất cả các tháng</SelectItem>
+                            {[...Array(12)].map((_, i) => (
+                                <SelectItem key={i + 1} value={(i + 1).toString()}>
+                                    Tháng {i + 1}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
                 <div className="rounded-md border">
                     <Table>
                         <TableHeader>
@@ -176,8 +203,6 @@ export function GuaranteeRequests() {
                 </div>
                 <DataTablePagination table={table} />
             </div>
-
-
         </>
     );
 }

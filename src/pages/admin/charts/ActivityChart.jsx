@@ -1,67 +1,81 @@
 import React, { useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 
-const options = {
-    chart: {
-        fontFamily: 'Satoshi, sans-serif',
-        type: 'donut',
-    },
-    colors: ['#8FD0EF', '#6577F3', '#FFA07A', '#FFEE58'],
-    labels: ['Phát thực phẩm', 'Giáo dục', 'Y tế', 'Khác'],
-    legend: {
-        show: false,
-        position: 'bottom',
-    },
-    plotOptions: {
-        pie: {
-            donut: {
-                size: '65%',
-                background: 'transparent',
-            },
-        },
-    },
-    dataLabels: {
-        enabled: false,
-    },
-    tooltip: {
-        enabled: true,
-        theme: 'light',
-        style: {
-            fontSize: '12px',
-            fontFamily: 'Satoshi, sans-serif',
-        },
-        y: {
-            formatter: function (value) {
-                return value + "%"
-            }
-        }
-    },
-    responsive: [
-        {
-            breakpoint: 2600,
-            options: {
-                chart: {
-                    width: 380,
-                },
-            },
-        },
-        {
-            breakpoint: 640,
-            options: {
-                chart: {
-                    width: 200,
-                },
-            },
-        },
-    ],
-};
-
 const ActivityChart = () => {
     const [state, setState] = useState({
         series: [45, 30, 15, 10],
     });
 
-
+    const options = {
+        chart: {
+            fontFamily: 'Satoshi, sans-serif',
+            type: 'donut',
+        },
+        colors: ['#8FD0EF', '#6577F3', '#FFA07A', '#FFEE58'],
+        labels: ['Phát thực phẩm', 'Giáo dục', 'Y tế', 'Khác'],
+        legend: {
+            show: false,
+            position: 'bottom',
+        },
+        plotOptions: {
+            pie: {
+                donut: {
+                    size: '65%',
+                    background: 'transparent',
+                },
+            },
+        },
+        dataLabels: {
+            enabled: true,
+            formatter: function (val, opts) {
+                return opts.w.globals.series[opts.seriesIndex] + '%'
+            },
+            style: {
+                fontSize: '16px',
+                fontFamily: 'Satoshi, sans-serif',
+                fontWeight: 'bold',
+            },
+            dropShadow: {
+                enabled: true,
+                color: '#112221',
+                top: -3,
+                left: 0,
+                blur: 4,
+                opacity: 1
+            }
+        },
+        tooltip: {
+            enabled: true,
+            theme: 'light',
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Satoshi, sans-serif',
+            },
+            y: {
+                formatter: function (value) {
+                    return value + "%"
+                }
+            }
+        },
+        responsive: [
+            {
+                breakpoint: 2600,
+                options: {
+                    chart: {
+                        width: 380,
+                    },
+                },
+            },
+            {
+                breakpoint: 640,
+                options: {
+                    chart: {
+                        width: 200,
+                    },
+                },
+            },
+        ],
+    };
 
     return (
         <div className="h-full sm:px-7 col-span-12 rounded-sm border border-[#e2e8f0] bg-white px-5 pb-5 pt-7 shadow-lg dark:border-[#2e3a47] dark:bg-[#24303f]">
@@ -123,7 +137,6 @@ const ActivityChart = () => {
                         <span className="mr-2 block h-3 w-full max-w-3 rounded-full bg-[#8FD0EF]"></span>
                         <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
                             <span> Phát thực phẩm </span>
-                            <span> 45% </span>
                         </p>
                     </div>
                 </div>
@@ -132,7 +145,6 @@ const ActivityChart = () => {
                         <span className="mr-2 block h-3 w-full max-w-3 rounded-full bg-[#6577F3]"></span>
                         <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
                             <span> Giáo dục </span>
-                            <span> 30% </span>
                         </p>
                     </div>
                 </div>
@@ -141,7 +153,6 @@ const ActivityChart = () => {
                         <span className="mr-2 block h-3 w-full max-w-3 rounded-full bg-[#FFA07A]"></span>
                         <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
                             <span> Y tế </span>
-                            <span> 15% </span>
                         </p>
                     </div>
                 </div>
@@ -150,7 +161,6 @@ const ActivityChart = () => {
                         <span className="mr-2 block h-3 w-full max-w-3 rounded-full bg-[#FFEE58]"></span>
                         <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
                             <span> Khác </span>
-                            <span> 10% </span>
                         </p>
                     </div>
                 </div>

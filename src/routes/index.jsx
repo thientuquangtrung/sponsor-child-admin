@@ -10,6 +10,8 @@ import { AdminLayout } from '@/components/layouts/AdminLayout';
 // config
 // import { DEFAULT_PATH } from '../config/app';
 import LoadingScreen from '@/components/common/LoadingScreen';
+import ContractManagement from '@/pages/admin/center/ContractManagement';
+import ContractDetail from '@/pages/admin/center/ContractDetail';
 
 
 
@@ -58,13 +60,16 @@ export default function Router() {
                 { element: <AdminCenter />, path: 'center' },
                 { element: <GuaranteeRequests />, path: 'center/guarantee-requests' },
                 { element: <GuaranteeRequestsDetail />, path: 'center/guarantee-requests/:id' },
+                { element: <ContractManagement />, path: 'center/contracts' },
+                { element: <ContractDetail />, path: 'center/contracts/:id' },
+
 
 
 
             ],
         },
 
-        { path: '*', element: <Navigate to="/404" replace /> },
+        // { path: '*', element: <Navigate to="/404" replace /> },
     ]);
 }
 
