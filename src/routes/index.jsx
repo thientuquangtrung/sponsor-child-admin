@@ -10,8 +10,6 @@ import { AdminLayout } from '@/components/layouts/AdminLayout';
 // config
 // import { DEFAULT_PATH } from '../config/app';
 import LoadingScreen from '@/components/common/LoadingScreen';
-import ContractManagement from '@/pages/admin/center/ContractManagement';
-import ContractDetail from '@/pages/admin/center/ContractDetail';
 
 
 
@@ -92,6 +90,9 @@ const FundDisbursement = Loadable(lazy(() => import('@/pages/admin/finance/FundD
 const AdminCenter = Loadable(lazy(() => import('@/pages/admin/center/AdminCenter')));
 const GuaranteeRequests = Loadable(lazy(() => import('@/pages/admin/center/GuaranteeRequests')));
 const GuaranteeRequestsDetail = Loadable(lazy(() => import('@/pages/admin/center/GuaranteeRequestsDetail')));
+const ContractManagement = Loadable(lazy(() => import('@/pages/admin/center/ContractManagement')));
+const ContractDetail = Loadable(lazy(() => import('@/pages/admin/center/ContractDetail')));
+
 
 
 
