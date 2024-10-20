@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     flexRender,
@@ -22,96 +22,71 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DataTablePagination } from '@/components/datatable/DataTablePagination';
 import { DataTableColumnHeader } from '@/components/datatable/DataTableColumnHeader';
-import { DataTableToolbarAdmin } from '@/components/datatable/DataTableToolbarAdmin';
+import { ToolbarForGuarantee } from '@/components/datatable/ToolbarForGuarantee';
 import Breadcrumb from '@/pages/admin/Breadcrumb';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
-const data = [
-    {
-        id: 'gr001',
-        name: 'Nguyễn Văn A',
-        phone: '0123456789',
-        email: 'nguyenvana@gmail.com',
-        logo: 'https://doanthanhnien.vn/Uploads/logo.jpg',
-        groupName: 'CLB Tình Nguyện A',
-        status: 'pending',
-        registrationDate: '2024-03-15',
-    },
-    {
-        id: 'gr002',
-        name: 'Trần Thị B',
-        phone: '0987654321',
-        email: 'tranthib@gmail.com',
-        logo: 'https://doanthanhnien.vn/Uploads/logo.jpg',
-        groupName: 'Đội Thiện Nguyện B',
-        status: 'pending',
-        registrationDate: '2024-04-02',
-    },
-];
+import { useGetPendingApprovalGuaranteesQuery } from '@/redux/guarantee/guaranteeApi';
+import { guaranteeTypes, organizationTypes, guaranteeStatus } from '@/config/combobox';
+import LoadingScreen from '@/components/common/LoadingScreen';
 
 export function GuaranteeRequests() {
     const navigate = useNavigate();
-    const [requests, setRequests] = useState(data);
-    const [selectedMonth, setSelectedMonth] = useState('all');
+    const { data: requests, isLoading, error } = useGetPendingApprovalGuaranteesQuery(undefined, {
+        refetchOnMountOrArgChange: true
+    });
 
     const breadcrumbs = [
         { name: 'Bảng điều khiển', path: '/' },
         { name: 'Trung tâm Quản trị', path: '/center' },
-        { name: 'Đơn đăng ký bảo lãnh', path: null },
+        { name: 'Danh sách đăng ký bảo lãnh', path: null },
     ];
-
-    const filteredRequests = useMemo(() => {
-        if (selectedMonth === 'all') {
-            return requests;
-        }
-        return requests.filter(request => {
-            const requestMonth = new Date(request.registrationDate).getMonth() + 1;
-            return requestMonth === parseInt(selectedMonth);
-        });
-    }, [requests, selectedMonth]);
 
     const columns = [
         {
-            accessorKey: 'name',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Tên" />,
-            cell: ({ row }) => <div className="font-medium">{row.getValue('name')}</div>,
+            accessorKey: 'organizationName',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Tên bảo lãnh" />,
+            cell: ({ row }) => <div className="font-medium">{row.getValue('organizationName')}</div>,
         },
         {
-            accessorKey: 'phone',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Điện thoại" />,
-            cell: ({ row }) => <div>{row.getValue('phone')}</div>,
+            accessorKey: 'type',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Bên bảo lãnh" />,
+            cell: ({ row }) => {
+                const type = guaranteeTypes.find(t => t.value === parseInt(row.getValue('type')));
+                return (
+                    <div className={`font-bold ${type.value === 0 ? 'text-green-600' :
+                        'text-orange-600'
+                        }`}>
+                        {type ? type.label : 'Không xác định'}
+                    </div>
+                );
+            },
         },
         {
-            accessorKey: 'email',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
-            cell: ({ row }) => <div>{row.getValue('email')}</div>,
+            accessorKey: 'organizationType',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Loại tổ chức" />,
+            cell: ({ row }) => {
+                const type = organizationTypes.find(t => t.value === parseInt(row.getValue('organizationType')));
+                return <div>{type ? type.label : 'Không xác định'}</div>;
+            },
         },
         {
-            accessorKey: 'logo',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Logo" />,
-            cell: ({ row }) => <img src={row.getValue('logo')} alt="Logo" className="w-10 h-10 object-contain" />,
+            accessorKey: 'position',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Chức vụ" />,
+            cell: ({ row }) => <div>{row.getValue('position')}</div>,
         },
-        {
-            accessorKey: 'groupName',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Tên CLB/Đội/Nhóm" />,
-            cell: ({ row }) => <div>{row.getValue('groupName')}</div>,
-        },
+
         {
             accessorKey: 'status',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Trạng thái" />,
-            cell: ({ row }) => (
-                <div className={`font-medium ${row.getValue('status') === 'approved' ? 'text-green-600' :
-                    row.getValue('status') === 'rejected' ? 'text-red-600' : 'text-blue-600'
-                    }`}>
-                    {row.getValue('status') === 'approved' ? 'Đã duyệt' :
-                        row.getValue('status') === 'rejected' ? 'Đã từ chối' : 'Đang chờ'}
-                </div>
-            ),
-        },
-        {
-            accessorKey: 'registrationDate',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Ngày đăng ký" />,
-            cell: ({ row }) => <div>{new Date(row.getValue('registrationDate')).toLocaleDateString('vi-VN')}</div>,
+            cell: ({ row }) => {
+                const status = guaranteeStatus.find(s => s.value === parseInt(row.getValue('status')));
+                return (
+                    <div className={`font-medium ${status.value === 1 ? 'text-green-600' :
+                        status.value === 2 ? 'text-red-600' : 'text-blue-600'
+                        }`}>
+                        {status ? status.label : 'Không xác định'}
+                    </div>
+                );
+            },
         },
         {
             id: 'actions',
@@ -125,7 +100,7 @@ export function GuaranteeRequests() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Hành động</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => navigate(`/center/guarantee-requests/${row.original.id}`)}>
+                        <DropdownMenuItem onClick={() => navigate(`/center/guarantee-requests/${row.original.userID}`)}>
                             <Eye className="mr-2 h-4 w-4" />
                             Xem chi tiết
                         </DropdownMenuItem>
@@ -136,7 +111,7 @@ export function GuaranteeRequests() {
     ];
 
     const table = useReactTable({
-        data: filteredRequests,
+        data: requests || [],
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
@@ -144,27 +119,15 @@ export function GuaranteeRequests() {
         getFilteredRowModel: getFilteredRowModel(),
     });
 
+    if (isLoading) return <LoadingScreen />
+    if (error) return <div>Đã xảy ra lỗi: {error.message}</div>;
+
     return (
         <>
             <Breadcrumb breadcrumbs={breadcrumbs} />
 
             <div className="w-full space-y-4 mx-3">
-                <div className="flex justify-between items-center">
-                    <DataTableToolbarAdmin table={table} type="GuaranteeRequests" />
-                    <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Chọn tháng" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Tất cả các tháng</SelectItem>
-                            {[...Array(12)].map((_, i) => (
-                                <SelectItem key={i + 1} value={(i + 1).toString()}>
-                                    Tháng {i + 1}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+                <ToolbarForGuarantee table={table} type="GuaranteeRequests" />
                 <div className="rounded-md border">
                     <Table>
                         <TableHeader>
