@@ -14,6 +14,7 @@ const baseQuery = fetchBaseQuery({
             headers.set('x-client-id', userId);
         }
 
+        headers.set('ngrok-skip-browser-warning', '69420');
         return headers;
     },
 });
