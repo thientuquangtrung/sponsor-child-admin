@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     flexRender,
@@ -8,9 +8,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table';
-
-import { MoreHorizontal, Eye, Download } from 'lucide-react';
-
+import { MoreHorizontal, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -22,73 +20,39 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DataTablePagination } from '@/components/datatable/DataTablePagination';
 import { DataTableColumnHeader } from '@/components/datatable/DataTableColumnHeader';
-import { DataTableToolbarAdmin } from '@/components/datatable/DataTableToolbarAdmin';
 import Breadcrumb from '@/pages/admin/Breadcrumb';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
-const data = [
-    {
-        id: 'contract001',
-        contractNumber: 'CT001',
-        contractType: 'disbursement',
-        partyB: 'Nguyễn Văn A',
-        startDate: '2024-01-01',
-        endDate: '2024-12-31',
-        status: 'active',
-        signatureDate: '2023-12-15',
-        amount: 100000000,
-    },
-    {
-        id: 'contract002',
-        contractNumber: 'CT002',
-        contractType: 'guarantee',
-        partyB: 'Trần Thị B',
-        startDate: '2024-02-01',
-        endDate: '2025-01-31',
-        status: 'pending',
-        signatureDate: '2024-01-20',
-        guaranteeAmount: 50000000,
-    },
-];
+import { useGetContractsByStatusQuery, useGetAllContractsQuery } from '@/redux/contract/contractApi';
+import { contractStatus, contractType } from '@/config/combobox';
+import { ToolbarForContract } from '@/components/datatable/ToolbarForContract';
 
 export function ContractManagement() {
     const navigate = useNavigate();
-    const [contracts, setContracts] = useState(data);
-    const [selectedStatus, setSelectedStatus] = useState('all');
-    const [selectedType, setSelectedType] = useState('all');
+    const [viewAll, setViewAll] = useState(false);
+
+    const { data: pendingContracts, isLoading: isPendingLoading } = useGetContractsByStatusQuery(0);
+    const { data: allContracts, isLoading: isAllLoading } = useGetAllContractsQuery();
+
+    const contracts = viewAll ? allContracts : pendingContracts;
+    const isLoading = viewAll ? isAllLoading : isPendingLoading;
 
     const breadcrumbs = [
-        { name: 'Trung tâm Quản trị', path: '/center' },
+        { name: 'Trung tâm Quản trị', path: '/center' },
         { name: 'Danh sách hợp đồng', path: null },
     ];
 
-    const filteredContracts = useMemo(() => {
-        return contracts.filter(contract =>
-            (selectedStatus === 'all' || contract.status === selectedStatus) &&
-            (selectedType === 'all' || contract.contractType === selectedType)
-        );
-    }, [contracts, selectedStatus, selectedType]);
-
     const columns = [
-        {
-            accessorKey: 'contractNumber',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Số hợp đồng" />,
-            cell: ({ row }) => <div className="font-medium">{row.getValue('contractNumber')}</div>,
-        },
         {
             accessorKey: 'contractType',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Loại hợp đồng" />,
-            cell: ({ row }) => (
-                <div>
-                    {row.getValue('contractType') === 'disbursement' ? 'Giải ngân' : 'Tham gia bảo lãnh'}
-                </div>
-            ),
+            cell: ({ row }) => {
+                const type = contractType.find(t => t.value === row.getValue('contractType'));
+                return <div>{type ? type.label : 'Không xác định'}</div>;
+            },
         },
-
         {
-            accessorKey: 'partyB',
+            accessorKey: 'partyBName',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Bên B" />,
-            cell: ({ row }) => <div>{row.getValue('partyB')}</div>,
+            cell: ({ row }) => <div>{row.getValue('partyBName')}</div>,
         },
         {
             accessorKey: 'startDate',
@@ -103,21 +67,9 @@ export function ContractManagement() {
         {
             accessorKey: 'status',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Trạng thái" />,
-            cell: ({ row }) => (
-                <div className={`font-medium ${row.getValue('status') === 'active' ? 'text-green-600' :
-                    row.getValue('status') === 'pending' ? 'text-yellow-600' : 'text-red-600'
-                    }`}>
-                    {row.getValue('status') === 'active' ? 'Đang hiệu lực' :
-                        row.getValue('status') === 'pending' ? 'Chờ ký' : 'Hết hạn'}
-                </div>
-            ),
-        },
-        {
-            accessorKey: 'amount',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Số tiền" />,
             cell: ({ row }) => {
-                const amount = row.getValue('amount') || row.getValue('guaranteeAmount');
-                return <div>{amount ? amount.toLocaleString('vi-VN') + ' VND' : 'N/A'}</div>;
+                const status = contractStatus.find(s => s.value === row.getValue('status'));
+                return <div className={`font-medium ${getStatusColor(status?.value)}`}>{status ? status.label : 'Không xác định'}</div>;
             },
         },
         {
@@ -136,10 +88,6 @@ export function ContractManagement() {
                             <Eye className="mr-2 h-4 w-4" />
                             Xem chi tiết
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDownloadPDF(row.original.id)}>
-                            <Download className="mr-2 h-4 w-4" />
-                            Tải PDF
-                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             ),
@@ -147,7 +95,7 @@ export function ContractManagement() {
     ];
 
     const table = useReactTable({
-        data: filteredContracts,
+        data: contracts || [],
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
@@ -155,7 +103,16 @@ export function ContractManagement() {
         getFilteredRowModel: getFilteredRowModel(),
     });
 
-    const handleDownloadPDF = (contractId) => {
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 0: return 'text-blue-500';
+            case 1: return 'text-orange-500';
+            case 2: return 'text-green-600';
+            case 3:
+            case 4: return 'text-red-600';
+            case 5: return 'text-gray-600';
+            default: return 'text-black';
+        }
     };
 
     return (
@@ -164,30 +121,10 @@ export function ContractManagement() {
 
             <div className="w-full space-y-4 mx-3">
                 <div className="flex justify-between items-center">
-                    <DataTableToolbarAdmin table={table} type="Contracts" />
-                    <div className="flex space-x-2">
-                        <Select value={selectedType} onValueChange={setSelectedType}>
-                            <SelectTrigger className="w-[200px]">
-                                <SelectValue placeholder="Chọn loại hợp đồng" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">Tất cả loại hợp đồng</SelectItem>
-                                <SelectItem value="disbursement">Hợp đồng giải ngân</SelectItem>
-                                <SelectItem value="guarantee">Hợp đồng tham gia bảo lãnh</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                            <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Chọn trạng thái" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                                <SelectItem value="active">Đang hiệu lực</SelectItem>
-                                <SelectItem value="pending">Chờ ký</SelectItem>
-                                <SelectItem value="expired">Hết hạn</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
+                    <ToolbarForContract table={table} />
+                    <Button onClick={() => setViewAll(!viewAll)}>
+                        {viewAll ? 'Xem hợp đồng đang chờ' : 'Xem tất cả hợp đồng'}
+                    </Button>
                 </div>
                 <div className="rounded-md border">
                     <Table>
@@ -205,7 +142,13 @@ export function ContractManagement() {
                             ))}
                         </TableHeader>
                         <TableBody>
-                            {table.getRowModel().rows?.length ? (
+                            {isLoading ? (
+                                <TableRow>
+                                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                                        Đang tải...
+                                    </TableCell>
+                                </TableRow>
+                            ) : table.getRowModel().rows?.length ? (
                                 table.getRowModel().rows.map((row) => (
                                     <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                                         {row.getVisibleCells().map((cell) => (

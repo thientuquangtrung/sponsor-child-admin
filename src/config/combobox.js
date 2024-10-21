@@ -103,12 +103,12 @@ export const contractStatus = [
     { label: 'Đã hủy', value: 5 },
 ];
 export const contractPartyType = [
-    { label: 'Bảo lãnh', value: 0 },
-    { label: 'Quản trị viên ', value: 1 },
+    { label: 'Quản trị viên', value: 0 },
+    { label: 'Bảo lãnh', value: 1 },
 ];
 export const contractType = [
-    { label: 'Hợp đồng bảo lãnh', value: 0 },
-    { label: 'Hợp đồng chiến dịch gây quỹ', value: 1 },
+    { label: 'Bảo lãnh', value: 0 },
+    { label: 'Chiến dịch gây quỹ', value: 1 },
 ];
 
 
