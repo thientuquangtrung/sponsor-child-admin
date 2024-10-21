@@ -40,6 +40,7 @@ export function GuaranteeRequests() {
         { name: 'Danh sách đăng ký bảo lãnh', path: null },
     ];
 
+
     const columns = [
         {
             accessorKey: 'organizationName',
@@ -50,10 +51,11 @@ export function GuaranteeRequests() {
             accessorKey: 'type',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Bên bảo lãnh" />,
             cell: ({ row }) => {
-                const type = guaranteeTypes.find(t => t.value === parseInt(row.getValue('type')));
+                const typeValue = row.getValue('type');
+                const type = guaranteeTypes.find(t => t.value === parseInt(typeValue));
                 return (
-                    <div className={`font-bold ${type.value === 0 ? 'text-green-600' :
-                        'text-orange-600'
+                    <div className={`font-bold ${type && type.value === 0 ? 'text-green-600' :
+                        type && type.value === 1 ? 'text-orange-600' : 'text-gray-600'
                         }`}>
                         {type ? type.label : 'Không xác định'}
                     </div>
