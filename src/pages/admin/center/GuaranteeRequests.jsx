@@ -30,8 +30,12 @@ import LoadingScreen from '@/components/common/LoadingScreen';
 
 export function GuaranteeRequests() {
     const navigate = useNavigate();
-    const { data: requests, isLoading, error } = useGetPendingApprovalGuaranteesQuery(undefined, {
-        refetchOnMountOrArgChange: true
+    const {
+        data: requests,
+        isLoading,
+        error,
+    } = useGetPendingApprovalGuaranteesQuery(undefined, {
+        refetchOnMountOrArgChange: true,
     });
 
     const breadcrumbs = [
@@ -40,51 +44,54 @@ export function GuaranteeRequests() {
         { name: 'Danh sách đăng ký bảo lãnh', path: null },
     ];
 
-
     const columns = [
         {
-            accessorKey: 'organizationName',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Tên bảo lãnh" />,
-            cell: ({ row }) => <div className="font-medium">{row.getValue('organizationName')}</div>,
+            accessorKey: 'fullname',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Họ tên" />,
+            cell: ({ row }) => <div className="font-medium">{row.getValue('fullname')}</div>,
         },
         {
-            accessorKey: 'type',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Bên bảo lãnh" />,
+            accessorKey: 'guaranteeType',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Loại đăng kí" />,
             cell: ({ row }) => {
-                const typeValue = row.getValue('type');
-                const type = guaranteeTypes.find(t => t.value === parseInt(typeValue));
+                const typeValue = row.getValue('guaranteeType');
+                const type = guaranteeTypes.find((t) => t.value === parseInt(typeValue));
                 return (
-                    <div className={`font-bold ${type && type.value === 0 ? 'text-green-600' :
-                        type && type.value === 1 ? 'text-orange-600' : 'text-gray-600'
-                        }`}>
+                    <div
+                        className={`font-bold ${
+                            type && type.value === 0
+                                ? 'text-green-600'
+                                : type && type.value === 1
+                                ? 'text-orange-600'
+                                : 'text-gray-600'
+                        }`}
+                    >
                         {type ? type.label : 'Không xác định'}
                     </div>
                 );
             },
         },
         {
-            accessorKey: 'organizationType',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Loại tổ chức" />,
-            cell: ({ row }) => {
-                const type = organizationTypes.find(t => t.value === parseInt(row.getValue('organizationType')));
-                return <div>{type ? type.label : 'Không xác định'}</div>;
-            },
+            accessorKey: 'registrationDate',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Ngày đăng kí" />,
+            //convert to human readable date dd/mm/yyyy
+            cell: ({ row }) => <div>{new Date(row.getValue('registrationDate')).toLocaleDateString('vi-VN')}</div>,
         },
-        {
-            accessorKey: 'position',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Chức vụ" />,
-            cell: ({ row }) => <div>{row.getValue('position')}</div>,
-        },
-
         {
             accessorKey: 'status',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Trạng thái" />,
             cell: ({ row }) => {
-                const status = guaranteeStatus.find(s => s.value === parseInt(row.getValue('status')));
+                const status = guaranteeStatus.find((s) => s.value === parseInt(row.getValue('status')));
                 return (
-                    <div className={`font-medium ${status.value === 1 ? 'text-green-600' :
-                        status.value === 2 ? 'text-red-600' : 'text-blue-600'
-                        }`}>
+                    <div
+                        className={`font-medium ${
+                            status.value === 1
+                                ? 'text-green-600'
+                                : status.value === 2
+                                ? 'text-red-600'
+                                : 'text-blue-600'
+                        }`}
+                    >
                         {status ? status.label : 'Không xác định'}
                     </div>
                 );
@@ -121,7 +128,7 @@ export function GuaranteeRequests() {
         getFilteredRowModel: getFilteredRowModel(),
     });
 
-    if (isLoading) return <LoadingScreen />
+    if (isLoading) return <LoadingScreen />;
     if (error) return <div>Đã xảy ra lỗi: {error.message}</div>;
 
     return (
