@@ -10,6 +10,7 @@ import { AdminLayout } from '@/components/layouts/AdminLayout';
 // config
 // import { DEFAULT_PATH } from '../config/app';
 import LoadingScreen from '@/components/common/LoadingScreen';
+import UpdateCampaign from '@/pages/admin/campaign/UpdateCampaign';
 
 
 
@@ -48,7 +49,9 @@ export default function Router() {
             children: [
                 { element: <AdminDashboard />, index: true },
                 { element: <UserManagement />, path: 'users' },
-                { element: <AdminFundrasing />, path: 'fundrasings' },
+                { element: <AdminCampaign />, path: 'campaigns' },
+                { element: <DetailCampaign />, path: 'campaign/:id' },
+                { element: <UpdateCampaign />, path: 'campaign/edit/:id' },
                 { element: <AddFundrasing />, path: 'fundrasings/add' },
                 { element: <FinanceTransaction />, path: 'finance/transactions' },
                 { element: <FinanceReport />, path: 'finance/reports' },
@@ -82,7 +85,7 @@ const NewPasswordPage = Loadable(lazy(() => import('../pages/auth/NewPassword'))
 //admin
 const AdminDashboard = Loadable(lazy(() => import('@/pages/admin/AdminDashboard')));
 const UserManagement = Loadable(lazy(() => import('@/pages/admin/UserManagement')));
-const AdminFundrasing = Loadable(lazy(() => import('@/pages/admin/AdminFundrasing')));
+const AdminCampaign = Loadable(lazy(() => import('@/pages/admin/campaign/AdminCampaign')));
 const AddFundrasing = Loadable(lazy(() => import('@/pages/admin/AddFundrasing')));
 const FinanceTransaction = Loadable(lazy(() => import('@/pages/admin/finance/FinanceTransaction')));
 const FinanceReport = Loadable(lazy(() => import('@/pages/admin/finance/FinanceReport')));
@@ -92,6 +95,8 @@ const GuaranteeRequests = Loadable(lazy(() => import('@/pages/admin/center/Guara
 const GuaranteeRequestsDetail = Loadable(lazy(() => import('@/pages/admin/center/GuaranteeRequestsDetail')));
 const ContractManagement = Loadable(lazy(() => import('@/pages/admin/center/ContractManagement')));
 const ContractDetail = Loadable(lazy(() => import('@/pages/admin/center/ContractDetail')));
+const DetailCampaign = Loadable(lazy(() => import('@/pages/admin/campaign/DetailCampaign')));
+
 
 
 

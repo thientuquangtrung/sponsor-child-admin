@@ -7,9 +7,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table';
-
-import { MoreHorizontal } from 'lucide-react';
-
+import { Eye, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -21,12 +19,9 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { DataTablePagination } from '@/components/datatable/DataTablePagination';
 import { DataTableColumnHeader } from '@/components/datatable/DataTableColumnHeader';
-import { DataTableToolbarAdmin } from '@/components/datatable/DataTableToolbarAdmin';
 import Breadcrumb from '@/pages/admin/Breadcrumb';
-
 import {
     AlertDialog,
     AlertDialogAction,
@@ -38,37 +33,11 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-
-const data = [
-    {
-        id: 'ct001',
-        name: 'Chiến dịch A',
-        status: 'Đang hoạt động',
-        join: 5,
-        budget: 200,
-        startDate: new Date(2024, 5, 1).toISOString(),
-        endDate: new Date(2025, 7, 31).toISOString(),
-        guaranteeId: 'Nguyễn A',
-        targetAmount: 5000,
-        raisedAmount: 1500,
-        thumbnailUrl: 'https://image.nhandan.vn/w800/Uploaded/2024/vowsxrdrei/2023_12_25/z5008015677689-d8950e8f203de9ef9dab802edd72b70b-1-3956.jpg.webp',
-    },
-    {
-        id: 'ct002',
-        name: 'Chiến dịch B',
-        status: 'Lên kế hoạch',
-        join: 75,
-        budget: 30,
-        startDate: new Date(2024, 8, 1).toISOString(),
-        endDate: new Date(2024, 8, 30).toISOString(),
-        guaranteeId: null,
-        targetAmount: 3000,
-        raisedAmount: 0,
-        thumbnailUrl: 'https://image.nhandan.vn/w800/Uploaded/2024/vowsxrdrei/2023_12_25/z5008015677689-d8950e8f203de9ef9dab802edd72b70b-1-3956.jpg.webp',
-    },
-
-
-];
+import { useGetAllCampaignsQuery, useDeleteCampaignMutation } from '@/redux/campaign/campaignApi';
+import { campaignTypes, campaignStatus, guaranteeTypes } from '@/config/combobox';
+import { ToolbarForCampaign } from '@/components/datatable/ToolbarForCampaign';
+import LoadingScreen from '@/components/common/LoadingScreen';
+import { useNavigate } from 'react-router-dom';
 
 const columns = [
     {
@@ -98,33 +67,76 @@ const columns = [
         ),
     },
     {
-        accessorKey: 'name',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Tên quỹ" />,
-        cell: ({ row }) => <div className="font-medium">{row.getValue('name')}</div>,
+        accessorKey: 'title',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Tên quỹ" />,
+        cell: ({ row }) => {
+            const campaignType = row.original.campaignType;
+            const typeInfo = campaignTypes.find(type => type.value === campaignType);
+
+            return (
+                <div
+                    className={`font-semibold text-ellipsis whitespace-nowrap overflow-hidden w-48 
+                        ${campaignType === 0 ? 'text-green-600' : 'text-red-400'}`}
+                    title={`Loại: ${typeInfo?.label || 'Không xác định'}`}
+                >
+                    {row.getValue('title')}
+                </div>
+            );
+        },
     },
     {
         accessorKey: 'status',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Trạng thái" />,
-        cell: ({ row }) => (
-            <Badge variant={row.getValue('status') === 'Đang hoạt động' ? 'default' : 'secondary'}>
-                {row.getValue('status')}
-            </Badge>
-        ),
+        cell: ({ row }) => {
+            const status = row.getValue('status');
+            const statusText = campaignStatus.find(s => s.value === status)?.label || 'Không xác định';
+            let statusColor;
+            switch (status) {
+                case 0:
+                    statusColor = 'text-blue-500';
+                    break;
+                case 1:
+                    statusColor = 'text-blue-700';
+                    break;
+                case 2:
+                    statusColor = 'text-orange-500';
+                    break;
+                case 3:
+                    statusColor = 'text-red-500';
+                    break;
+                case 4:
+                    statusColor = 'text-green-500';
+                    break;
+                case 5:
+                    statusColor = 'text-purple-500';
+                    break;
+                case 6:
+                    statusColor = 'text-yellow-500';
+                    break;
+                default:
+                    statusColor = 'text-gray-500';
+            }
+            return (
+                <div className={`font-medium ${statusColor}`}>
+                    {statusText}
+                </div>
+            );
+        },
         filterFn: (row, id, value) => {
             return value.includes(row.getValue(id));
         },
     },
     {
-        accessorKey: 'join',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Người tham gia" className="justify-end" />,
-        cell: ({ row }) => <div className="text-right">{row.getValue('join').toLocaleString('vi-VN')}</div>,
+        accessorKey: 'targetAmount',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Mục tiêu" className="justify-end" />,
+        cell: ({ row }) => <div className="text-right">{row.getValue('targetAmount').toLocaleString('vi-VN')} ₫</div>,
     },
     {
-        accessorKey: 'budget',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Ngân sách" className="justify-end" />,
+        accessorKey: 'raisedAmount',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Đã quyên góp" className="justify-end" />,
         cell: ({ row }) => (
             <div className="text-right font-medium">
-                {row.getValue('budget').toLocaleString('vi-VN')} ₫
+                {row.getValue('raisedAmount').toLocaleString('vi-VN')} ₫
             </div>
         ),
     },
@@ -139,25 +151,26 @@ const columns = [
         cell: ({ row }) => <div>{new Date(row.getValue('endDate')).toLocaleDateString('vi-VN')}</div>,
     },
 
+
     {
-        accessorKey: 'targetAmount',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Số tiền mục tiêu" />,
-        cell: ({ row }) => <div>{row.getValue('targetAmount').toLocaleString('vi-VN')} ₫</div>,
+        accessorKey: 'guaranteeName',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Tên bảo lãnh" />,
+        cell: ({ row }) => {
+            const guaranteeType = row.original.guaranteeType;
+            const typeInfo = guaranteeTypes.find(type => type.value === guaranteeType);
+
+            return (
+                <div
+                    className={`font-medium ${guaranteeType === 0 ? 'text-green-600' : 'text-purple-500'}`}
+                    title={`Loại: ${typeInfo?.label || 'Không xác định'}`}
+                >
+                    {row.getValue('guaranteeName') || 'Chưa có'}
+                </div>
+            );
+        },
     },
-    {
-        accessorKey: 'raisedAmount',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Số tiền quyên góp" />,
-        cell: ({ row }) => <div>{row.getValue('raisedAmount').toLocaleString('vi-VN')} ₫</div>,
-    },
-    {
-        accessorKey: 'guaranteeId',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Người bảo lãnh" />,
-        cell: ({ row }) => (
-            row.getValue('status') === 'Đang hoạt động' || row.getValue('status') === 'Dã kết thúc'
-                ? <div>{row.getValue('guaranteeId') || 'Chưa có'}</div>
-                : <div>Chưa có</div>
-        ),
-    },
+
+
     {
         id: 'actions',
         cell: ({ row }) => <ActionMenu row={row} />,
@@ -165,7 +178,15 @@ const columns = [
 ];
 
 const ActionMenu = ({ row }) => {
-    const handleDelete = () => {
+    const [deleteCampaign] = useDeleteCampaignMutation();
+    const navigate = useNavigate();
+
+    const handleDelete = async () => {
+        try {
+            await deleteCampaign(row.original.campaignID);
+        } catch (error) {
+            console.error('Failed to delete campaign:', error);
+        }
     };
 
     return (
@@ -178,8 +199,10 @@ const ActionMenu = ({ row }) => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Hành động</DropdownMenuLabel>
-                <DropdownMenuItem>Cập nhật chiến dịch</DropdownMenuItem>
-                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate(`/campaign/${row.original.campaignID}`)}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    Xem chi tiết
+                </DropdownMenuItem>                <DropdownMenuSeparator />
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
                         <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600">
@@ -204,18 +227,21 @@ const ActionMenu = ({ row }) => {
     );
 };
 
-export function AdminFundrasing() {
-
+export function AdminCampaign() {
+    const { data: campaigns, isLoading, isError } = useGetAllCampaignsQuery();
     const [sorting, setSorting] = React.useState([]);
     const [columnFilters, setColumnFilters] = React.useState([]);
     const [columnVisibility, setColumnVisibility] = React.useState({});
     const [rowSelection, setRowSelection] = React.useState({});
+
+
     const breadcrumbs = [
-        { name: 'Bảng điều khiển', path: '/' },
-        { name: 'Chiến dịch gây quỹ', path: null },
+        { name: 'Bảng điều khiển', path: '/' },
+        { name: 'Chiến dịch gây quỹ', path: null },
     ];
+
     const table = useReactTable({
-        data,
+        data: campaigns || [],
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -233,13 +259,19 @@ export function AdminFundrasing() {
         },
     });
 
+    if (isLoading) {
+        return <LoadingScreen />;
+    }
+
+    if (isError) {
+        return <div>Error loading campaigns</div>;
+    }
+
     return (
-        <>                 <Breadcrumb breadcrumbs={breadcrumbs} />
-
-
+        <>
+            <Breadcrumb breadcrumbs={breadcrumbs} />
             <div className="w-full space-y-4 mx-3">
-
-                <DataTableToolbarAdmin table={table} type="Fundraising" />
+                <ToolbarForCampaign table={table} />
                 <div className="rounded-md border">
                     <Table>
                         <TableHeader>
@@ -282,4 +314,4 @@ export function AdminFundrasing() {
     );
 }
 
-export default AdminFundrasing;
+export default AdminCampaign;
