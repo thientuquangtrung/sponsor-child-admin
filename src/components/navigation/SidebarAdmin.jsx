@@ -21,7 +21,7 @@ import {
 
 const menuItems = [
     { icon: LayoutDashboard, label: "Bảng điều khiển", path: "/" },
-    { icon: Leaf, label: 'Gây quỹ', path: '/fundrasings' },
+    { icon: Leaf, label: 'Chiến dịch gây quỹ', path: '/campaigns' },
     {
         icon: BarChart2,
         label: 'Tài chính',

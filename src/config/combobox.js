@@ -1,12 +1,4 @@
-export const campaignStatus = [
-    { label: 'Đang thực hiện', value: 0 },
-    { label: 'Đã kết thúc', value: 1 },
-];
 
-export const campaignTypes = [
-    { label: 'Nuôi em', value: 0 },
-    { label: 'Khẩn cấp', value: 1 },
-];
 
 export const provinces = [
     { value: '047D915F-0363-4DAD-A408-00B10A146404', label: 'Cao Bằng' },
@@ -111,7 +103,25 @@ export const contractType = [
     { label: 'Chiến dịch gây quỹ', value: 1 },
 ];
 
+//campaign
+export const campaignStatus = [
+    { label: 'Đợi duyệt', value: 0 },
+    { label: 'Chờ ký hợp đồng', value: 1 },
+    { label: 'Đã duyệt', value: 2 },
+    { label: 'Từ chối', value: 3 },
+    { label: 'Hoạt động', value: 4 },
+    { label: 'Đã kết thúc', value: 5 },
+    { label: 'Đã hủy', value: 6 },
+    { label: 'Quá hạn', value: 7 },
+    { label: 'Đang giải ngân', value: 8 },
+    { label: 'Đã ngưng', value: 9 },
 
 
+];
 
+
+export const campaignTypes = [
+    { label: 'Nuôi em', value: 0 },
+    { label: 'Khẩn cấp', value: 1 },
+];
 
