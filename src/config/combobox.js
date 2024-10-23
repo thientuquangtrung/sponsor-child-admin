@@ -124,4 +124,15 @@ export const campaignTypes = [
     { label: 'Nuôi em', value: 0 },
     { label: 'Khẩn cấp', value: 1 },
 ];
+//childProfile
 
+export const guaranteeRelation = [
+    { value: 0, label: 'Cha mẹ' },
+    { value: 1, label: 'Chú' },
+    { value: 2, label: 'Anh/chị họ' },
+    { value: 3, label: 'Chị' },
+    { value: 4, label: 'Anh' },
+    { value: 5, label: 'Dì' },
+    { value: 6, label: 'Ông bà' },
+
+];
