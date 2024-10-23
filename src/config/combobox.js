@@ -72,6 +72,7 @@ export const guaranteeTypes = [
     { label: 'Cá nhân', value: 0 },
     { label: 'Tổ chức', value: 1 },
 ];
+
 export const organizationTypes = [
     { label: 'Chính trị xã hội', value: 0 },
     { label: 'Xã hội', value: 1 },
@@ -79,6 +80,7 @@ export const organizationTypes = [
     { label: 'Tôn giáo', value: 3 },
     { label: 'Kinh tế', value: 4 },
 ];
+
 export const guaranteeStatus = [
     { label: 'Đang chờ', value: 0 },
     { label: 'Phê duyệt', value: 1 },
@@ -94,14 +96,17 @@ export const contractStatus = [
     { label: 'Từ chối bởi quản trị viên', value: 4 },
     { label: 'Đã hủy', value: 5 },
 ];
+
 export const contractPartyType = [
     { label: 'Quản trị viên', value: 0 },
     { label: 'Bảo lãnh', value: 1 },
 ];
+
 export const contractType = [
     { label: 'Bảo lãnh', value: 0 },
     { label: 'Chiến dịch gây quỹ', value: 1 },
 ];
+
 
 //campaign
 export const campaignStatus = [
@@ -126,6 +131,7 @@ export const campaignTypes = [
 ];
 //childProfile
 
+
 export const guaranteeRelation = [
     { value: 0, label: 'Cha mẹ' },
     { value: 1, label: 'Chú' },
@@ -136,3 +142,6 @@ export const guaranteeRelation = [
     { value: 6, label: 'Ông bà' },
 
 ];
+
+
+
