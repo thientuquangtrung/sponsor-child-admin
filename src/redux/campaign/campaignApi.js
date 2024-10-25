@@ -17,7 +17,7 @@ export const campaignApi = baseApi.injectEndpoints({
         }),
         updateCampaign: builder.mutation({
             query: ({ id, ...data }) => ({
-                url: `/campaign/${id}`,
+                url: `/campaign/update/${id}`,
                 method: 'PUT',
                 body: data,
             }),
@@ -28,8 +28,24 @@ export const campaignApi = baseApi.injectEndpoints({
                 method: 'DELETE',
             }),
         }),
+
+        filterAdminCampaigns: builder.query({
+            query: (params) => ({
+                url: '/campaign/admin/filter',
+                method: 'GET',
+                params: {
+                    title: params.title,
+                    status: params.status,
+                    type: params.type,
+                    provinceId: params.provinceId,
+                    guaranteeType: params.guaranteeType,
+                    hasGuarantee: params.hasGuarantee
+                }
+            }),
+        }),
     }),
 });
+
 
 export const {
     useGetAllCampaignsQuery,
@@ -37,4 +53,5 @@ export const {
     useCreateCampaignMutation,
     useUpdateCampaignMutation,
     useDeleteCampaignMutation,
+    useFilterAdminCampaignsQuery,
 } = campaignApi;

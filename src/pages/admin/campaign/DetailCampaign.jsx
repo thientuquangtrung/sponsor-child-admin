@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Pencil } from "lucide-react";
+import { Pencil, Loader2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -20,28 +21,38 @@ import Breadcrumb from '@/pages/admin/Breadcrumb';
 import { useGetCampaignByIdQuery, useUpdateCampaignMutation } from '@/redux/campaign/campaignApi';
 import { campaignStatus, campaignTypes, guaranteeTypes } from '@/config/combobox';
 import LoadingScreen from '@/components/common/LoadingScreen';
+import { toast } from 'sonner';
+
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
 
 const DetailCampaign = () => {
     const { id } = useParams();
-    const { data: campaignData, isLoading, isError } = useGetCampaignByIdQuery(id);
-    const [updateStatus] = useUpdateCampaignMutation();
     const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false);
+    const [rejectionReason, setRejectionReason] = useState('');
+    const { data: campaignData, isLoading: campaignLoading, isError: campaignError } = useGetCampaignByIdQuery(id);
+    const [updateStatus] = useUpdateCampaignMutation();
 
-
-    if (isLoading) {
+    if (campaignLoading) {
         return <LoadingScreen />;
     }
 
-    if (isError) {
-        return <div>Error fetching campaign data.</div>;
+    if (campaignError) {
+        return <div>Error fetching data.</div>;
     }
 
     if (!campaignData) {
         return null;
     }
 
-
-    console.log(campaignData);
+    const { childProfile, disbursementPlans } = campaignData;
 
     const campaignStatusObj = campaignStatus.find((status) => status.value === campaignData.status);
     const campaignTypeObj = campaignTypes.find((type) => type.value === campaignData.campaignType);
@@ -51,34 +62,80 @@ const DetailCampaign = () => {
         { name: 'Chi tiết chiến dịch', path: null },
     ];
 
-
-    const updateCampaignStatus = async (newStatus) => {
+    const updateCampaignStatus = async (newStatus, reason = '') => {
         try {
-            await updateStatus({
+            setIsLoading(true);
+            const response = await updateStatus({
                 id,
                 title: campaignData.title,
                 story: campaignData.story,
                 status: newStatus,
                 thumbnailUrl: campaignData.thumbnailUrl,
-                imagesFolderUrl: campaignData.imagesFolderUrl
-            });
+                imagesFolderUrl: campaignData.imagesFolderUrl,
+                rejectionReason: reason
+            }).unwrap();
+
+            toast.success('Cập nhật chiến dịch thành công');
+            navigate('/campaigns');
+
         } catch (error) {
             console.error('Error updating campaign status:', error);
+            toast.error(error.data?.message || 'Có lỗi xảy ra khi cập nhật trạng thái chiến dịch');
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    const handleAccept = () => updateCampaignStatus(1);
-    const handleApprove = () => updateCampaignStatus(2);
-    const handleReject = () => updateCampaignStatus(3);
-    const handleCancel = () => updateCampaignStatus(6);
-    const handlePause = () => updateCampaignStatus(9);
+    const handleAccept = async () => {
+        try {
+            setIsLoading(true);
+            await updateCampaignStatus(1);
+        } catch (error) {
+            toast.error('Không thể chấp nhận đơn. Vui lòng thử lại sau.');
+        }
+    };
+
+    const handleApprove = async () => {
+        try {
+            setIsLoading(true);
+            await updateCampaignStatus(2);
+        } catch (error) {
+            toast.error('Không thể duyệt chiến dịch. Vui lòng thử lại sau.');
+        }
+    };
+
+    const handleReject = async () => {
+        try {
+            setIsLoading(true);
+            await updateCampaignStatus(3, rejectionReason);
+        } catch (error) {
+            toast.error('Không thể từ chối chiến dịch. Vui lòng thử lại sau.');
+        }
+    };
+
+    const handleCancel = async () => {
+        try {
+            setIsLoading(true);
+            await updateCampaignStatus(6, rejectionReason);
+        } catch (error) {
+            toast.error('Không thể hủy chiến dịch. Vui lòng thử lại sau.');
+        }
+    };
+
+    const handlePause = async () => {
+        try {
+            setIsLoading(true);
+            await updateCampaignStatus(9);
+        } catch (error) {
+            toast.error('Không thể tạm ngưng chiến dịch. Vui lòng thử lại sau.');
+        }
+    };
 
     const showAcceptButton = campaignData.status === 0;
     const showApproveButton = campaignData.status === 1;
     const showRejectButton = campaignData.status === 0;
-    const showCancelButton = [1, 2, 4].includes(campaignData.status);;
+    const showCancelButton = [1, 2, 4].includes(campaignData.status);
     const showPauseButton = campaignData.status === 8;
-
 
     return (
         <>
@@ -97,6 +154,7 @@ const DetailCampaign = () => {
                     </div>
 
                     <div className="space-y-6 max-w-7xl mx-auto">
+                        {/* Campaign Image Card */}
                         <Card className="shadow-lg border-0 overflow-hidden">
                             <CardHeader className="bg-teal-600 text-white">
                                 <CardTitle className="text-2xl font-semibold">Hình ảnh chiến dịch</CardTitle>
@@ -112,6 +170,7 @@ const DetailCampaign = () => {
                             </CardContent>
                         </Card>
 
+                        {/* Campaign Information Card */}
                         <Card className="shadow-lg border-0">
                             <CardHeader className="bg-teal-600 text-white">
                                 <CardTitle className="text-2xl font-semibold">Thông tin chiến dịch</CardTitle>
@@ -160,6 +219,7 @@ const DetailCampaign = () => {
                             </CardContent>
                         </Card>
 
+                        {/* Campaign Description Card */}
                         <Card className="shadow-lg border-0">
                             <CardHeader className="bg-teal-600 text-white">
                                 <CardTitle className="text-2xl font-semibold">Mô tả chiến dịch</CardTitle>
@@ -169,6 +229,42 @@ const DetailCampaign = () => {
                                     className="prose max-w-none text-lg bg-white rounded-lg p-6"
                                     dangerouslySetInnerHTML={{ __html: campaignData.story }}
                                 />
+                            </CardContent>
+                        </Card>
+
+                        {/* Child Information Card */}
+                        <Card className="shadow-lg border-0 mb-6">
+                            <CardHeader className="bg-teal-600 text-white">
+                                <CardTitle className="text-2xl font-semibold">Thông tin trẻ em</CardTitle>
+                            </CardHeader>
+                            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+                                <div className="md:col-span-2 flex justify-center mb-4">
+                                    <img
+                                        src={childProfile.imageUrl}
+                                        alt={childProfile.name}
+                                        className="w-48 h-48 rounded-full object-cover border-4 border-teal-600"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-lg font-medium text-gray-700">Họ và tên:</Label>
+                                    <Input value={childProfile.name} readOnly className="h-12 text-lg bg-gray-50" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-lg font-medium text-gray-700">Tuổi:</Label>
+                                    <Input value={childProfile.age} readOnly className="h-12 text-lg bg-gray-50" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-lg font-medium text-gray-700">Giới tính:</Label>
+                                    <Input
+                                        value={childProfile.gender === 0 ? "Nam" : "Nữ"}
+                                        readOnly
+                                        className="h-12 text-lg bg-gray-50"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-lg font-medium text-gray-700">Địa chỉ:</Label>
+                                    <Input value={childProfile.location} readOnly className="h-12 text-lg bg-gray-50" />
+                                </div>
                             </CardContent>
                         </Card>
 
@@ -187,13 +283,104 @@ const DetailCampaign = () => {
                                 </div>
                             </CardContent>
                         </Card>
+                        <Card className="shadow-lg border-0 mb-6">
+                            <CardHeader className="bg-teal-600 text-white">
+                                <CardTitle className="text-2xl font-semibold">Kế hoạch giải ngân</CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-6">
+                                {disbursementPlans.map((plan, index) => (
+                                    <div key={index} className="mb-8">
+                                        <div className="mb-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+                                            <div className="bg-teal-50 p-4 rounded-lg">
+                                                <p className="text-sm text-teal-600 font-medium">Ngày bắt đầu</p>
+                                                <p className="text-lg font-semibold">
+                                                    {new Date(plan.plannedStartDate).toLocaleDateString('vi-VN')}
+                                                </p>
+                                            </div>
+                                            <div className="bg-teal-50 p-4 rounded-lg">
+                                                <p className="text-sm text-teal-600 font-medium">Ngày kết thúc dự kiến</p>
+                                                <p className="text-lg font-semibold">
+                                                    {new Date(plan.plannedEndDate).toLocaleDateString('vi-VN')}
+                                                </p>
+                                            </div>
+                                            <div className="bg-teal-50 p-4 rounded-lg">
+                                                <p className="text-sm text-teal-600 font-medium">Ngày kết thúc thực tế</p>
+                                                <p className="text-lg font-semibold">
+                                                    {plan.actualEndDate ? new Date(plan.actualEndDate).toLocaleDateString('vi-VN') : '---'}
+                                                </p>
+                                            </div>
+                                            <div className="bg-teal-50 p-4 rounded-lg">
+                                                <p className="text-sm text-teal-600 font-medium">Tổng số tiền</p>
+                                                <p className="text-lg font-semibold">
+                                                    {plan.totalPlannedAmount.toLocaleString()} VNĐ
+                                                </p>
+                                            </div>
+                                        </div>
+                                        {/* 
+                                        <div className="mb-4 flex items-center">
+                                            <span className="text-sm font-medium mr-2">Cho phép sửa đổi:</span>
+                                            <span className={`px-3 py-1 rounded-full text-sm font-semibold ${plan.amendmentAllowed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                                }`}>
+                                                {plan.amendmentAllowed ? 'Có' : 'Không'}
+                                            </span>
+                                        </div> */}
+
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Giai đoạn</TableHead>
+                                                    <TableHead>Số tiền giải ngân</TableHead>
+                                                    <TableHead>Ngày dự kiến</TableHead>
+                                                    <TableHead>Ngày giải ngân thực tế</TableHead>
+                                                    <TableHead>Trạng thái</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {plan.stages.map((stage) => (
+                                                    <TableRow key={stage.stageNumber}>
+                                                        <TableCell>Giai đoạn {stage.stageNumber}</TableCell>
+                                                        <TableCell>{stage.disbursementAmount.toLocaleString()} VNĐ</TableCell>
+                                                        <TableCell>
+                                                            {new Date(stage.scheduledDate).toLocaleDateString('vi-VN')}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {stage.actualDisbursementDate
+                                                                ? new Date(stage.actualDisbursementDate).toLocaleDateString('vi-VN')
+                                                                : '---'
+                                                            }
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <span className={`px-3 py-1 rounded-full text-sm font-semibold
+                                            ${stage.status === 0 ? 'bg-yellow-100 text-yellow-800' :
+                                                                    stage.status === 1 ? 'bg-green-100 text-green-800' :
+                                                                        'bg-red-100 text-red-800'}`}>
+                                                                {stage.status === 0 ? 'Chờ giải ngân' :
+                                                                    stage.status === 1 ? 'Đã giải ngân' : 'Đã hủy'}
+                                                            </span>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                ))}
+                            </CardContent>
+                        </Card>
                         <div className="mt-6 flex justify-end space-x-4">
                             {showAcceptButton && (
                                 <Button
                                     onClick={handleAccept}
                                     className="bg-teal-600 hover:bg-green-700 text-white"
+                                    disabled={isLoading}
                                 >
-                                    Chấp nhận đơn
+                                    {isLoading ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Đang xử lý
+                                        </>
+                                    ) : (
+                                        'Chấp nhận đơn'
+                                    )}
                                 </Button>
                             )}
 
@@ -201,8 +388,16 @@ const DetailCampaign = () => {
                                 <Button
                                     onClick={handleApprove}
                                     className="bg-blue-600 hover:bg-blue-700 text-white"
+                                    disabled={isLoading}
                                 >
-                                    Duyệt Chiến dịch
+                                    {isLoading ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Đang xử lý
+                                        </>
+                                    ) : (
+                                        'Duyệt Chiến dịch'
+                                    )}
                                 </Button>
                             )}
 
@@ -217,14 +412,32 @@ const DetailCampaign = () => {
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Xác nhận từ chối</AlertDialogTitle>
                                             <AlertDialogDescription>
-                                                Bạn có chắc chắn muốn từ chối chiến dịch này?
+                                                Vui lòng nhập lý do từ chối chiến dịch này.
                                                 Hành động này không thể hoàn tác.
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
+                                        <div className="my-4">
+                                            <Textarea
+                                                placeholder="Nhập lý do từ chối..."
+                                                value={rejectionReason}
+                                                onChange={(e) => setRejectionReason(e.target.value)}
+                                                className="min-h-[100px]"
+                                            />
+                                        </div>
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>Hủy</AlertDialogCancel>
-                                            <AlertDialogAction onClick={handleReject}>
-                                                Xác nhận từ chối
+                                            <AlertDialogAction
+                                                onClick={handleReject}
+                                                disabled={isLoading || !rejectionReason.trim()}
+                                            >
+                                                {isLoading ? (
+                                                    <>
+                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        Đang xử lý
+                                                    </>
+                                                ) : (
+                                                    'Xác nhận từ chối'
+                                                )}
                                             </AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
@@ -242,14 +455,32 @@ const DetailCampaign = () => {
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Xác nhận hủy chiến dịch</AlertDialogTitle>
                                             <AlertDialogDescription>
-                                                Bạn có chắc chắn muốn hủy chiến dịch này?
+                                                Vui lòng nhập lý do hủy chiến dịch này.
                                                 Hành động này sẽ thay đổi trạng thái chiến dịch.
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
+                                        <div className="my-4">
+                                            <Textarea
+                                                placeholder="Nhập lý do hủy..."
+                                                value={rejectionReason}
+                                                onChange={(e) => setRejectionReason(e.target.value)}
+                                                className="min-h-[100px]"
+                                            />
+                                        </div>
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>Không</AlertDialogCancel>
-                                            <AlertDialogAction onClick={handleCancel}>
-                                                Xác nhận hủy
+                                            <AlertDialogAction
+                                                onClick={handleCancel}
+                                                disabled={isLoading || !rejectionReason.trim()}
+                                            >
+                                                {isLoading ? (
+                                                    <>
+                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        Đang xử lý
+                                                    </>
+                                                ) : (
+                                                    'Xác nhận hủy'
+                                                )}
                                             </AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
@@ -273,8 +504,18 @@ const DetailCampaign = () => {
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>Không</AlertDialogCancel>
-                                            <AlertDialogAction onClick={handlePause}>
-                                                Xác nhận tạm ngưng
+                                            <AlertDialogAction
+                                                onClick={handlePause}
+                                                disabled={isLoading}
+                                            >
+                                                {isLoading ? (
+                                                    <>
+                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        Đang xử lý
+                                                    </>
+                                                ) : (
+                                                    'Xác nhận tạm ngưng'
+                                                )}
                                             </AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { toast } from "sonner";
 import {
     flexRender,
     getCoreRowModel,
@@ -33,7 +34,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { useGetAllCampaignsQuery, useDeleteCampaignMutation } from '@/redux/campaign/campaignApi';
+import { useGetAllCampaignsQuery, useDeleteCampaignMutation, useFilterAdminCampaignsQuery } from '@/redux/campaign/campaignApi';
 import { campaignTypes, campaignStatus, guaranteeTypes } from '@/config/combobox';
 import { ToolbarForCampaign } from '@/components/datatable/ToolbarForCampaign';
 import LoadingScreen from '@/components/common/LoadingScreen';
@@ -184,8 +185,11 @@ const ActionMenu = ({ row }) => {
     const handleDelete = async () => {
         try {
             await deleteCampaign(row.original.campaignID);
+            toast.success("Xóa chiến dịch thành công!");
+            onDeleteSuccess(row.original.campaignID);
         } catch (error) {
             console.error('Failed to delete campaign:', error);
+            toast.error("Xóa chiến dịch thất bại!");
         }
     };
 
@@ -228,12 +232,42 @@ const ActionMenu = ({ row }) => {
 };
 
 export function AdminCampaign() {
-    const { data: campaigns, isLoading, isError } = useGetAllCampaignsQuery();
+    const [isFiltering, setIsFiltering] = React.useState(false);
+    const [hasGuaranteeFilter, setHasGuaranteeFilter] = React.useState(null);
+    const filterParams = hasGuaranteeFilter !== null ? { hasGuarantee: hasGuaranteeFilter } : {};
+    const [localData, setLocalData] = React.useState([]);
+
+    const {
+        data: allCampaigns,
+        isLoading: isLoadingAll,
+        isError: isErrorAll
+    } = useGetAllCampaignsQuery();
+
+    const {
+        data: filteredCampaigns,
+        isLoading: isLoadingFiltered,
+        isError: isErrorFiltered
+    } = useFilterAdminCampaignsQuery(filterParams, {
+        skip: !isFiltering
+    });
+
+    React.useEffect(() => {
+        const currentData = isFiltering ? filteredCampaigns : allCampaigns;
+        if (currentData) {
+            setLocalData(currentData);
+        }
+    }, [allCampaigns, filteredCampaigns, isFiltering]);
+
+    const handleDeleteSuccess = React.useCallback((deletedId) => {
+        setLocalData(prev => prev.filter(campaign => campaign.campaignID !== deletedId));
+    }, []);
     const [sorting, setSorting] = React.useState([]);
     const [columnFilters, setColumnFilters] = React.useState([]);
     const [columnVisibility, setColumnVisibility] = React.useState({});
     const [rowSelection, setRowSelection] = React.useState({});
 
+    const isLoading = isFiltering ? isLoadingFiltered : isLoadingAll;
+    const isError = isFiltering ? isErrorFiltered : isErrorAll;
 
     const breadcrumbs = [
         { name: 'Bảng điều khiển', path: '/' },
@@ -241,8 +275,18 @@ export function AdminCampaign() {
     ];
 
     const table = useReactTable({
-        data: campaigns || [],
-        columns,
+        data: localData,
+        columns: React.useMemo(
+            () => columns.map(col =>
+                col.id === 'actions'
+                    ? {
+                        ...col,
+                        cell: ({ row }) => <ActionMenu row={row} onDeleteSuccess={handleDeleteSuccess} />
+                    }
+                    : col
+            ),
+            [handleDeleteSuccess]
+        ),
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
         getCoreRowModel: getCoreRowModel(),
@@ -259,6 +303,16 @@ export function AdminCampaign() {
         },
     });
 
+    const handleGuaranteeFilter = (hasGuarantee) => {
+        setIsFiltering(true);
+        setHasGuaranteeFilter(hasGuarantee);
+    };
+
+    const clearFilter = () => {
+        setIsFiltering(false);
+        setHasGuaranteeFilter(null);
+    };
+
     if (isLoading) {
         return <LoadingScreen />;
     }
@@ -271,6 +325,30 @@ export function AdminCampaign() {
         <>
             <Breadcrumb breadcrumbs={breadcrumbs} />
             <div className="w-full space-y-4 mx-3">
+                <div className="flex gap-4 items-center">
+                    <Button
+                        variant={isFiltering && hasGuaranteeFilter === true ? "default" : "outline"}
+                        onClick={() => handleGuaranteeFilter(true)}
+                    >
+                        Có nhà bảo lãnh
+                    </Button>
+                    <Button
+                        variant={isFiltering && hasGuaranteeFilter === false ? "default" : "outline"}
+                        onClick={() => handleGuaranteeFilter(false)}
+                    >
+                        Không có nhà bảo lãnh
+                    </Button>
+                    {isFiltering && (
+                        <Button
+                            variant="ghost"
+                            onClick={clearFilter}
+                            className="text-gray-500"
+                        >
+                            Xem tất cả
+                        </Button>
+                    )}
+                </div>
+
                 <ToolbarForCampaign table={table} />
                 <div className="rounded-md border">
                     <Table>

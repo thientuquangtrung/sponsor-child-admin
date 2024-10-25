@@ -28,8 +28,14 @@ import { ToolbarForContract } from '@/components/datatable/ToolbarForContract';
 export function ContractManagement() {
     const navigate = useNavigate();
     const [viewAll, setViewAll] = useState(false);
+    const [sorting, setSorting] = useState([
+        {
+            id: 'startDate',
+            desc: false
+        }
+    ]);
 
-    const { data: pendingContracts, isLoading: isPendingLoading } = useGetContractsByStatusQuery(0);
+    const { data: pendingContracts, isLoading: isPendingLoading } = useGetContractsByStatusQuery(1);
     const { data: allContracts, isLoading: isAllLoading } = useGetAllContractsQuery();
 
     const contracts = viewAll ? allContracts : pendingContracts;
@@ -56,8 +62,18 @@ export function ContractManagement() {
         },
         {
             accessorKey: 'startDate',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Ngày bắt đầu" />,
+            header: ({ column }) => (
+                <DataTableColumnHeader
+                    column={column}
+                    title="Ngày bắt đầu"
+                />
+            ),
             cell: ({ row }) => <div>{new Date(row.getValue('startDate')).toLocaleDateString('vi-VN')}</div>,
+            sortingFn: (rowA, rowB) => {
+                const b = new Date(rowA.getValue('startDate')).getTime();
+                const a = new Date(rowB.getValue('startDate')).getTime();
+                return a < b ? -1 : a > b ? 1 : 0;
+            }
         },
         {
             accessorKey: 'endDate',
@@ -84,7 +100,7 @@ export function ContractManagement() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Hành động</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => navigate(`/center/contracts/${row.original.id}`)}>
+                        <DropdownMenuItem onClick={() => navigate(`/center/contracts/${row.original.contractID}`)}>
                             <Eye className="mr-2 h-4 w-4" />
                             Xem chi tiết
                         </DropdownMenuItem>
@@ -97,6 +113,10 @@ export function ContractManagement() {
     const table = useReactTable({
         data: contracts || [],
         columns,
+        state: {
+            sorting,
+        },
+        onSortingChange: setSorting,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
@@ -105,8 +125,8 @@ export function ContractManagement() {
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 0: return 'text-blue-500';
-            case 1: return 'text-orange-500';
+            case 0: return 'text-purple-400';
+            case 1: return 'text-blue-500';
             case 2: return 'text-green-600';
             case 3:
             case 4: return 'text-red-600';

@@ -90,10 +90,10 @@ export const guaranteeStatus = [
 //contract
 export const contractStatus = [
     { label: 'Đang chờ', value: 0 },
-    { label: 'Đang chờ quản trị viên', value: 1 },
+    { label: 'Đang chờ Quản trị viên', value: 1 },
     { label: 'Đã duyệt', value: 2 },
-    { label: 'Từ chối bởi bảo lãnh', value: 3 },
-    { label: 'Từ chối bởi quản trị viên', value: 4 },
+    { label: 'Từ chối bởi Bảo lãnh', value: 3 },
+    { label: 'Từ chối bởi Quản trị viên', value: 4 },
     { label: 'Đã hủy', value: 5 },
 ];
 
@@ -103,7 +103,7 @@ export const contractPartyType = [
 ];
 
 export const contractType = [
-    { label: 'Bảo lãnh', value: 0 },
+    { label: 'Đăng ký Bảo lãnh', value: 0 },
     { label: 'Chiến dịch gây quỹ', value: 1 },
 ];
 
