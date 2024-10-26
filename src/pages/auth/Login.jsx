@@ -73,7 +73,7 @@ const Login = () => {
                 <div className="md:w-[500px] md:px-0 w-full px-4">
                     <h1 className="text-3xl font-semibold mb-8">Đăng nhập</h1>
                     <LoginForm />
-                    <div className="flex flex-col md:flex-row gap-1 justify-between mt-8 text-muted-foreground">
+                    {/* <div className="flex flex-col md:flex-row gap-1 justify-between mt-8 text-muted-foreground">
                         <p>
                             Bạn chưa có tài khoản?{' '}
                             <Link className="text-lg text-primary font-bold" to="/auth/register">
@@ -97,7 +97,7 @@ const Login = () => {
                     >
                         <img className="w-6 h-auto" src={logoGoogle} alt="sponsor-child" />
                         <span className="ml-4 text-lg">Đăng nhập bằng Google</span>
-                    </ButtonLoading>
+                    </ButtonLoading> */}
                 </div>
             </div>
         </div>
