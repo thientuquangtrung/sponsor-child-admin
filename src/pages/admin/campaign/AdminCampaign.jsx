@@ -236,7 +236,6 @@ export function AdminCampaign() {
     const [isFiltering, setIsFiltering] = React.useState(false);
     const [hasGuaranteeFilter, setHasGuaranteeFilter] = React.useState(null);
     const filterParams = hasGuaranteeFilter !== null ? { hasGuarantee: hasGuaranteeFilter } : {};
-    const [localData, setLocalData] = React.useState([]);
 
     const {
         data: allCampaigns,
@@ -252,12 +251,12 @@ export function AdminCampaign() {
         skip: !isFiltering
     });
 
-    React.useEffect(() => {
-        const currentData = isFiltering ? filteredCampaigns : allCampaigns;
-        if (currentData) {
-            setLocalData(currentData);
-        }
-    }, [allCampaigns, filteredCampaigns, isFiltering]);
+    // React.useEffect(() => {
+    //     const currentData = isFiltering ? filteredCampaigns : allCampaigns;
+    //     if (currentData) {
+    //         setLocalData(currentData);
+    //     }
+    // }, [allCampaigns, filteredCampaigns, isFiltering]);
 
     const handleDeleteSuccess = React.useCallback((deletedId) => {
         setLocalData(prev => prev.filter(campaign => campaign.campaignID !== deletedId));

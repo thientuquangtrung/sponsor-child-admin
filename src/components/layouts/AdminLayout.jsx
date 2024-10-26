@@ -16,8 +16,7 @@ export function AdminLayout() {
             <HeaderSidebar className="fixed top-0 left-0 right-0 h-16 z-50" />
 
             <div className="flex pt-16 min-h-screen">
-                <SidebarAdmin className="fixed top-16 left-0 w-64 h-[calc(100vh-64px)] z-40" />
-
+                <SidebarAdmin />
                 <main className="flex-1 ml-0 md:ml-64 min-h-[calc(100vh-64px)]">
                     <div className="container mx-auto p-6">
                         <Outlet />
