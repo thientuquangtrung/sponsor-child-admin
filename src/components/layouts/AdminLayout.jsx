@@ -12,18 +12,20 @@ export function AdminLayout() {
     }
 
     return (
-        <div className="dark:bg-[#1a222c] dark:text-white">
-            <div className="flex flex-col h-screen">
-                <HeaderSidebar className="z-30" />
-                <div className="flex flex-1 overflow-hidden">
-                    <SidebarAdmin className="z-40 h-[calc(100vh-64px)] fixed top-16 left-0" />
-                    <main className="flex-1 overflow-y-auto bg-[#f3f4f6] dark:bg-gray-700 p-6 md:mt-16 ml-0 md:ml-64">
+        <div className="min-h-screen bg-[#f3f4f6] dark:bg-[#1a222c] dark:text-white">
+            <HeaderSidebar className="fixed top-0 left-0 right-0 h-16 z-50" />
+
+            <div className="flex pt-16 min-h-screen">
+                <SidebarAdmin className="fixed top-16 left-0 w-64 h-[calc(100vh-64px)] z-40" />
+
+                <main className="flex-1 ml-0 md:ml-64 min-h-[calc(100vh-64px)]">
+                    <div className="container mx-auto p-6">
                         <Outlet />
-                    </main>
-                </div>
+                    </div>
+                </main>
             </div>
         </div>
     );
-}
+};
 
 export default AdminLayout;

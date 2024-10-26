@@ -5,10 +5,19 @@ import FundChart from '@/pages/admin/charts/FundChart';
 import DisbursementChart from '@/pages/admin/charts/DisbursementChart';
 import ActivityChart from './charts/ActivityChart';
 import FundTable from '@/pages/admin/FundTable';
+import DateRangePicker from '@/components/ui/date-range-picker';
 
 const AdminDashboard = () => {
+    const handleDateRangeChange = (range) => {
+
+    };
+
     return (
         <>
+            <div className="flex justify-end mb-4">
+                <DateRangePicker onRangeChange={handleDateRangeChange} />
+            </div>
+
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7">
                 <CardDataStats title="Tổng số người dùng" total="3,456" rate="0.95%" levelDown>
                     <Users className="text-indigo-700 dark:fill-white" size={22} />

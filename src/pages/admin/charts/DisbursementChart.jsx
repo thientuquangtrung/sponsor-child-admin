@@ -54,7 +54,7 @@ const DisbursementChart = () => {
       enabled: false,
     },
     xaxis: {
-      categories: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Dự án A', 'Dự án B', 'Dự án C'],
+      categories: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7'],
     },
     legend: {
       position: 'top',
@@ -75,9 +75,9 @@ const DisbursementChart = () => {
     <div className="col-span-12 rounded-sm border border-[#e2e8f0] bg-white p-7 shadow-lg dark:border-[#2e3a47] dark:bg-[#2e3a47] xl:col-span-4">
       <div className="mb-4 flex justify-between gap-4">
         <h4 className="text-xl font-semibold text-black dark:text-white">
-          Giải Ngân Tuần Này
+          Giải Ngân
         </h4>
-        <div className="relative z-20 inline-block">
+        {/* <div className="relative z-20 inline-block">
           <select
             className="relative z-20 inline-flex appearance-none bg-transparent py-1 pl-3 pr-8 text-sm font-medium outline-none dark:bg-[#2e3a47]"
           >
@@ -104,7 +104,7 @@ const DisbursementChart = () => {
               />
             </svg>
           </span>
-        </div>
+        </div> */}
       </div>
 
       <div>

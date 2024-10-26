@@ -154,11 +154,8 @@ const DetailCampaign = () => {
                     </div>
 
                     <div className="space-y-6 max-w-7xl mx-auto">
-                        {/* Campaign Image Card */}
                         <Card className="shadow-lg border-0 overflow-hidden">
-                            <CardHeader className="bg-teal-600 text-white">
-                                <CardTitle className="text-2xl font-semibold">Hình ảnh chiến dịch</CardTitle>
-                            </CardHeader>
+
                             <CardContent className="p-0">
                                 <div className="w-full h-[600px] relative">
                                     <img
@@ -170,7 +167,6 @@ const DetailCampaign = () => {
                             </CardContent>
                         </Card>
 
-                        {/* Campaign Information Card */}
                         <Card className="shadow-lg border-0">
                             <CardHeader className="bg-teal-600 text-white">
                                 <CardTitle className="text-2xl font-semibold">Thông tin chiến dịch</CardTitle>

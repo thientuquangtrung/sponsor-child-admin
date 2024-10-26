@@ -39,6 +39,7 @@ import { campaignTypes, campaignStatus, guaranteeTypes } from '@/config/combobox
 import { ToolbarForCampaign } from '@/components/datatable/ToolbarForCampaign';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import { useNavigate } from 'react-router-dom';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 const columns = [
     {
@@ -265,7 +266,6 @@ export function AdminCampaign() {
     const [columnFilters, setColumnFilters] = React.useState([]);
     const [columnVisibility, setColumnVisibility] = React.useState({});
     const [rowSelection, setRowSelection] = React.useState({});
-
     const isLoading = isFiltering ? isLoadingFiltered : isLoadingAll;
     const isError = isFiltering ? isErrorFiltered : isErrorAll;
 
@@ -274,44 +274,81 @@ export function AdminCampaign() {
         { name: 'Chiến dịch gây quỹ', path: null },
     ];
 
-    const table = useReactTable({
-        data: localData,
-        columns: React.useMemo(
-            () => columns.map(col =>
-                col.id === 'actions'
-                    ? {
-                        ...col,
-                        cell: ({ row }) => <ActionMenu row={row} onDeleteSuccess={handleDeleteSuccess} />
-                    }
-                    : col
+    const {
+        data: guaranteedCampaigns,
+        isLoading: isLoadingGuaranteed,
+        isError: isErrorGuaranteed
+    } = useFilterAdminCampaignsQuery({ hasGuarantee: true });
+
+    const {
+        data: nonGuaranteedCampaigns,
+        isLoading: isLoadingNonGuaranteed,
+        isError: isErrorNonGuaranteed
+    } = useFilterAdminCampaignsQuery({ hasGuarantee: false });
+    const createTable = (data) => {
+        return useReactTable({
+            data: data || [],
+            columns: React.useMemo(
+                () => columns.map(col =>
+                    col.id === 'actions'
+                        ? {
+                            ...col,
+                            cell: ({ row }) => <ActionMenu row={row} onDeleteSuccess={handleDeleteSuccess} />
+                        }
+                        : col
+                ),
+                [handleDeleteSuccess]
             ),
-            [handleDeleteSuccess]
-        ),
-        onSortingChange: setSorting,
-        onColumnFiltersChange: setColumnFilters,
-        getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
-        onColumnVisibilityChange: setColumnVisibility,
-        onRowSelectionChange: setRowSelection,
-        state: {
-            sorting,
-            columnFilters,
-            columnVisibility,
-            rowSelection,
-        },
-    });
-
-    const handleGuaranteeFilter = (hasGuarantee) => {
-        setIsFiltering(true);
-        setHasGuaranteeFilter(hasGuarantee);
+            onSortingChange: setSorting,
+            onColumnFiltersChange: setColumnFilters,
+            getCoreRowModel: getCoreRowModel(),
+            getPaginationRowModel: getPaginationRowModel(),
+            getSortedRowModel: getSortedRowModel(),
+            getFilteredRowModel: getFilteredRowModel(),
+            onColumnVisibilityChange: setColumnVisibility,
+            onRowSelectionChange: setRowSelection,
+            state: {
+                sorting,
+                columnFilters,
+                columnVisibility,
+                rowSelection,
+            },
+        });
     };
 
-    const clearFilter = () => {
-        setIsFiltering(false);
-        setHasGuaranteeFilter(null);
-    };
+    const guaranteedTable = createTable(guaranteedCampaigns);
+    const nonGuaranteedTable = createTable(nonGuaranteedCampaigns);
+    // const table = useReactTable({
+    //     data: localData,
+    //     columns: React.useMemo(
+    //         () => columns.map(col =>
+    //             col.id === 'actions'
+    //                 ? {
+    //                     ...col,
+    //                     cell: ({ row }) => <ActionMenu row={row} onDeleteSuccess={handleDeleteSuccess} />
+    //                 }
+    //                 : col
+    //         ),
+    //         [handleDeleteSuccess]
+    //     ),
+    //     onSortingChange: setSorting,
+    //     onColumnFiltersChange: setColumnFilters,
+    //     getCoreRowModel: getCoreRowModel(),
+    //     getPaginationRowModel: getPaginationRowModel(),
+    //     getSortedRowModel: getSortedRowModel(),
+    //     getFilteredRowModel: getFilteredRowModel(),
+    //     onColumnVisibilityChange: setColumnVisibility,
+    //     onRowSelectionChange: setRowSelection,
+    //     state: {
+    //         sorting,
+    //         columnFilters,
+    //         columnVisibility,
+    //         rowSelection,
+    //     },
+    // });
+
+
+
 
     if (isLoading) {
         return <LoadingScreen />;
@@ -321,72 +358,69 @@ export function AdminCampaign() {
         return <div>Error loading campaigns</div>;
     }
 
+    const renderTable = (table) => (
+        <>
+            <ToolbarForCampaign table={table} />
+            <div className="rounded-md border">
+                <Table>
+                    <TableHeader>
+                        {table.getHeaderGroups().map((headerGroup) => (
+                            <TableRow key={headerGroup.id}>
+                                {headerGroup.headers.map((header) => (
+                                    <TableHead key={header.id}>
+                                        {header.isPlaceholder
+                                            ? null
+                                            : flexRender(header.column.columnDef.header, header.getContext())}
+                                    </TableHead>
+                                ))}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {table.getRowModel().rows?.length ? (
+                            table.getRowModel().rows.map((row) => (
+                                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                                    {row.getVisibleCells().map((cell) => (
+                                        <TableCell key={cell.id}>
+                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={columns.length} className="h-24 text-center">
+                                    Không có kết quả.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
+            <DataTablePagination table={table} />
+        </>
+    );
+
     return (
         <>
             <Breadcrumb breadcrumbs={breadcrumbs} />
             <div className="w-full space-y-4 mx-3">
-                <div className="flex gap-4 items-center">
-                    <Button
-                        variant={isFiltering && hasGuaranteeFilter === true ? "default" : "outline"}
-                        onClick={() => handleGuaranteeFilter(true)}
-                    >
-                        Có nhà bảo lãnh
-                    </Button>
-                    <Button
-                        variant={isFiltering && hasGuaranteeFilter === false ? "default" : "outline"}
-                        onClick={() => handleGuaranteeFilter(false)}
-                    >
-                        Không có nhà bảo lãnh
-                    </Button>
-                    {isFiltering && (
-                        <Button
-                            variant="ghost"
-                            onClick={clearFilter}
-                            className="text-gray-500"
-                        >
-                            Xem tất cả
-                        </Button>
-                    )}
-                </div>
-
-                <ToolbarForCampaign table={table} />
-                <div className="rounded-md border">
-                    <Table>
-                        <TableHeader>
-                            {table.getHeaderGroups().map((headerGroup) => (
-                                <TableRow key={headerGroup.id}>
-                                    {headerGroup.headers.map((header) => (
-                                        <TableHead key={header.id}>
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(header.column.columnDef.header, header.getContext())}
-                                        </TableHead>
-                                    ))}
-                                </TableRow>
-                            ))}
-                        </TableHeader>
-                        <TableBody>
-                            {table.getRowModel().rows?.length ? (
-                                table.getRowModel().rows.map((row) => (
-                                    <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                                        {row.getVisibleCells().map((cell) => (
-                                            <TableCell key={cell.id}>
-                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={columns.length} className="h-24 text-center">
-                                        Không có kết quả.
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </div>
-                <DataTablePagination table={table} />
+                <Tabs defaultValue="guaranteed" className="w-full">
+                    <TabsList className="grid w-full max-w-[400px] grid-cols-2">
+                        <TabsTrigger value="guaranteed">
+                            Có Bảo lãnh
+                        </TabsTrigger>
+                        <TabsTrigger value="non-guaranteed">
+                            Chưa có Bảo lãnh
+                        </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="guaranteed" className="space-y-4">
+                        {renderTable(guaranteedTable)}
+                    </TabsContent>
+                    <TabsContent value="non-guaranteed" className="space-y-4">
+                        {renderTable(nonGuaranteedTable)}
+                    </TabsContent>
+                </Tabs>
             </div>
         </>
     );

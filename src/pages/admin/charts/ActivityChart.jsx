@@ -87,7 +87,7 @@ const ActivityChart = () => {
                 </div>
                 <div>
                     <div className="relative z-20 inline-block">
-                        <select
+                        {/* <select
                             className="relative z-20 inline-flex appearance-none bg-transparent py-1 pl-3 pr-8 text-sm font-medium outline-none"
                         >
                             <option value="" className="dark:bg-[#24303f]">
@@ -96,7 +96,7 @@ const ActivityChart = () => {
                             <option value="" className="dark:bg-[#24303f]">
                                 Hàng năm
                             </option>
-                        </select>
+                        </select> */}
                         <span className="absolute right-3 top-1/2 z-10 -translate-y-1/2">
                             <svg
                                 width="10"
