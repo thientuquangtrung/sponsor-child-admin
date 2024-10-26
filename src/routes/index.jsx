@@ -5,8 +5,6 @@ import { Navigate, useRoutes } from 'react-router-dom';
 import { AuthLayout } from '@/components/layouts/AuthLayout';
 import { AdminLayout } from '@/components/layouts/AdminLayout';
 
-
-
 // config
 // import { DEFAULT_PATH } from '../config/app';
 import LoadingScreen from '@/components/common/LoadingScreen';
@@ -15,8 +13,6 @@ import CampaignChildrenManager from '@/pages/children-manager/campaign/CampaignC
 import DetailCampaignChildrenManager from '@/pages/children-manager/campaign/DetailCampaignChildrenManager';
 import UpdateCampaignChildrenManager from '@/pages/children-manager/campaign/UpdateCampaignChildrenManager';
 import CampaignCreate from '@/pages/children-manager/campaign/CampaignCreate';
-
-
 
 const Loadable = (Component) => {
     const LoadableComponent = (props) => {
@@ -46,12 +42,12 @@ export default function Router() {
                 { element: <NewPasswordPage />, path: 'new-password' },
             ],
         },
-
         {
             path: '/',
             element: <AdminLayout />,
             children: [
-                { element: <AdminDashboard />, index: true },
+                { element: <Navigate to="/home" replace />, index: true },
+                { element: <AdminDashboard />, path: '/home' },
                 { element: <UserManagement />, path: 'users' },
                 { element: <AdminCampaign />, path: 'campaigns' },
                 { element: <DetailCampaign />, path: 'campaign/:id' },
@@ -67,28 +63,24 @@ export default function Router() {
                 { element: <GuaranteeRequestsDetail />, path: 'center/guarantee-requests/:id' },
                 { element: <ContractManagement />, path: 'center/contracts' },
                 { element: <ContractDetail />, path: 'center/contracts/:id' },
-
                 { element: <CampaignChildrenManager />, path: 'cm-campaigns' },
                 { element: <DetailCampaignChildrenManager />, path: 'cm-campaign/:id' },
                 { element: <UpdateCampaignChildrenManager />, path: 'cm-campaign/edit/:id' },
                 { element: <CampaignCreate />, path: 'create-campaign' },
-
-
-
+                { path: '404', element: <Page404 /> },
             ],
         },
-
-        // { path: '*', element: <Navigate to="/404" replace /> },
+        { path: '404', element: <Page404 /> },
+        { path: '*', element: <Navigate to="/404" replace /> },
     ]);
 }
+
+const Page404 = Loadable(lazy(() => import('../pages/NoMatch')));
 
 const LoginPage = Loadable(lazy(() => import('../pages/auth/Login')));
 const RegisterPage = Loadable(lazy(() => import('../pages/auth/Register')));
 const ResetPasswordPage = Loadable(lazy(() => import('../pages/auth/ResetPassword')));
 const NewPasswordPage = Loadable(lazy(() => import('../pages/auth/NewPassword')));
-
-
-
 
 //admin
 const AdminDashboard = Loadable(lazy(() => import('@/pages/admin/AdminDashboard')));
@@ -105,16 +97,6 @@ const ContractManagement = Loadable(lazy(() => import('@/pages/admin/center/Cont
 const ContractDetail = Loadable(lazy(() => import('@/pages/admin/center/ContractDetail')));
 const DetailCampaign = Loadable(lazy(() => import('@/pages/admin/campaign/DetailCampaign')));
 
-
-
-
-
-
 //children-manager
 const Visit = Loadable(lazy(() => import('@/pages/children-manager/Visit')));
 const VisitForm = Loadable(lazy(() => import('@/pages/children-manager/VisitForm')));
-
-
-
-
-

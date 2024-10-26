@@ -1,12 +1,18 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import SidebarAdmin from '@/components/navigation/SidebarAdmin';
 import HeaderSidebar from '@/components/navigation/HeaderSidebar';
+import { useSelector } from 'react-redux';
 
 export function AdminLayout() {
+    const { user } = useSelector((state) => state.auth);
+
+    if (user?.role.toLowerCase() !== 'admin') {
+        return <Navigate to="/auth/login" />;
+    }
+
     return (
         <div className="dark:bg-[#1a222c] dark:text-white">
-
             <div className="flex flex-col h-screen">
                 <HeaderSidebar className="z-30" />
                 <div className="flex flex-1 overflow-hidden">
