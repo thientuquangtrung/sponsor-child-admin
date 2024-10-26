@@ -136,7 +136,7 @@ const FundChart = () => {
                         </span>
                         <div className="w-full">
                             <p className="font-semibold  text-[#2dd4bf]">Tiến độ gây quỹ</p>
-                            <p className="text-sm font-medium">12.10.2024 - 12.01.2025</p>
+                            {/* <p className="text-sm font-medium">12.10.2024 - 12.01.2025</p> */}
                         </div>
                     </div>
                     <div className="flex min-w-48">
@@ -145,11 +145,11 @@ const FundChart = () => {
                         </span>
                         <div className="w-full">
                             <p className="font-semibold text-[#50c878] ">Mục tiêu gây quỹ</p>
-                            <p className="text-sm font-medium">12.10.2024 - 12.12.2024</p>
+                            {/* <p className="text-sm font-medium">12.10.2024 - 12.12.2024</p> */}
                         </div>
                     </div>
                 </div>
-                <div className="flex w-full max-w-44 justify-end">
+                {/* <div className="flex w-full max-w-44 justify-end">
                     <div className="inline-flex items-center rounded-md bg-[#f5f7fd] p-1 dark:bg-[#313d4a]">
                         <button className="rounded bg-white py-1 px-3 text-xs font-medium text-black shadow-card hover:bg-white hover:shadow-card dark:bg-[#24303f] dark:text-white dark:hover:bg-[#24303f]">
                             Ngày
@@ -161,7 +161,7 @@ const FundChart = () => {
                             Tháng
                         </button>
                     </div>
-                </div>
+                </div> */}
             </div>
 
             <div>
