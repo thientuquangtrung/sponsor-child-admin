@@ -31,6 +31,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import FileViewer from '@/pages/admin/campaign/FileViewer';
 
 const DetailCampaign = () => {
     const { id } = useParams();
@@ -62,14 +63,17 @@ const DetailCampaign = () => {
         { name: 'Chi tiết chiến dịch', path: null },
     ];
 
+
     const updateCampaignStatus = async (newStatus, reason = '') => {
         try {
             setIsLoading(true);
             const response = await updateStatus({
                 id,
+                guaranteeID: campaignData.guaranteeID,
                 title: campaignData.title,
                 story: campaignData.story,
                 status: newStatus,
+                raisedAmount: campaignData.raisedAmount,
                 thumbnailUrl: campaignData.thumbnailUrl,
                 imagesFolderUrl: campaignData.imagesFolderUrl,
                 rejectionReason: reason
@@ -95,14 +99,7 @@ const DetailCampaign = () => {
         }
     };
 
-    const handleApprove = async () => {
-        try {
-            setIsLoading(true);
-            await updateCampaignStatus(2);
-        } catch (error) {
-            toast.error('Không thể duyệt chiến dịch. Vui lòng thử lại sau.');
-        }
-    };
+
 
     const handleReject = async () => {
         try {
@@ -131,8 +128,8 @@ const DetailCampaign = () => {
         }
     };
 
+
     const showAcceptButton = campaignData.status === 0;
-    const showApproveButton = campaignData.status === 1;
     const showRejectButton = campaignData.status === 0;
     const showCancelButton = [1, 2, 4].includes(campaignData.status);
     const showPauseButton = campaignData.status === 8;
@@ -166,7 +163,36 @@ const DetailCampaign = () => {
                                 </div>
                             </CardContent>
                         </Card>
-
+                        <Card className="shadow-lg border-0 mb-6">
+                            <CardHeader className="bg-teal-600 text-white">
+                                <CardTitle className="text-2xl font-semibold">Thông tin trẻ em</CardTitle>
+                            </CardHeader>
+                            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+                                <div className="md:col-span-2 flex justify-center mb-4">
+                                    <FileViewer fileUrl={childProfile.identificationInformationFile} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-lg font-medium text-gray-700">Họ và tên:</Label>
+                                    <Input value={childProfile.name} readOnly className="h-12 text-lg bg-gray-50" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-lg font-medium text-gray-700">Tuổi:</Label>
+                                    <Input value={childProfile.age} readOnly className="h-12 text-lg bg-gray-50" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-lg font-medium text-gray-700">Giới tính:</Label>
+                                    <Input
+                                        value={childProfile.gender === 0 ? "Nam" : "Nữ"}
+                                        readOnly
+                                        className="h-12 text-lg bg-gray-50"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-lg font-medium text-gray-700">Địa chỉ:</Label>
+                                    <Input value={childProfile.location} readOnly className="h-12 text-lg bg-gray-50" />
+                                </div>
+                            </CardContent>
+                        </Card>
                         <Card className="shadow-lg border-0">
                             <CardHeader className="bg-teal-600 text-white">
                                 <CardTitle className="text-2xl font-semibold">Thông tin chiến dịch</CardTitle>
@@ -214,56 +240,6 @@ const DetailCampaign = () => {
                                 </div>
                             </CardContent>
                         </Card>
-
-                        {/* Campaign Description Card */}
-                        <Card className="shadow-lg border-0">
-                            <CardHeader className="bg-teal-600 text-white">
-                                <CardTitle className="text-2xl font-semibold">Mô tả chiến dịch</CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-6">
-                                <div
-                                    className="prose max-w-none text-lg bg-white rounded-lg p-6"
-                                    dangerouslySetInnerHTML={{ __html: campaignData.story }}
-                                />
-                            </CardContent>
-                        </Card>
-
-                        {/* Child Information Card */}
-                        <Card className="shadow-lg border-0 mb-6">
-                            <CardHeader className="bg-teal-600 text-white">
-                                <CardTitle className="text-2xl font-semibold">Thông tin trẻ em</CardTitle>
-                            </CardHeader>
-                            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-                                <div className="md:col-span-2 flex justify-center mb-4">
-                                    <img
-                                        src={childProfile.imageUrl}
-                                        alt={childProfile.name}
-                                        className="w-48 h-48 rounded-full object-cover border-4 border-teal-600"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-lg font-medium text-gray-700">Họ và tên:</Label>
-                                    <Input value={childProfile.name} readOnly className="h-12 text-lg bg-gray-50" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-lg font-medium text-gray-700">Tuổi:</Label>
-                                    <Input value={childProfile.age} readOnly className="h-12 text-lg bg-gray-50" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-lg font-medium text-gray-700">Giới tính:</Label>
-                                    <Input
-                                        value={childProfile.gender === 0 ? "Nam" : "Nữ"}
-                                        readOnly
-                                        className="h-12 text-lg bg-gray-50"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-lg font-medium text-gray-700">Địa chỉ:</Label>
-                                    <Input value={childProfile.location} readOnly className="h-12 text-lg bg-gray-50" />
-                                </div>
-                            </CardContent>
-                        </Card>
-
                         <Card className="shadow-lg border-0">
                             <CardHeader className="bg-teal-600 text-white">
                                 <CardTitle className="text-2xl font-semibold">Thông tin bảo lãnh</CardTitle>
@@ -279,6 +255,20 @@ const DetailCampaign = () => {
                                 </div>
                             </CardContent>
                         </Card>
+                        <Card className="shadow-lg border-0">
+                            <CardHeader className="bg-teal-600 text-white">
+                                <CardTitle className="text-2xl font-semibold">Mô tả chiến dịch</CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-6">
+                                <div
+                                    className="prose max-w-none text-lg bg-white rounded-lg p-6"
+                                    dangerouslySetInnerHTML={{ __html: campaignData.story }}
+                                />
+                            </CardContent>
+                        </Card>
+
+
+
                         <Card className="shadow-lg border-0 mb-6">
                             <CardHeader className="bg-teal-600 text-white">
                                 <CardTitle className="text-2xl font-semibold">Kế hoạch giải ngân</CardTitle>
@@ -312,14 +302,6 @@ const DetailCampaign = () => {
                                                 </p>
                                             </div>
                                         </div>
-                                        {/* 
-                                        <div className="mb-4 flex items-center">
-                                            <span className="text-sm font-medium mr-2">Cho phép sửa đổi:</span>
-                                            <span className={`px-3 py-1 rounded-full text-sm font-semibold ${plan.amendmentAllowed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                                }`}>
-                                                {plan.amendmentAllowed ? 'Có' : 'Không'}
-                                            </span>
-                                        </div> */}
 
                                         <Table>
                                             <TableHeader>
@@ -332,30 +314,32 @@ const DetailCampaign = () => {
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
-                                                {plan.stages.map((stage) => (
-                                                    <TableRow key={stage.stageNumber}>
-                                                        <TableCell>Giai đoạn {stage.stageNumber}</TableCell>
-                                                        <TableCell>{stage.disbursementAmount.toLocaleString()} VNĐ</TableCell>
-                                                        <TableCell>
-                                                            {new Date(stage.scheduledDate).toLocaleDateString('vi-VN')}
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            {stage.actualDisbursementDate
-                                                                ? new Date(stage.actualDisbursementDate).toLocaleDateString('vi-VN')
-                                                                : '---'
-                                                            }
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <span className={`px-3 py-1 rounded-full text-sm font-semibold
-                                            ${stage.status === 0 ? 'bg-yellow-100 text-yellow-800' :
-                                                                    stage.status === 1 ? 'bg-green-100 text-green-800' :
-                                                                        'bg-red-100 text-red-800'}`}>
-                                                                {stage.status === 0 ? 'Chờ giải ngân' :
-                                                                    stage.status === 1 ? 'Đã giải ngân' : 'Đã hủy'}
-                                                            </span>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
+                                                {[...plan.stages]
+                                                    .sort((a, b) => a.stageNumber - b.stageNumber)
+                                                    .map((stage) => (
+                                                        <TableRow key={stage.stageNumber}>
+                                                            <TableCell>Giai đoạn {stage.stageNumber}</TableCell>
+                                                            <TableCell>{stage.disbursementAmount.toLocaleString()} VNĐ</TableCell>
+                                                            <TableCell>
+                                                                {new Date(stage.scheduledDate).toLocaleDateString('vi-VN')}
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                {stage.actualDisbursementDate
+                                                                    ? new Date(stage.actualDisbursementDate).toLocaleDateString('vi-VN')
+                                                                    : '---'
+                                                                }
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <span className={`px-3 py-1 rounded-full text-sm font-semibold
+                                                                    ${stage.status === 0 ? 'bg-yellow-100 text-yellow-800' :
+                                                                        stage.status === 1 ? 'bg-green-100 text-green-800' :
+                                                                            'bg-red-100 text-red-800'}`}>
+                                                                    {stage.status === 0 ? 'Chờ giải ngân' :
+                                                                        stage.status === 1 ? 'Đã giải ngân' : 'Đã hủy'}
+                                                                </span>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
                                             </TableBody>
                                         </Table>
                                     </div>
@@ -380,22 +364,6 @@ const DetailCampaign = () => {
                                 </Button>
                             )}
 
-                            {showApproveButton && (
-                                <Button
-                                    onClick={handleApprove}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                                    disabled={isLoading}
-                                >
-                                    {isLoading ? (
-                                        <>
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Đang xử lý
-                                        </>
-                                    ) : (
-                                        'Duyệt Chiến dịch'
-                                    )}
-                                </Button>
-                            )}
 
                             {showRejectButton && (
                                 <AlertDialog>

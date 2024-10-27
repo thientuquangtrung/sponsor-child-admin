@@ -16,6 +16,7 @@ import { contractStatus, contractPartyType, contractType } from '@/config/combob
 
 import { useGetContractByIdQuery, useUpdateContractMutation } from '@/redux/contract/contractApi';
 import LoadingScreen from '@/components/common/LoadingScreen';
+import { useSelector } from 'react-redux';
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
 
 const ContractDetail = () => {
@@ -33,6 +34,8 @@ const ContractDetail = () => {
     const [isUploading, setIsUploading] = useState(false);
     const [isApproving, setIsApproving] = useState(false);
     const [isRejecting, setIsRejecting] = useState(false);
+    const { user } = useSelector((state) => state.auth);
+    console.log(contract);
 
     useEffect(() => {
         const loadPDF = async () => {
@@ -166,12 +169,13 @@ const ContractDetail = () => {
             }
 
             const hardContractData = await hardContractResponse.json();
-
+            const partyAID = user.userID;
             const updateResponse = await updateContract({
                 contractId: contract.contractID,
                 contractType: contract.contractType,
                 partyAType: contract.partyAType,
-                partyAID: contract.partyAID,
+                campaignID: contract.campaignID,
+                partyAID: partyAID,
                 partyBType: contract.partyBType,
                 partyBID: contract.partyBID,
                 signDate: contract.signDate,
