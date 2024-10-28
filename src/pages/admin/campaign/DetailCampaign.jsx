@@ -62,6 +62,7 @@ const DetailCampaign = () => {
         { name: 'Chiến dịch', path: '/campaigns' },
         { name: 'Chi tiết chiến dịch', path: null },
     ];
+    console.log(campaignData);
 
 
     const updateCampaignStatus = async (newStatus, reason = '') => {
@@ -191,6 +192,19 @@ const DetailCampaign = () => {
                                     <Label className="text-lg font-medium text-gray-700">Địa chỉ:</Label>
                                     <Input value={childProfile.location} readOnly className="h-12 text-lg bg-gray-50" />
                                 </div>
+                                <div className="space-y-2">
+                                    <Label className="text-lg font-medium text-gray-700">Phường/Xã:</Label>
+                                    <Input value={childProfile.ward} readOnly className="h-12 text-lg bg-gray-50" />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label className="text-lg font-medium text-gray-700">Quận/Huyện:</Label>
+                                    <Input value={childProfile.district} readOnly className="h-12 text-lg bg-gray-50" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-lg font-medium text-gray-700">Tỉnh/Thành phố:</Label>
+                                    <Input value={childProfile.province} readOnly className="h-12 text-lg bg-gray-50" />
+                                </div>
                             </CardContent>
                         </Card>
                         <Card className="shadow-lg border-0">
@@ -198,22 +212,11 @@ const DetailCampaign = () => {
                                 <CardTitle className="text-2xl font-semibold">Thông tin chiến dịch</CardTitle>
                             </CardHeader>
                             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-                                <div className="space-y-2">
+                                <div className="space-y-2  md:col-span-2">
                                     <Label htmlFor="title" className="text-lg font-medium text-gray-700">Tiêu đề:</Label>
                                     <Input id="title" value={campaignData.title} readOnly className="h-12 text-lg bg-gray-50" />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="status" className="text-lg font-medium text-gray-700">Trạng thái:</Label>
-                                    <div className="flex items-center h-12">
-                                        <span className={`px-4 py-2 rounded-full text-sm font-semibold
-                                        ${campaignData.status === 0 ? 'bg-green-100 text-green-800' :
-                                                campaignData.status === 1 ? 'bg-yellow-100 text-yellow-800' :
-                                                    campaignData.status === 2 ? 'bg-red-100 text-red-800' :
-                                                        'bg-gray-100 text-gray-800'}`}>
-                                            {campaignStatusObj?.label || ''}
-                                        </span>
-                                    </div>
-                                </div>
+
                                 <div className="space-y-2">
                                     <Label htmlFor="targetAmount" className="text-lg font-medium text-gray-700">Số tiền kêu gọi:</Label>
                                     <Input id="targetAmount" value={`${campaignData.targetAmount.toLocaleString()} VNĐ`} readOnly className="h-12 text-lg bg-gray-50" />
@@ -227,9 +230,22 @@ const DetailCampaign = () => {
                                     <Input id="campaignType" value={campaignTypeObj?.label || ''} readOnly className="h-12 text-lg bg-gray-50" />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="province" className="text-lg font-medium text-gray-700">Tỉnh/Thành phố:</Label>
-                                    <Input id="province" value={campaignData.provinceName} readOnly className="h-12 text-lg bg-gray-50" />
+                                    <Label htmlFor="status" className="text-lg font-medium text-gray-700">Trạng thái:</Label>
+                                    <div className="flex items-center h-12">
+                                        <span className={`px-4 py-2 rounded-full text-sm font-semibold
+                                        ${campaignData.status === 0 ? 'bg-blue-300 text-blue-800' :
+                                                campaignData.status === 1 ? 'bg-yellow-300 text-yellow-800' :
+                                                    campaignData.status === 2 ? 'bg-teal-300 text-teal-800' :
+                                                        campaignData.status === 3 ? 'bg-red-300 text-red-800' :
+                                                            campaignData.status === 4 ? 'bg-green-300 text-green-800' :
+
+                                                                'bg-rose-100 text-rose-800'}`}>
+                                            {campaignStatusObj?.label || ''}
+                                        </span>
+                                    </div>
                                 </div>
+
+
                                 <div className="space-y-2">
                                     <Label htmlFor="startDate" className="text-lg font-medium text-gray-700">Ngày bắt đầu:</Label>
                                     <Input id="startDate" value={new Date(campaignData.startDate).toLocaleDateString('vi-VN')} readOnly className="h-12 text-lg bg-gray-50" />
@@ -257,7 +273,7 @@ const DetailCampaign = () => {
                         </Card>
                         <Card className="shadow-lg border-0">
                             <CardHeader className="bg-teal-600 text-white">
-                                <CardTitle className="text-2xl font-semibold">Mô tả chiến dịch</CardTitle>
+                                <CardTitle className="text-2xl font-semibold">Câu chuyện</CardTitle>
                             </CardHeader>
                             <CardContent className="p-6">
                                 <div

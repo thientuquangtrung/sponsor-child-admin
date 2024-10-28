@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, Image, File, Download, Maximize2, Minimize2 } from 'lucide-react';
+import { FileText, Image, File, Maximize2, Minimize2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const FileViewer = ({ fileUrl }) => {
@@ -24,7 +24,7 @@ const FileViewer = ({ fileUrl }) => {
 
     const getFileIcon = (extension) => {
         if (isImageFile(extension)) return <Image className="w-12 h-12 text-teal-600" />;
-        if (isPdfFile(extension)) return <FileText className="w-12 h-12 text-red-600" />;
+        if (isPdfFile(extension)) return <FileText className="w-12 h-12 text-rose-300" />;
         if (isDocFile(extension)) return <FileText className="w-12 h-12 text-blue-600" />;
         return <File className="w-12 h-12 text-gray-600" />;
     };
@@ -106,7 +106,7 @@ const FileViewer = ({ fileUrl }) => {
                                 className="bg-teal-600 hover:bg-teal-700 text-white"
                                 onClick={() => window.open(fileUrl, '_blank')}
                             >
-                                <Download className="w-4 h-4 mr-2" />
+                                <Eye className="w-4 h-4 mr-2" />
                                 Xem tập tin
                             </Button>
                         </div>

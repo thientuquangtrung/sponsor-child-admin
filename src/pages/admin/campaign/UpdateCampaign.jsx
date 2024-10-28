@@ -199,12 +199,14 @@ const UpdateCampaign = () => {
 
             const finalData = {
                 id,
+                guaranteeID: campaignData.guaranteeID,
                 title: data.title,
                 story: data.story,
                 thumbnailUrl,
                 imagesFolderUrl: imageUrls,
                 status: campaignData.status,
             };
+
 
             await updateCampaign(finalData).unwrap();
             toast.success('Cập nhật chiến dịch thành công!');
