@@ -18,6 +18,10 @@ module.exports = {
             },
         },
         extend: {
+            fontFamily: {
+                sans: ['Roboto', 'sans-serif'],
+                serif: ['Lora', 'sans-serif'],
+            },
             boxShadow: {
                 'xl': '0 1px 16px 0px rgba(0, 0, 0, 0.2)',
             },
