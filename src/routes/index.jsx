@@ -13,6 +13,9 @@ import CampaignChildrenManager from '@/pages/children-manager/campaign/CampaignC
 import DetailCampaignChildrenManager from '@/pages/children-manager/campaign/DetailCampaignChildrenManager';
 import UpdateCampaignChildrenManager from '@/pages/children-manager/campaign/UpdateCampaignChildrenManager';
 import CampaignCreate from '@/pages/children-manager/campaign/CampaignCreate';
+import DisbursementRequest from '@/pages/admin/disbursement/DisbursementRequest';
+import DisbursementDetail from '@/pages/admin/disbursement/DisbursementRequestDetail';
+import DisbursementRequestDetail from '@/pages/admin/disbursement/DisbursementRequestDetail';
 
 const Loadable = (Component) => {
     const LoadableComponent = (props) => {
@@ -67,6 +70,8 @@ export default function Router() {
                 { element: <DetailCampaignChildrenManager />, path: 'cm-campaign/:id' },
                 { element: <UpdateCampaignChildrenManager />, path: 'cm-campaign/edit/:id' },
                 { element: <CampaignCreate />, path: 'create-campaign' },
+                { element: <DisbursementRequest />, path: 'disbursement-requests' },
+                { element: <DisbursementRequestDetail />, path: 'disbursement-requests/:id' },
                 { path: '404', element: <Page404 /> },
             ],
         },
