@@ -14,6 +14,7 @@ import Breadcrumb from '@/pages/admin/Breadcrumb';
 import { useGetCampaignByIdQuery, useUpdateCampaignMutation } from '@/redux/campaign/campaignApi';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import { toast } from 'sonner';
+import { useSelector } from 'react-redux';
 
 const updateCampaignSchema = z.object({
     title: z.string().min(1, "Bạn vui lòng nhập Tiêu Đề chiến dịch"),
@@ -48,6 +49,7 @@ const UpdateCampaign = () => {
     const navigate = useNavigate();
     const { data: campaignData, isLoading, error } = useGetCampaignByIdQuery(id);
     const [updateCampaign, { isLoading: isUpdating }] = useUpdateCampaignMutation();
+    const { user } = useSelector((state) => state.auth);
 
     const [imagesFolderUrl, setImagesFolderUrl] = useState([]);
     const [thumbnail, setThumbnail] = useState(null);
@@ -205,6 +207,8 @@ const UpdateCampaign = () => {
                 thumbnailUrl,
                 imagesFolderUrl: imageUrls,
                 status: campaignData.status,
+                userID: user.userID,
+
             };
 
 

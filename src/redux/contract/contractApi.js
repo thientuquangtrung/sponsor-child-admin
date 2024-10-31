@@ -1,6 +1,7 @@
 import baseApi from '@/redux/baseApi';
 
 export const contractApi = baseApi.injectEndpoints({
+    tagTypes: ['Contract'],
     endpoints: (builder) => ({
         createContract: builder.mutation({
             query: (partyBID) => ({
@@ -10,6 +11,8 @@ export const contractApi = baseApi.injectEndpoints({
         }),
         getContractById: builder.query({
             query: (contractId) => `/Contract/${contractId}`,
+            providesTags: (result, error, id) => [{ type: 'Contract', id }]
+
         }),
         getAllContracts: builder.query({
             query: () => '/Contract/all',
@@ -26,6 +29,9 @@ export const contractApi = baseApi.injectEndpoints({
                 method: 'PUT',
                 body: data,
             }),
+            invalidatesTags: (result, error, { contractId }) => [
+                { type: 'Contract', id: contractId }
+            ]
         }),
     }),
 });

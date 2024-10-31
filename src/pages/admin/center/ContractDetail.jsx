@@ -95,19 +95,15 @@ const ContractDetail = () => {
                 partyBID: contract.partyBID,
                 signDate: contract.signDate,
                 softContractUrl: contract.softContractUrl,
-                status: 6,
+                status: 2,
                 partyBSignatureUrl: contract.signatureUrl,
-
-
                 hardContractUrl: hardContractData.secure_url,
             });
 
             if (updateResponse.error) {
                 throw new Error('Failed to update contract');
             }
-            setTimeout(() => {
-                navigate('/center/contracts');
-            }, 1000);
+
             toast.success('Bản cứng hợp đồng đã được tải lên thành công.');
             setHardContractFile(null);
         } catch (error) {
@@ -117,6 +113,8 @@ const ContractDetail = () => {
             setIsUploadingHardContract(false);
         }
     };
+
+
 
     if (isLoading) return <div><LoadingScreen /></div>;
     if (error) return <div className="flex justify-center items-center h-screen">Lỗi: {error.message}</div>;
@@ -151,7 +149,7 @@ const ContractDetail = () => {
                                     <TableCell>
                                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${contract.status === 2 ? 'bg-green-200 text-green-800' :
                                             contract.status === 0 || contract.status === 1 ? 'bg-yellow-200 text-yellow-800' :
-                                                'bg-red-200 text-red-800'
+                                                'bg-purple-200 text-purple-800'
                                             }`}>
                                             {getContractStatusString(contract.status)}
                                         </span>
@@ -197,7 +195,7 @@ const ContractDetail = () => {
                                 </ScrollArea>
                             </CardContent>
                         </Card>
-                        {contract.status === 2 && (
+                        {contract.status === 6 && (
                             <Card className="w-1/3">
                                 <CardHeader className="bg-teal-600 text-white">
                                     <CardTitle className="text-2xl">Upload bản cứng hợp đồng</CardTitle>

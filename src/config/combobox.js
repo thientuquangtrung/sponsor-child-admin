@@ -83,8 +83,10 @@ export const organizationTypes = [
 
 export const guaranteeStatus = [
     { label: 'Đang chờ', value: 0 },
-    { label: 'Phê duyệt', value: 1 },
-    { label: 'Từ chối', value: 2 },
+    { label: 'Đang ký hợp đồng', value: 1 },
+    { label: 'Đã duyệt', value: 2 },
+    { label: 'Từ chối', value: 3 },
+
 ];
 
 //contract
@@ -95,7 +97,7 @@ export const contractStatus = [
     { label: 'Từ chối bởi Bảo lãnh', value: 3 },
     { label: 'Từ chối bởi Quản trị viên', value: 4 },
     { label: 'Đã hủy', value: 5 },
-    { label: 'Đã duyệt bản cứng hợp đồng', value: 6 },
+    { label: 'Đã ký nhưng chưa duyệt bản cứng', value: 6 },
 
 ];
 

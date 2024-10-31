@@ -317,37 +317,6 @@ export function AdminCampaign() {
 
     const guaranteedTable = createTable(guaranteedCampaigns);
     const nonGuaranteedTable = createTable(nonGuaranteedCampaigns);
-    // const table = useReactTable({
-    //     data: localData,
-    //     columns: React.useMemo(
-    //         () => columns.map(col =>
-    //             col.id === 'actions'
-    //                 ? {
-    //                     ...col,
-    //                     cell: ({ row }) => <ActionMenu row={row} onDeleteSuccess={handleDeleteSuccess} />
-    //                 }
-    //                 : col
-    //         ),
-    //         [handleDeleteSuccess]
-    //     ),
-    //     onSortingChange: setSorting,
-    //     onColumnFiltersChange: setColumnFilters,
-    //     getCoreRowModel: getCoreRowModel(),
-    //     getPaginationRowModel: getPaginationRowModel(),
-    //     getSortedRowModel: getSortedRowModel(),
-    //     getFilteredRowModel: getFilteredRowModel(),
-    //     onColumnVisibilityChange: setColumnVisibility,
-    //     onRowSelectionChange: setRowSelection,
-    //     state: {
-    //         sorting,
-    //         columnFilters,
-    //         columnVisibility,
-    //         rowSelection,
-    //     },
-    // });
-
-
-
 
     if (isLoading) {
         return <LoadingScreen />;

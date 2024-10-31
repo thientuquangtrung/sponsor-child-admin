@@ -12,11 +12,9 @@ import { Toaster, toast } from 'sonner';
 import { useGetCampaignByIdQuery } from '@/redux/campaign/campaignApi';
 import ContractCampaignContent from '@/pages/admin/center/ContractCampaignContent';
 import ContractGuaranteeContent from '@/pages/admin/center/ContractGuaranteeContent';
-import { useNavigate } from 'react-router-dom';
 
 
 const ContractSign = ({ contractID }) => {
-    const navigate = useNavigate();
     const { user } = useSelector((state) => state.auth);
     const [signatureA, setSignatureA] = useState(null);
     const [isSigned, setIsSigned] = useState(false);
@@ -102,7 +100,7 @@ const ContractSign = ({ contractID }) => {
         if (!contractDetails) return;
 
         setUploadLoading(true);
-        const actionText = status === 2 ? 'phê duyệt' : 'từ chối';
+        const actionText = status === 6 ? 'phê duyệt' : 'từ chối';
 
         toast.promise(
             async () => {
@@ -110,7 +108,7 @@ const ContractSign = ({ contractID }) => {
                     const partyAID = user.userID;
                     let pdfUrl = contractDetails.softContractUrl;
 
-                    if (status === 2) {
+                    if (status === 6) {
                         const pdf = await generatePDF();
                         const pdfBlob = pdf.output('blob');
                         const pdfData = await uploadToCloudinary(
@@ -140,10 +138,11 @@ const ContractSign = ({ contractID }) => {
                     }
 
                     await updateContract(updateData).unwrap();
-                    setTimeout(() => {
-                        navigate('/center/contracts');
-                    }, 1000);
-                    return `Đã ${actionText} hợp đồng`;
+
+                    // Remove the navigation
+                    // No need to manually navigate or reload
+
+                    return `Đã ${actionText} hợp đồng`;
                 } catch (error) {
                     console.error('Update failed:', error);
                     throw error;
@@ -159,7 +158,7 @@ const ContractSign = ({ contractID }) => {
         );
     };
 
-    const handleApprove = () => handleUpdateContract(2);
+    const handleApprove = () => handleUpdateContract(6);
     const handleReject = () => handleUpdateContract(4);
 
     const renderContractContent = () => {
@@ -207,44 +206,42 @@ const ContractSign = ({ contractID }) => {
                     <SignatureCanvas ref={sigCanvas} canvasProps={{ width: 350, height: 150 }} />
                 </div>
 
-                <div className="flex flex-wrap gap-2 mb-4">
-                    <div className="flex space-x-2 mt-4">
-                        <Button
-                            className="flex-1 border-2 bg-red-500 hover:bg-red-600 text-white rounded-lg"
-                            type="button"
-                            onClick={handleClear}
-                        >
-                            <Trash className="h-4 w-4 mr-2" /> Ký lại
-                        </Button>
-                        <Button
-                            className="flex-1 border-2 bg-blue-500 hover:bg-blue-700 text-white rounded-lg"
-                            onClick={handleSave}
-                        >
-                            <Save className="h-4 w-4 mr-2" /> Xác nhận
-                        </Button>
-                    </div>
-                </div>
-
-                <div className="flex space-x-2 mt-4">
+                <div className="flex space-x-2 mb-4">
                     <Button
-                        className="flex-1 border-2 bg-[#21883b] hover:bg-green-600 text-white"
+                        className="flex-1 border-2 bg-rose-200 hover:bg-rose-300 text-rose-800 rounded-lg"
+                        type="button"
+                        onClick={handleClear}
+                    >
+                        <Trash className="h-4 w-4 mr-2" /> Ký lại
+                    </Button>
+                    <Button
+                        className="flex-1 border-2 bg-sky-300 hover:bg-sky-400 text-sky-800 rounded-lg"
+                        onClick={handleSave}
+                    >
+                        <Save className="h-4 w-4 mr-2" /> Ký
+                    </Button>
+                    <Button
+                        className="flex-1 border-2 bg-emerald-300 hover:bg-emerald-400 text-emerald-800"
                         onClick={handleApprove}
                         disabled={!isSigned || uploadLoading || isUpdatingContract}
                     >
                         <Send className="h-4 w-4 mr-2" />
                         {uploadLoading || isUpdatingContract ? 'Đang xử lý...' : 'Phê duyệt hợp đồng'}
                     </Button>
-                    <Button
-                        className="flex-1 border-2 bg-red-500 hover:bg-red-600 text-white"
-                        onClick={handleReject}
-                        disabled={uploadLoading || isUpdatingContract}
-                    >
-                        <XCircle className="h-4 w-4 mr-2" />
-                        {uploadLoading || isUpdatingContract ? 'Đang xử lý...' : 'Từ chối hợp đồng'}
-                    </Button>
                 </div>
+                <Button
+                    className="flex-1 border-2 bg-gray-300 hover:bg-gray-400 text-gray-800"
+                    onClick={handleReject}
+                    disabled={uploadLoading || isUpdatingContract}
+                >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    {uploadLoading || isUpdatingContract ? 'Đang xử lý...' : 'Từ chối hợp đồng'}
+                </Button>
             </div>
-        </div>
+
+
+
+        </div >
     );
 };
 
