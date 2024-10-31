@@ -58,13 +58,12 @@ export function GuaranteeRequests() {
                 const type = guaranteeTypes.find((t) => t.value === parseInt(typeValue));
                 return (
                     <div
-                        className={`font-bold ${
-                            type && type.value === 0
-                                ? 'text-green-600'
-                                : type && type.value === 1
+                        className={`font-bold ${type && type.value === 0
+                            ? 'text-green-600'
+                            : type && type.value === 1
                                 ? 'text-orange-600'
                                 : 'text-gray-600'
-                        }`}
+                            }`}
                     >
                         {type ? type.label : 'Không xác định'}
                     </div>
@@ -81,18 +80,18 @@ export function GuaranteeRequests() {
             accessorKey: 'status',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Trạng thái" />,
             cell: ({ row }) => {
-                const status = guaranteeStatus.find((s) => s.value === parseInt(row.getValue('status')));
+                const status = row.getValue('status');
+                const statusObj = guaranteeStatus.find((s) => s.value === status);
                 return (
                     <div
-                        className={`font-medium ${
-                            status.value === 1
-                                ? 'text-green-600'
-                                : status.value === 2
+                        className={`font-medium ${statusObj?.value === "1"
+                            ? 'text-green-600'
+                            : statusObj?.value === 2
                                 ? 'text-red-600'
                                 : 'text-blue-600'
-                        }`}
+                            }`}
                     >
-                        {status ? status.label : 'Không xác định'}
+                        {statusObj ? statusObj.label : 'Không xác định'}
                     </div>
                 );
             },

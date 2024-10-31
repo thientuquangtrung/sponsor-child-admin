@@ -32,6 +32,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import FileViewer from '@/pages/admin/campaign/FileViewer';
+import { useSelector } from 'react-redux';
 
 const DetailCampaign = () => {
     const { id } = useParams();
@@ -40,6 +41,7 @@ const DetailCampaign = () => {
     const [rejectionReason, setRejectionReason] = useState('');
     const { data: campaignData, isLoading: campaignLoading, isError: campaignError } = useGetCampaignByIdQuery(id);
     const [updateStatus] = useUpdateCampaignMutation();
+    const { user } = useSelector((state) => state.auth);
 
     if (campaignLoading) {
         return <LoadingScreen />;
@@ -53,7 +55,7 @@ const DetailCampaign = () => {
         return null;
     }
 
-    const { childProfile, disbursementPlans } = campaignData;
+    const { disbursementPlans } = campaignData;
 
     const campaignStatusObj = campaignStatus.find((status) => status.value === campaignData.status);
     const campaignTypeObj = campaignTypes.find((type) => type.value === campaignData.campaignType);
@@ -77,7 +79,8 @@ const DetailCampaign = () => {
                 raisedAmount: campaignData.raisedAmount,
                 thumbnailUrl: campaignData.thumbnailUrl,
                 imagesFolderUrl: campaignData.imagesFolderUrl,
-                rejectionReason: reason
+                rejectionReason: reason,
+                userID: user.userID,
             }).unwrap();
 
             toast.success('Cập nhật chiến dịch thành công');
@@ -132,7 +135,7 @@ const DetailCampaign = () => {
 
     const showAcceptButton = campaignData.status === 0;
     const showRejectButton = campaignData.status === 0;
-    const showCancelButton = [1, 2, 4].includes(campaignData.status);
+    const showCancelButton = [0, 1, 2, 4].includes(campaignData.status);
     const showPauseButton = campaignData.status === 8;
 
     return (
@@ -170,40 +173,32 @@ const DetailCampaign = () => {
                             </CardHeader>
                             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
                                 <div className="md:col-span-2 flex justify-center mb-4">
-                                    <FileViewer fileUrl={childProfile.identificationInformationFile} />
+                                    <FileViewer fileUrl={campaignData.childIdentificationInformationFile} />
                                 </div>
                                 <div className="space-y-2">
                                     <Label className="text-lg font-medium text-gray-700">Họ và tên:</Label>
-                                    <Input value={childProfile.name} readOnly className="h-12 text-lg bg-gray-50" />
+                                    <Input value={campaignData.childName} readOnly className="h-12 text-lg bg-gray-50" />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-lg font-medium text-gray-700">Tuổi:</Label>
-                                    <Input value={childProfile.age} readOnly className="h-12 text-lg bg-gray-50" />
+                                    <Label className="text-lg font-medium text-gray-700">Năm sinh:</Label>
+                                    <Input value={campaignData.childBirthYear} readOnly className="h-12 text-lg bg-gray-50" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label className="text-lg font-medium text-gray-700">Giới tính:</Label>
                                     <Input
-                                        value={childProfile.gender === 0 ? "Nam" : "Nữ"}
+                                        value={campaignData.childGender === 0 ? "Nam" : "Nữ"}
                                         readOnly
                                         className="h-12 text-lg bg-gray-50"
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label className="text-lg font-medium text-gray-700">Địa chỉ:</Label>
-                                    <Input value={childProfile.location} readOnly className="h-12 text-lg bg-gray-50" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-lg font-medium text-gray-700">Phường/Xã:</Label>
-                                    <Input value={childProfile.ward} readOnly className="h-12 text-lg bg-gray-50" />
-                                </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-lg font-medium text-gray-700">Quận/Huyện:</Label>
-                                    <Input value={childProfile.district} readOnly className="h-12 text-lg bg-gray-50" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-lg font-medium text-gray-700">Tỉnh/Thành phố:</Label>
-                                    <Input value={childProfile.province} readOnly className="h-12 text-lg bg-gray-50" />
+                                    <Label className="text-lg font-medium text-gray-700">Địa chỉ:</Label>
+                                    <Input
+                                        value={`${campaignData.childLocation}, ${campaignData.childWard}, ${campaignData.childDistrict}, ${campaignData.childProvince}`}
+                                        readOnly
+                                        className="h-12 text-lg bg-gray-50"
+                                    />
                                 </div>
                             </CardContent>
                         </Card>
