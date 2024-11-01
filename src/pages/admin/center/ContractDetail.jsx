@@ -14,8 +14,32 @@ import LoadingScreen from '@/components/common/LoadingScreen';
 import ContractSign from '@/pages/admin/center/ContractSign';
 import { Button } from '@/components/ui/button';
 import { Loader2, Upload } from 'lucide-react';
+import { z } from 'zod';
+
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const ACCEPTED_FILE_TYPES = ['application/pdf'];
+
+const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+const fileSchema = z.object({
+    file: z
+        .instanceof(File)
+        .refine((file) => file.size <= MAX_FILE_SIZE, {
+            message: `File không được vượt quá ${formatFileSize(MAX_FILE_SIZE)}`,
+        })
+        .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
+            message: "Chỉ chấp nhận file PDF",
+        }),
+});
 
 const ContractDetail = () => {
     const { id } = useParams();
@@ -45,21 +69,49 @@ const ContractDetail = () => {
     const getPartyTypeString = (type) => {
         return contractPartyType.find(t => t.value === type)?.label || 'Không xác định';
     };
-    const handleHardContractUpload = (event) => {
-        const file = event.target.files[0];
-        if (file && file.type === 'application/pdf') {
-            setHardContractFile(file);
-        } else {
-            toast.error('Vui lòng upload file PDF hợp lệ');
+
+
+    const validateFile = (file) => {
+        try {
+            fileSchema.parse({ file });
+            return {
+                success: true,
+                fileSize: formatFileSize(file.size)
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.errors[0]?.message || "Lỗi validate file"
+            };
         }
     };
 
-    const onDocumentLoadSuccess = ({ numPages }) => {
-        setNumPages(numPages);
+    const handleHardContractUpload = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const validation = validateFile(file);
+
+        if (!validation.success) {
+            toast.error(validation.error);
+            event.target.value = null;
+            setHardContractFile(null);
+            return;
+        }
+
+        setHardContractFile(file);
     };
+
     const handleUploadHardContract = async () => {
         if (!hardContractFile) {
             toast.error("Vui lòng chọn file PDF trước khi tải lên.");
+            return;
+        }
+
+        const validation = validateFile(hardContractFile);
+        if (!validation.success) {
+            toast.error(validation.error);
+            setHardContractFile(null);
             return;
         }
 
@@ -80,7 +132,8 @@ const ContractDetail = () => {
             );
 
             if (!hardContractResponse.ok) {
-                throw new Error('Failed to upload hard contract to Cloudinary');
+                const errorData = await hardContractResponse.json();
+                throw new Error(errorData.error?.message || 'Failed to upload hard contract to Cloudinary');
             }
 
             const hardContractData = await hardContractResponse.json();
@@ -106,12 +159,19 @@ const ContractDetail = () => {
 
             toast.success('Bản cứng hợp đồng đã được tải lên thành công.');
             setHardContractFile(null);
+            const fileInput = document.getElementById('hard-contract-upload');
+            if (fileInput) fileInput.value = null;
         } catch (error) {
             console.error('Error uploading hard contract:', error);
             toast.error(`Đã xảy ra lỗi khi tải lên bản cứng: ${error.message}`);
         } finally {
             setIsUploadingHardContract(false);
         }
+    };
+
+
+    const onDocumentLoadSuccess = ({ numPages }) => {
+        setNumPages(numPages);
     };
 
 
@@ -202,6 +262,7 @@ const ContractDetail = () => {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="my-4">
+                                        <h3 className="mb-3">Click chọn file hợp đồng cần tải lên!</h3>
                                         <div className="flex items-center space-x-2">
                                             <input
                                                 type="file"
