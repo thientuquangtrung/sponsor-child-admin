@@ -38,6 +38,8 @@ export function GuaranteeRequests() {
         refetchOnMountOrArgChange: true,
     });
 
+    console.log(requests);
+
     const breadcrumbs = [
         { name: 'Bảng điều khiển', path: '/' },
         { name: 'Trung tâm Quản trị', path: '/center' },

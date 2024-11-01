@@ -4,7 +4,7 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Save, Send, Trash, XCircle } from 'lucide-react';
+import { ClipboardCheck, ClipboardPenLine, Eraser, XCircle } from 'lucide-react';
 import "react-datepicker/dist/react-datepicker.css";
 import { useGetContractByIdQuery, useUpdateContractMutation } from '@/redux/contract/contractApi';
 import { useSelector } from 'react-redux';
@@ -12,7 +12,6 @@ import { Toaster, toast } from 'sonner';
 import { useGetCampaignByIdQuery } from '@/redux/campaign/campaignApi';
 import ContractCampaignContent from '@/pages/admin/center/ContractCampaignContent';
 import ContractGuaranteeContent from '@/pages/admin/center/ContractGuaranteeContent';
-
 
 const ContractSign = ({ contractID }) => {
     const { user } = useSelector((state) => state.auth);
@@ -31,6 +30,10 @@ const ContractSign = ({ contractID }) => {
         }
     );
 
+    const isSignatureEmpty = () => {
+        return sigCanvas.current?.isEmpty();
+    };
+
     const handleClear = () => {
         sigCanvas.current.clear();
         setSignatureA(null);
@@ -38,6 +41,10 @@ const ContractSign = ({ contractID }) => {
     };
 
     const handleSave = () => {
+        if (isSignatureEmpty()) {
+            toast.info('Vui lòng ký tên trước');
+            return;
+        }
         setSignatureA(sigCanvas.current.toDataURL());
         setIsSigned(true);
     };
@@ -139,8 +146,7 @@ const ContractSign = ({ contractID }) => {
 
                     await updateContract(updateData).unwrap();
 
-                    // Remove the navigation
-                    // No need to manually navigate or reload
+
 
                     return `Đã ${actionText} hợp đồng`;
                 } catch (error) {
@@ -158,8 +164,13 @@ const ContractSign = ({ contractID }) => {
         );
     };
 
-    const handleApprove = () => handleUpdateContract(6);
-    const handleReject = () => handleUpdateContract(4);
+    const handleApprove = () => {
+        if (!isSigned) {
+            toast.info('Vui lòng ký tên trước khi phê duyệt');
+            return;
+        }
+        handleUpdateContract(6);
+    }; const handleReject = () => handleUpdateContract(4);
 
     const renderContractContent = () => {
         if (!contractDetails) return null;
@@ -202,41 +213,46 @@ const ContractSign = ({ contractID }) => {
             </div>
             <div className="w-full lg:w-1/3 p-4 bg-white shadow-md py-8 font-sans">
                 <h2 className="font-semibold mb-2">Ký tên</h2>
-                <div className="border-2 border-gray-300 rounded-lg mb-4 w-fit">
-                    <SignatureCanvas ref={sigCanvas} canvasProps={{ width: 350, height: 150 }} />
+                <div className="border-2 border-gray-300 rounded-lg mb-4">
+                    <SignatureCanvas ref={sigCanvas} canvasProps={{ width: 390, height: 150 }} />
                 </div>
 
-                <div className="flex space-x-2 mb-4">
+                <div className="grid grid-cols-2 gap-4 mb-4">
                     <Button
-                        className="flex-1 border-2 bg-rose-200 hover:bg-rose-300 text-rose-800 rounded-lg"
+                        className="flex-1 border-2 bg-sky-400 hover:bg-sky-500 text-sky-800 rounded-lg"
+                        onClick={handleSave}
+                    >
+                        <ClipboardPenLine className="h-4 w-4 mr-2" /> Ký
+                    </Button>
+                    <Button
+                        className="flex-1 border-2 bg-yellow-400 hover:bg-yellow-400 text-rose-800 rounded-lg"
                         type="button"
                         onClick={handleClear}
                     >
-                        <Trash className="h-4 w-4 mr-2" /> Ký lại
+                        <Eraser className="h-4 w-4 mr-2" /> Ký lại
                     </Button>
+
+
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+
                     <Button
-                        className="flex-1 border-2 bg-sky-300 hover:bg-sky-400 text-sky-800 rounded-lg"
-                        onClick={handleSave}
-                    >
-                        <Save className="h-4 w-4 mr-2" /> Ký
-                    </Button>
-                    <Button
-                        className="flex-1 border-2 bg-emerald-300 hover:bg-emerald-400 text-emerald-800"
+                        className="flex-1 border-2 bg-green-500 hover:bg-green-500"
                         onClick={handleApprove}
                         disabled={!isSigned || uploadLoading || isUpdatingContract}
                     >
-                        <Send className="h-4 w-4 mr-2" />
+                        <ClipboardCheck className="h-4 w-4 mr-2" />
                         {uploadLoading || isUpdatingContract ? 'Đang xử lý...' : 'Phê duyệt hợp đồng'}
                     </Button>
+                    <Button
+                        className="flex-1 border-2 bg-red-500 hover:bg-red-500 text-white"
+                        onClick={handleReject}
+                        disabled={uploadLoading || isUpdatingContract}
+                    >
+                        <XCircle className="h-4 w-4 mr-2" />
+                        {uploadLoading || isUpdatingContract ? 'Đang xử lý...' : 'Từ chối hợp đồng'}
+                    </Button>
                 </div>
-                <Button
-                    className="flex-1 border-2 bg-gray-300 hover:bg-gray-400 text-gray-800"
-                    onClick={handleReject}
-                    disabled={uploadLoading || isUpdatingContract}
-                >
-                    <XCircle className="h-4 w-4 mr-2" />
-                    {uploadLoading || isUpdatingContract ? 'Đang xử lý...' : 'Từ chối hợp đồng'}
-                </Button>
             </div>
 
 
