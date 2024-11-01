@@ -13,7 +13,7 @@ import { useGetContractByIdQuery, useUpdateContractMutation } from '@/redux/cont
 import LoadingScreen from '@/components/common/LoadingScreen';
 import ContractSign from '@/pages/admin/center/ContractSign';
 import { Button } from '@/components/ui/button';
-import { Loader2, Upload } from 'lucide-react';
+import { CheckCircle, FileText, Loader2, Upload } from 'lucide-react';
 import { z } from 'zod';
 
 
@@ -169,6 +169,13 @@ const ContractDetail = () => {
         }
     };
 
+    const handleViewHardContract = () => {
+        if (contract.hardContractUrl) {
+            window.open(contract.hardContractUrl, '_blank');
+        } else {
+            toast.error('Không tìm thấy file hợp đồng cứng');
+        }
+    };
 
     const onDocumentLoadSuccess = ({ numPages }) => {
         setNumPages(numPages);
@@ -255,63 +262,88 @@ const ContractDetail = () => {
                                 </ScrollArea>
                             </CardContent>
                         </Card>
-                        {contract.status === 6 && (
-                            <Card className="w-1/3">
-                                <CardHeader className="bg-teal-600 text-white">
-                                    <CardTitle className="text-2xl">Upload bản cứng hợp đồng</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="my-4">
-                                        <h3 className="mb-3">Click chọn file hợp đồng cần tải lên!</h3>
-                                        <div className="flex items-center space-x-2">
-                                            <input
-                                                type="file"
-                                                accept=".pdf"
-                                                onChange={handleHardContractUpload}
-                                                className="hidden"
-                                                id="hard-contract-upload"
-                                            />
-                                            <label
-                                                htmlFor="hard-contract-upload"
-                                                className="cursor-pointer"
-                                                onClick={() => document.getElementById('hard-contract-upload').click()}
+
+                        <Card className="w-1/3">
+                            <CardHeader className="bg-teal-600 text-white">
+                                <CardTitle className="text-2xl">
+                                    {contract.status === 2 ? 'Trạng thái hợp đồng' : 'Upload bản cứng hợp đồng'}
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                {contract.status === 2 ? (
+                                    <div className="space-y-6 py-4">
+                                        <div className="flex items-center justify-center space-x-2 text-green-600 my-10">
+                                            <CheckCircle className="h-8 w-8" />
+                                            <span className="text-lg font-medium">
+                                                Hợp đồng đã được ký kết thành công
+                                            </span>
+                                        </div>
+
+                                        <div className="flex flex-col items-center space-y-4 my-6">
+                                            <Button
+                                                onClick={handleViewHardContract}
+                                                className="bg-yellow-400 hover:bg-yellow-500"
                                             >
-                                                <Button
-                                                    variant="outline"
-                                                    className="border-teal-600 text-teal-600 hover:bg-teal-50"
-                                                    disabled={isUploadingHardContract}
-                                                >
-                                                    Chọn file PDF
-                                                </Button>
-                                            </label>
-                                            {hardContractFile && (
-                                                <span className="text-sm text-gray-600">{hardContractFile.name}</span>
-                                            )}
+                                                <FileText className="h-4 w-4 mr-2" />
+                                                Xem bản cứng hợp đồng
+                                            </Button>
                                         </div>
                                     </div>
+                                ) : contract.status === 6 && (
+                                    <div className="my-8 space-y-4">
+                                        <h3 className="text-base font-medium">Click chọn file hợp đồng cần tải lên!</h3>
 
-                                    <div className="flex justify-center">
-                                        <Button
-                                            onClick={handleUploadHardContract}
-                                            className="bg-teal-600 hover:bg-teal-700 text-white"
-                                            disabled={!hardContractFile || isUploadingHardContract}
-                                        >
-                                            {isUploadingHardContract ? (
-                                                <>
-                                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                                    Đang tải lên...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Upload className="h-4 w-4 mr-2" />
-                                                    Tải lên hợp đồng
-                                                </>
-                                            )}
-                                        </Button>
+                                        {hardContractFile && (
+                                            <span className="block text-sm text-gray-600 truncate max-w-[200px] mb-2">
+                                                {hardContractFile.name}
+                                            </span>
+                                        )}
+                                        <div className="flex justify-center items-center gap-4 pt-4">
+                                            <div className="flex items-center gap-3">
+                                                <input
+                                                    type="file"
+                                                    accept=".pdf"
+                                                    onChange={handleHardContractUpload}
+                                                    className="hidden"
+                                                    id="hard-contract-upload"
+                                                />
+                                                <label
+                                                    htmlFor="hard-contract-upload"
+                                                    className="cursor-pointer"
+                                                    onClick={() => document.getElementById('hard-contract-upload').click()}
+                                                >
+                                                    <Button
+                                                        variant="outline"
+                                                        className="border-teal-600 text-teal-600 hover:bg-teal-50 min-w-[120px]"
+                                                        disabled={isUploadingHardContract}
+                                                    >
+                                                        Chọn file PDF
+                                                    </Button>
+                                                </label>
+                                            </div>
+
+                                            <Button
+                                                onClick={handleUploadHardContract}
+                                                className="bg-teal-600 hover:bg-teal-700 text-white min-w-[160px]"
+                                                disabled={!hardContractFile || isUploadingHardContract}
+                                            >
+                                                {isUploadingHardContract ? (
+                                                    <>
+                                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                                        Đang tải lên...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Upload className="h-4 w-4 mr-2" />
+                                                        Tải lên hợp đồng
+                                                    </>
+                                                )}
+                                            </Button>
+                                        </div>
                                     </div>
-                                </CardContent>
-                            </Card>
-                        )}
+                                )}
+                            </CardContent>
+                        </Card>
                     </div>
                 )}
             </div>
