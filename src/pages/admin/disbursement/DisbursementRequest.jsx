@@ -6,8 +6,6 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
@@ -22,7 +20,7 @@ import { Eye, MoreHorizontal } from 'lucide-react';
 const getRequestStatusVariant = (status) => {
     switch (status) {
         case 0:
-            return 'bg-yellow-500 text-white hover:bg-normal';
+            return 'bg-yellow-500 text-yellow-100 hover:bg-normal';
         case 1:
             return 'bg-teal-500 text-white hover:bg-normal';
         case 2:
@@ -70,14 +68,10 @@ export function DisbursementRequests() {
             enableHiding: false,
         },
         {
-            accessorKey: 'id',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="ID" />,
-            cell: ({ row }) => <div>{row.getValue('id')}</div>,
-        },
-        {
-            accessorKey: 'guaranteeRequestID',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="ID của Guarantee" />,
-            cell: ({ row }) => <div>{row.getValue('guaranteeRequestID')}</div>,
+            accessorFn: (row) => row.campaign?.guaranteeName,
+            id: 'guaranteeName',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Tên của Guarantee" />,
+            cell: ({ row }) => <div>{row.getValue('guaranteeName')}</div>,
         },
         {
             accessorKey: 'bankAccountName',
@@ -102,7 +96,6 @@ export function DisbursementRequests() {
         {
             accessorKey: 'requestStatus',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Trạng thái" />,
-
             cell: ({ row }) => {
                 const statusValue = row.getValue('requestStatus');
                 return (
@@ -127,7 +120,7 @@ export function DisbursementRequests() {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => navigate(`/disbursement-requests/${row.original.id}`)} >
+                    <DropdownMenuItem onClick={() => navigate(`/disbursement-requests/${row.original.id}`)}>
                         <Eye className="mr-2 h-4 w-4" />
                         Xem chi tiết
                     </DropdownMenuItem>
@@ -189,7 +182,7 @@ export function DisbursementRequests() {
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center">
+                                <TableCell colSpan={columns.length} className="h-24 text-center italic">
                                     Không có yêu cầu giải ngân nào.
                                 </TableCell>
                             </TableRow>
