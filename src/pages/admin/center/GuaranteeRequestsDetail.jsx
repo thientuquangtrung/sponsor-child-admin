@@ -47,7 +47,7 @@ const GuaranteeRequestsDetail = () => {
             return;
         }
         try {
-            await updateStatus({ userId: id, status: 2, rejectionReason: rejectReason });
+            await updateStatus({ userId: id, status: 3, rejectionReason: rejectReason });
             setIsRejectDialogOpen(false);
             setRejectReason('');
             toast.success('Từ chối yêu cầu thành công');
@@ -360,16 +360,22 @@ const GuaranteeRequestsDetail = () => {
                                                 className="h-12 text-lg bg-gray-50"
                                             />
                                         </div>
+
                                         <div className="space-y-2">
                                             <Label htmlFor="bankName" className="text-lg font-medium text-gray-700">
                                                 Tên ngân hàng:
                                             </Label>
                                             <Input
                                                 id="bankName"
-                                                value={requestData.bankName}
+                                                value={
+                                                    bankName.find(
+                                                        (t) => t.value === parseInt(requestData.bankName),
+                                                    )?.label || 'Không xác định'
+                                                }
                                                 readOnly
                                                 className="h-12 text-lg bg-gray-50"
                                             />
+
                                         </div>
                                         <div className="space-y-2">
                                             <Label

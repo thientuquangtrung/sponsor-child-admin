@@ -67,7 +67,7 @@ const AdminCenter = () => {
                         to="reports"
                     />
                     <StatusCard
-                        title="Yêu cầu"
+                        title="Yêu cầu trở thành Bảo lãnh"
                         count={5}
                         icon={<UserCheck />}
                         color="bg-[#4aba75] hover:bg-green-600"
