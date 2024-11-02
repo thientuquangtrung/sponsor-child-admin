@@ -37,7 +37,6 @@ const menuItems = [
     { icon: Heater, label: "Trung tâm Quản trị", path: "/center" },
     { icon: Settings, label: "Cài đặt", path: "/settings" },
     { icon: Telescope, label: "Chuyến thăm", path: "/visit" },
-    { icon: Leaf, label: 'Chiến dịch gây quỹ', path: '/cm-campaigns' },
     { icon: CircleDollarSign, label: 'Yêu cầu giải ngân', path: '/disbursement-requests' },
 
     { icon: LogOut, label: 'Đăng xuất', path: '/logout' },

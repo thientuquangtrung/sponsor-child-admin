@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, isBefore, startOfDay } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
-const DatePicker = React.forwardRef(({ className, date, onDateSelect, ...props }, ref) => {
+const DatePicker = React.forwardRef(({
+    className,
+    date,
+    onDateSelect,
+    fromDate,
+    toDate,
+    disablePastDates = false,
+    disableFutureDates = false,
+    ...props
+}, ref) => {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState(date);
     const [currentMonth, setCurrentMonth] = useState(date ? date.getMonth() : new Date().getMonth());
@@ -49,13 +58,37 @@ const DatePicker = React.forwardRef(({ className, date, onDateSelect, ...props }
         }
     };
 
-    const handleDateSelect = (day) => {
-        const newDate = new Date(currentYear, currentMonth, day);
-        setSelectedDate(newDate);
-        onDateSelect?.(newDate);
-        setIsOpen(false);
+    const isDateDisabled = (day) => {
+        const currentDate = startOfDay(new Date(currentYear, currentMonth, day));
+        const today = startOfDay(new Date());
+
+        if (fromDate && isBefore(currentDate, startOfDay(fromDate))) {
+            return true;
+        }
+
+        if (toDate && isAfter(currentDate, startOfDay(toDate))) {
+            return true;
+        }
+
+        if (disablePastDates && isBefore(currentDate, today)) {
+            return true;
+        }
+
+        if (disableFutureDates && isAfter(currentDate, today)) {
+            return true;
+        }
+
+        return false;
     };
 
+    const handleDateSelect = (day) => {
+        if (!isDateDisabled(day)) {
+            const newDate = new Date(currentYear, currentMonth, day);
+            setSelectedDate(newDate);
+            onDateSelect?.(newDate);
+            setIsOpen(false);
+        }
+    };
     const isToday = (day) => {
         const today = new Date();
         return day === today.getDate() &&
@@ -116,12 +149,14 @@ const DatePicker = React.forwardRef(({ className, date, onDateSelect, ...props }
                         {daysArray.map((day) => (
                             <button
                                 key={day}
-                                onClick={() => handleDateSelect(day)}
+                                onClick={() => !isDateDisabled(day) && handleDateSelect(day)}
+                                disabled={isDateDisabled(day)}
                                 className={cn(
-                                    'h-10 w-10 flex items-center justify-center rounded-lg cursor-pointer transition-colors',
+                                    'h-10 w-10 flex items-center justify-center rounded-lg transition-colors',
                                     isSelected(day) ? 'bg-teal-500 text-white hover:bg-teal-600' :
                                         isToday(day) ? 'bg-teal-500 text-white' :
-                                            'hover:bg-blue-100 text-black'
+                                            isDateDisabled(day) ? 'text-gray-300 cursor-not-allowed' :
+                                                'hover:bg-blue-100 text-black cursor-pointer'
                                 )}
                             >
                                 {day}
@@ -137,3 +172,33 @@ const DatePicker = React.forwardRef(({ className, date, onDateSelect, ...props }
 DatePicker.displayName = 'DatePicker';
 
 export { DatePicker };
+
+
+// // - Not select dates in the past
+// <DatePicker
+//     date={startDate}
+//     onDateSelect={handleStartDateSelect}
+//     disablePastDates={true}
+// />
+
+// // Allows selecting dates in the past
+// <DatePicker
+//     date={birthDate}
+//     onDateSelect={handleBirthDateSelect}
+//     disableFutureDates={true}
+// />
+
+// // Form selects a specific time period
+// <DatePicker
+//     date={selectedDate}
+//     onDateSelect={handleDateSelect}
+//     fromDate={new Date('2024-01-01')}
+//     toDate={new Date('2024-12-31')}
+// />
+
+// // Form has no date limit
+// <DatePicker
+//     date={selectedDate}
+//     onDateSelect={handleDateSelect}
+// />
+

@@ -35,3 +35,8 @@ export function humanFileSize(bytes, si = true, dp = 1) {
 
     return bytes.toFixed(dp) + " " + units[u];
 }
+
+export const formatNumber = (value) => {
+    return value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};
+

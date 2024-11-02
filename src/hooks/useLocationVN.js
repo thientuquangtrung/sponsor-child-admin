@@ -19,7 +19,7 @@ function useLocationVN() {
     useEffect(() => {
         if (selectedProvince) {
             // Fetch districts based on selected province
-            fetch(`https://open.oapi.vn/location/districts?provinceId=${selectedProvince.id}&size=100`)
+            fetch(`https://open.oapi.vn/location/districts/${selectedProvince.id}?size=100`)
                 .then((response) => response.json())
                 .then((data) => setDistricts(data.data || []))
                 .catch((error) => console.error('Error fetching districts:', error));
@@ -29,7 +29,7 @@ function useLocationVN() {
     useEffect(() => {
         if (selectedDistrict) {
             // Fetch wards based on selected district
-            fetch(`https://open.oapi.vn/location/wards?districtId=${selectedDistrict.id}&size=100`)
+            fetch(`https://open.oapi.vn/location/wards/${selectedDistrict.id}?size=100`)
                 .then((response) => response.json())
                 .then((data) => setWards(data.data || []))
                 .catch((error) => console.error('Error fetching wards:', error));
