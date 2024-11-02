@@ -19,10 +19,18 @@ const addCampaignSchema = z.object({
     wardId: z.string().min(1, "Vui lòng chọn phường/xã"),
     title: z.string().min(1, "Bạn vui lòng nhập Tiêu Đề chiến dịch"),
     story: z.string().min(1, "Bạn vui lòng nhập thông tin chi tiết về chiến dịch"),
-    targetAmount: z.string().refine((val) => {
-        const numericValue = parseFloat(val.replace(/,/g, ''));
-        return !isNaN(numericValue) && numericValue > 0;
-    }, { message: "Bạn vui lòng nhập số tiền mục tiêu lớn hơn 0" }),
+    targetAmount: z.string()
+        .refine((val) => {
+            const numericValue = parseFloat(val.replace(/,/g, ''));
+            return !isNaN(numericValue) && numericValue >= 10000000;
+        }, { message: "Số tiền mục tiêu tối thiểu là 10,000,000đ" })
+        .refine((val) => {
+            const numericValue = parseFloat(val.replace(/,/g, ''));
+            return !isNaN(numericValue) && numericValue <= 50000000000;
+        }, { message: "Số tiền mục tiêu tối đa là 50,000,000,000đ" }),
+    startDate: z.date({
+        required_error: "Vui lòng chọn ngày bắt đầu",
+    }),
     startDate: z.date({
         required_error: "Vui lòng chọn ngày bắt đầu",
     }),
