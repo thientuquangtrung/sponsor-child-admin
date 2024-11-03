@@ -10,12 +10,16 @@ const UPLOAD_FOLDER = {
     getUserProfileFolder: (userID) => `users/${userID}`,
     getUserIdentificationDocFolder: (userID) => `users/${userID}/identification_docs`,
     getUserExperienceFolder: (userID) => `users/${userID}/experiences`,
+    getGuaranteeContractFolder: (userID) => `users/${userID}/contracts`,
 };
 
 const UPLOAD_NAME = {
     PROFILE_PICTURE: 'profile_picture',
     CCCD_FRONT: 'cccd_front',
     CCCD_BACK: 'cccd_back',
+    SIGNATURE_GUARANTEE: 'signature_guarantee',
+    REGISTRATION_CONTRACT_SOFT: 'registration_contract_soft',
+    REGISTRATION_CONTRACT_HARD: 'registration_contract_hard',
 };
 
 // Create a Cloudinary instance and set your cloud name.

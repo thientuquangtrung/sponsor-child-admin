@@ -2,16 +2,18 @@ import React, { useState, useRef } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ClipboardCheck, ClipboardPenLine, Eraser, XCircle } from 'lucide-react';
-import "react-datepicker/dist/react-datepicker.css";
-import { useGetContractByIdQuery, useUpdateContractMutation } from '@/redux/contract/contractApi';
 import { useSelector } from 'react-redux';
 import { Toaster, toast } from 'sonner';
+import { ClipboardCheck, ClipboardPenLine, Eraser, XCircle } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import 'react-datepicker/dist/react-datepicker.css';
+import { useGetContractByIdQuery, useUpdateContractMutation } from '@/redux/contract/contractApi';
 import { useGetCampaignByIdQuery } from '@/redux/campaign/campaignApi';
 import ContractCampaignContent from '@/pages/admin/center/ContractCampaignContent';
 import ContractGuaranteeContent from '@/pages/admin/center/ContractGuaranteeContent';
+import { UPLOAD_FOLDER, UPLOAD_NAME, uploadFile } from '@/lib/cloudinary';
 
 const ContractSign = ({ contractID }) => {
     const { user } = useSelector((state) => state.auth);
@@ -26,8 +28,8 @@ const ContractSign = ({ contractID }) => {
     const { data: campaignDetails, isLoading: isLoadingCampaign } = useGetCampaignByIdQuery(
         contractDetails?.contractType === 1 ? contractDetails.campaignID : undefined,
         {
-            skip: !contractDetails || contractDetails.contractType !== 1
-        }
+            skip: !contractDetails || contractDetails.contractType !== 1,
+        },
     );
 
     const isSignatureEmpty = () => {
@@ -49,40 +51,20 @@ const ContractSign = ({ contractID }) => {
         setIsSigned(true);
     };
 
-    const uploadToCloudinary = async (file, folder) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', import.meta.env.VITE_UPLOAD_PRESET_NAME);
-        formData.append('folder', folder);
-
-        const response = await fetch(
-            `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUD_NAME}/raw/upload`,
-            {
-                method: 'POST',
-                body: formData,
-            }
-        );
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        return await response.json();
-    };
-
     const generatePDF = async () => {
         const element = contractRef.current;
         const canvas = await html2canvas(element, {
             scale: 2,
             logging: false,
             useCORS: true,
-            scrollY: -window.scrollY
+            scrollY: -window.scrollY,
         });
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF({
             orientation: 'portrait',
             unit: 'mm',
             format: 'a4',
-            compress: true
+            compress: true,
         });
         const imgProps = pdf.getImageProperties(imgData);
         const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -112,16 +94,17 @@ const ContractSign = ({ contractID }) => {
         toast.promise(
             async () => {
                 try {
-                    const partyAID = user.userID;
                     let pdfUrl = contractDetails.softContractUrl;
 
                     if (status === 6) {
                         const pdf = await generatePDF();
                         const pdfBlob = pdf.output('blob');
-                        const pdfData = await uploadToCloudinary(
-                            pdfBlob,
-                            `admin_${partyAID}/contracts_${contractDetails.partyBID}`
-                        );
+                        const pdfData = await uploadFile({
+                            file: pdfBlob,
+                            folder: UPLOAD_FOLDER.getGuaranteeContractFolder(contractDetails.partyBID),
+                            customFilename: UPLOAD_NAME.REGISTRATION_CONTRACT_SOFT,
+                            resourceType: 'raw',
+                        });
                         pdfUrl = pdfData.secure_url;
                     }
 
@@ -130,13 +113,13 @@ const ContractSign = ({ contractID }) => {
                         contractId: contractDetails.contractID,
                         contractType: contractDetails.contractType,
                         partyAType: contractDetails.partyAType,
-                        partyAID: partyAID,
+                        partyAID: user.userID,
                         partyBType: contractDetails.partyBType,
                         partyBID: contractDetails.partyBID,
                         signDate: contractDetails.signDate,
                         status: status,
                         softContractUrl: pdfUrl,
-                        hardContractUrl: "",
+                        hardContractUrl: '',
                         partyBSignatureUrl: contractDetails.partyBSignatureUrl,
                     };
 
@@ -145,8 +128,6 @@ const ContractSign = ({ contractID }) => {
                     }
 
                     await updateContract(updateData).unwrap();
-
-
 
                     return `Đã ${actionText} hợp đồng`;
                 } catch (error) {
@@ -160,7 +141,7 @@ const ContractSign = ({ contractID }) => {
                 loading: `Đang ${actionText} hợp đồng...`,
                 success: (message) => message,
                 error: `${actionText} hợp đồng thất bại. Vui lòng thử lại.`,
-            }
+            },
         );
     };
 
@@ -170,7 +151,8 @@ const ContractSign = ({ contractID }) => {
             return;
         }
         handleUpdateContract(6);
-    }; const handleReject = () => handleUpdateContract(4);
+    };
+    const handleReject = () => handleUpdateContract(4);
 
     const renderContractContent = () => {
         if (!contractDetails) return null;
@@ -191,12 +173,7 @@ const ContractSign = ({ contractID }) => {
                 />
             );
         } else {
-            return (
-                <ContractGuaranteeContent
-                    signatureA={signatureA}
-                    contractDetails={contractDetails}
-                />
-            );
+            return <ContractGuaranteeContent signatureA={signatureA} contractDetails={contractDetails} />;
         }
     };
 
@@ -206,9 +183,7 @@ const ContractSign = ({ contractID }) => {
 
             <div className="w-full lg:w-2/3 p-4">
                 <ScrollArea className="h-[calc(100vh-2rem)] lg:h-[calc(100vh-2rem)]">
-                    <div ref={contractRef}>
-                        {renderContractContent()}
-                    </div>
+                    <div ref={contractRef}>{renderContractContent()}</div>
                 </ScrollArea>
             </div>
             <div className="w-full lg:w-1/3 p-4 bg-white shadow-md py-8 font-sans">
@@ -231,11 +206,8 @@ const ContractSign = ({ contractID }) => {
                     >
                         <Eraser className="h-4 w-4 mr-2" /> Ký lại
                     </Button>
-
-
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-
                     <Button
                         className="flex-1 border-2 bg-green-500 hover:bg-green-500"
                         onClick={handleApprove}
@@ -254,10 +226,7 @@ const ContractSign = ({ contractID }) => {
                     </Button>
                 </div>
             </div>
-
-
-
-        </div >
+        </div>
     );
 };
 

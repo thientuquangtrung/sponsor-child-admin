@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Document, Page, pdfjs } from 'react-pdf';
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableRow } from '@/components/ui/table';
 import { Toaster, toast } from 'sonner';
 import Breadcrumb from '@/pages/admin/Breadcrumb';
@@ -15,7 +15,7 @@ import ContractSign from '@/pages/admin/center/ContractSign';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, FileText, Loader2, Upload } from 'lucide-react';
 import { z } from 'zod';
-
+import { UPLOAD_FOLDER, UPLOAD_NAME, uploadFile } from '@/lib/cloudinary';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
 
@@ -37,7 +37,7 @@ const fileSchema = z.object({
             message: `File không được vượt quá ${formatFileSize(MAX_FILE_SIZE)}`,
         })
         .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
-            message: "Chỉ chấp nhận file PDF",
+            message: 'Chỉ chấp nhận file PDF',
         }),
 });
 
@@ -48,9 +48,6 @@ const ContractDetail = () => {
     const [isUploadingHardContract, setIsUploadingHardContract] = useState(false);
     const [hardContractFile, setHardContractFile] = useState(null);
     const [updateContract] = useUpdateContractMutation();
-    const navigate = useNavigate();
-
-    console.log(contract);
 
     const breadcrumbs = [
         { name: 'Bảng điều khiển', path: '/center' },
@@ -59,29 +56,28 @@ const ContractDetail = () => {
     ];
 
     const getContractTypeString = (type) => {
-        return contractType.find(t => t.value === type)?.label || 'Không xác định';
+        return contractType.find((t) => t.value === type)?.label || 'Không xác định';
     };
 
     const getContractStatusString = (status) => {
-        return contractStatus.find(s => s.value === status)?.label || 'Không xác định';
+        return contractStatus.find((s) => s.value === status)?.label || 'Không xác định';
     };
 
     const getPartyTypeString = (type) => {
-        return contractPartyType.find(t => t.value === type)?.label || 'Không xác định';
+        return contractPartyType.find((t) => t.value === type)?.label || 'Không xác định';
     };
-
 
     const validateFile = (file) => {
         try {
             fileSchema.parse({ file });
             return {
                 success: true,
-                fileSize: formatFileSize(file.size)
+                fileSize: formatFileSize(file.size),
             };
         } catch (error) {
             return {
                 success: false,
-                error: error.errors[0]?.message || "Lỗi validate file"
+                error: error.errors[0]?.message || 'Lỗi validate file',
             };
         }
     };
@@ -104,7 +100,7 @@ const ContractDetail = () => {
 
     const handleUploadHardContract = async () => {
         if (!hardContractFile) {
-            toast.error("Vui lòng chọn file PDF trước khi tải lên.");
+            toast.error('Vui lòng chọn file PDF trước khi tải lên.');
             return;
         }
 
@@ -118,25 +114,12 @@ const ContractDetail = () => {
         setIsUploadingHardContract(true);
         try {
             // Upload hard contract
-            const hardContractFormData = new FormData();
-            hardContractFormData.append('file', hardContractFile);
-            hardContractFormData.append('upload_preset', import.meta.env.VITE_UPLOAD_PRESET_NAME);
-            hardContractFormData.append('folder', 'admin/contracts/hard_contract');
-
-            const hardContractResponse = await fetch(
-                `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUD_NAME}/raw/upload`,
-                {
-                    method: 'POST',
-                    body: hardContractFormData,
-                }
-            );
-
-            if (!hardContractResponse.ok) {
-                const errorData = await hardContractResponse.json();
-                throw new Error(errorData.error?.message || 'Failed to upload hard contract to Cloudinary');
-            }
-
-            const hardContractData = await hardContractResponse.json();
+            const hardContractData = await uploadFile({
+                file: hardContractFile,
+                folder: UPLOAD_FOLDER.getGuaranteeContractFolder(contract.partyBID),
+                customFilename: UPLOAD_NAME.REGISTRATION_CONTRACT_HARD,
+                resourceType: 'raw',
+            });
 
             const updateResponse = await updateContract({
                 contractId: contract.contractID,
@@ -181,9 +164,12 @@ const ContractDetail = () => {
         setNumPages(numPages);
     };
 
-
-
-    if (isLoading) return <div><LoadingScreen /></div>;
+    if (isLoading)
+        return (
+            <div>
+                <LoadingScreen />
+            </div>
+        );
     if (error) return <div className="flex justify-center items-center h-screen">Lỗi: {error.message}</div>;
     if (!contract) return <div className="flex justify-center items-center h-screen">Không tìm thấy hợp đồng</div>;
 
@@ -205,19 +191,28 @@ const ContractDetail = () => {
                                 </TableRow>
                                 <TableRow>
                                     <TableHead className="font-semibold">Bên A</TableHead>
-                                    <TableCell>{contract.partyAName} ({getPartyTypeString(contract.partyAType)})</TableCell>
+                                    <TableCell>
+                                        {contract.partyAName} ({getPartyTypeString(contract.partyAType)})
+                                    </TableCell>
                                     <TableHead className="font-semibold">Bên B</TableHead>
-                                    <TableCell>{contract.partyBName} ({getPartyTypeString(contract.partyBType)})</TableCell>
+                                    <TableCell>
+                                        {contract.partyBName} ({getPartyTypeString(contract.partyBType)})
+                                    </TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableHead className="font-semibold">Ngày ký</TableHead>
                                     <TableCell>{new Date(contract.signDate).toLocaleDateString('vi-VN')}</TableCell>
                                     <TableHead className="font-semibold">Trạng thái</TableHead>
                                     <TableCell>
-                                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${contract.status === 2 ? 'bg-green-200 text-green-800' :
-                                            contract.status === 0 || contract.status === 1 ? 'bg-yellow-200 text-yellow-800' :
-                                                'bg-purple-200 text-purple-800'
-                                            }`}>
+                                        <span
+                                            className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                                contract.status === 2
+                                                    ? 'bg-green-200 text-green-800'
+                                                    : contract.status === 0 || contract.status === 1
+                                                    ? 'bg-yellow-200 text-yellow-800'
+                                                    : 'bg-purple-200 text-purple-800'
+                                            }`}
+                                        >
                                             {getContractStatusString(contract.status)}
                                         </span>
                                     </TableCell>
@@ -289,58 +284,64 @@ const ContractDetail = () => {
                                             </Button>
                                         </div>
                                     </div>
-                                ) : contract.status === 6 && (
-                                    <div className="my-8 space-y-4">
-                                        <h3 className="text-base font-medium">Click chọn file hợp đồng cần tải lên!</h3>
+                                ) : (
+                                    contract.status === 6 && (
+                                        <div className="my-8 space-y-4">
+                                            <h3 className="text-base font-medium">
+                                                Click chọn file hợp đồng cần tải lên!
+                                            </h3>
 
-                                        {hardContractFile && (
-                                            <span className="block text-sm text-gray-600 truncate max-w-[200px] mb-2">
-                                                {hardContractFile.name}
-                                            </span>
-                                        )}
-                                        <div className="flex justify-center items-center gap-4 pt-4">
-                                            <div className="flex items-center gap-3">
-                                                <input
-                                                    type="file"
-                                                    accept=".pdf"
-                                                    onChange={handleHardContractUpload}
-                                                    className="hidden"
-                                                    id="hard-contract-upload"
-                                                />
-                                                <label
-                                                    htmlFor="hard-contract-upload"
-                                                    className="cursor-pointer"
-                                                    onClick={() => document.getElementById('hard-contract-upload').click()}
-                                                >
-                                                    <Button
-                                                        variant="outline"
-                                                        className="border-teal-600 text-teal-600 hover:bg-teal-50 min-w-[120px]"
-                                                        disabled={isUploadingHardContract}
+                                            {hardContractFile && (
+                                                <span className="block text-sm text-gray-600 truncate max-w-[200px] mb-2">
+                                                    {hardContractFile.name}
+                                                </span>
+                                            )}
+                                            <div className="flex justify-center items-center gap-4 pt-4">
+                                                <div className="flex items-center gap-3">
+                                                    <input
+                                                        type="file"
+                                                        accept=".pdf"
+                                                        onChange={handleHardContractUpload}
+                                                        className="hidden"
+                                                        id="hard-contract-upload"
+                                                    />
+                                                    <label
+                                                        htmlFor="hard-contract-upload"
+                                                        className="cursor-pointer"
+                                                        onClick={() =>
+                                                            document.getElementById('hard-contract-upload').click()
+                                                        }
                                                     >
-                                                        Chọn file PDF
-                                                    </Button>
-                                                </label>
-                                            </div>
+                                                        <Button
+                                                            variant="outline"
+                                                            className="border-teal-600 text-teal-600 hover:bg-teal-50 min-w-[120px]"
+                                                            disabled={isUploadingHardContract}
+                                                        >
+                                                            Chọn file PDF
+                                                        </Button>
+                                                    </label>
+                                                </div>
 
-                                            <Button
-                                                onClick={handleUploadHardContract}
-                                                className="bg-teal-600 hover:bg-teal-700 text-white min-w-[160px]"
-                                                disabled={!hardContractFile || isUploadingHardContract}
-                                            >
-                                                {isUploadingHardContract ? (
-                                                    <>
-                                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                                        Đang tải lên...
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Upload className="h-4 w-4 mr-2" />
-                                                        Tải lên hợp đồng
-                                                    </>
-                                                )}
-                                            </Button>
+                                                <Button
+                                                    onClick={handleUploadHardContract}
+                                                    className="bg-teal-600 hover:bg-teal-700 text-white min-w-[160px]"
+                                                    disabled={!hardContractFile || isUploadingHardContract}
+                                                >
+                                                    {isUploadingHardContract ? (
+                                                        <>
+                                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                                            Đang tải lên...
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Upload className="h-4 w-4 mr-2" />
+                                                            Tải lên hợp đồng
+                                                        </>
+                                                    )}
+                                                </Button>
+                                            </div>
                                         </div>
-                                    </div>
+                                    )
                                 )}
                             </CardContent>
                         </Card>
