@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/table";
 import FileViewer from '@/pages/admin/campaign/FileViewer';
 import { useSelector } from 'react-redux';
+import ImageGallery from './ImageGallery';
 
 const DetailCampaign = () => {
     const { id } = useParams();
@@ -42,6 +43,7 @@ const DetailCampaign = () => {
     const { data: campaignData, isLoading: campaignLoading, isError: campaignError } = useGetCampaignByIdQuery(id);
     const [updateStatus] = useUpdateCampaignMutation();
     const { user } = useSelector((state) => state.auth);
+
 
     if (campaignLoading) {
         return <LoadingScreen />;
@@ -64,7 +66,6 @@ const DetailCampaign = () => {
         { name: 'Chiến dịch', path: '/campaigns' },
         { name: 'Chi tiết chiến dịch', path: null },
     ];
-    console.log(campaignData);
 
 
     const updateCampaignStatus = async (newStatus, reason = '') => {
@@ -158,13 +159,10 @@ const DetailCampaign = () => {
                         <Card className="shadow-lg border-0 overflow-hidden">
 
                             <CardContent className="p-0">
-                                <div className="w-full h-[600px] relative">
-                                    <img
-                                        src={campaignData.thumbnailUrl}
-                                        alt="Campaign Thumbnail"
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
+                                <ImageGallery
+                                    thumbnailUrl={campaignData.thumbnailUrl}
+                                    imagesFolderUrl={campaignData.imagesFolderUrl}
+                                />
                             </CardContent>
                         </Card>
                         <Card className="shadow-lg border-0 mb-6">

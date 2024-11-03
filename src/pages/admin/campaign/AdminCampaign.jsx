@@ -8,7 +8,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table';
-import { Eye, MoreHorizontal } from 'lucide-react';
+import { BadgePlus, Eye, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -236,7 +236,7 @@ export function AdminCampaign() {
     const [isFiltering, setIsFiltering] = React.useState(false);
     const [hasGuaranteeFilter, setHasGuaranteeFilter] = React.useState(null);
     const filterParams = hasGuaranteeFilter !== null ? { hasGuarantee: hasGuaranteeFilter } : {};
-
+    const navigate = useNavigate();
     const {
         data: allCampaigns,
         isLoading: isLoadingAll,
@@ -373,6 +373,15 @@ export function AdminCampaign() {
         <>
             <Breadcrumb breadcrumbs={breadcrumbs} />
             <div className="w-full space-y-4 mx-3">
+                <div className="flex justify-end items-center mb-6">
+                    <Button
+                        className="bg-teal-600 hover:bg-teal-700 text-white"
+                        onClick={() => navigate(`/create-campaign`)}
+                    >
+                        <BadgePlus className="w-4 h-4 mr-2" />
+                        Tạo Chiến dịch
+                    </Button>
+                </div>
                 <Tabs defaultValue="guaranteed" className="w-full">
                     <TabsList className="grid w-full max-w-[400px] grid-cols-2 bg-transparent">
                         <TabsTrigger value="guaranteed" className="relative px-4 py-2 rounded-none transition-colors duration-200

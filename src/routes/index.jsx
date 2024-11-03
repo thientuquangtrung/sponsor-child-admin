@@ -12,12 +12,12 @@ import UpdateCampaign from '@/pages/admin/campaign/UpdateCampaign';
 import CampaignChildrenManager from '@/pages/children-manager/campaign/CampaignChildrenManager';
 import DetailCampaignChildrenManager from '@/pages/children-manager/campaign/DetailCampaignChildrenManager';
 import UpdateCampaignChildrenManager from '@/pages/children-manager/campaign/UpdateCampaignChildrenManager';
-import CampaignCreate from '@/pages/children-manager/campaign/CampaignCreate';
 import DisbursementRequest from '@/pages/admin/disbursement/DisbursementRequest';
 import DisbursementDetail from '@/pages/admin/disbursement/DisbursementRequestDetail';
 import DisbursementRequestDetail from '@/pages/admin/disbursement/DisbursementRequestDetail';
 import DisbursementReport from '@/pages/admin/disbursement/DisbursementReport';
 import DisbursementReportDetail from '@/pages/admin/disbursement/DisbursementReportDetail';
+import CampaignInfo from '@/pages/children-manager/campaign/CampaignInfo';
 
 const Loadable = (Component) => {
     const LoadableComponent = (props) => {
@@ -68,10 +68,7 @@ export default function Router() {
                 { element: <GuaranteeRequestsDetail />, path: 'center/guarantee-requests/:id' },
                 { element: <ContractManagement />, path: 'center/contracts' },
                 { element: <ContractDetail />, path: 'center/contracts/:id' },
-                { element: <CampaignChildrenManager />, path: 'cm-campaigns' },
-                { element: <DetailCampaignChildrenManager />, path: 'cm-campaign/:id' },
-                { element: <UpdateCampaignChildrenManager />, path: 'cm-campaign/edit/:id' },
-                { element: <CampaignCreate />, path: 'create-campaign' },
+                { element: <CampaignInfo />, path: 'create-campaign' },
                 { element: <DisbursementRequest />, path: 'disbursement-requests' },
                 { element: <DisbursementRequestDetail />, path: 'disbursement-requests/:id' },
                 { element: <DisbursementReport />, path: 'disbursement-reports' },
