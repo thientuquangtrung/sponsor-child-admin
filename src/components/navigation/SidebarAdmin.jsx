@@ -29,8 +29,8 @@ const menuItems = [
         path: '/finance',
         subItems: [
             { icon: ReceiptText, label: 'Giao dịch', path: '/finance/transactions' },
-            { icon: LandPlot, label: 'Giải ngân', path: '/finance/disbursement' },
-            { icon: MessageSquareDot, label: 'Báo cáo', path: '/finance/reports' }
+            { icon: CircleDollarSign, label: 'Giải ngân', path: '/disbursement-requests' },
+            { icon: MessageSquareDot, label: 'Báo cáo', path: '/disbursement-reports' }
         ]
     },
     { icon: SquareUser, label: "Người dùng", path: "/users" },
@@ -38,8 +38,6 @@ const menuItems = [
     { icon: Settings, label: "Cài đặt", path: "/settings" },
     { icon: Telescope, label: "Chuyến thăm", path: "/visit" },
     { icon: Leaf, label: 'Chiến dịch gây quỹ', path: '/cm-campaigns' },
-    { icon: CircleDollarSign, label: 'Yêu cầu giải ngân', path: '/disbursement-requests' },
-
     { icon: LogOut, label: 'Đăng xuất', path: '/logout' },
 
 ];

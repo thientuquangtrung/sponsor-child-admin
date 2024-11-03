@@ -99,7 +99,7 @@ export default function DisbursementRequestDetail() {
     const getActivityStatus = (status) => {
         switch (status) {
             case 0:
-                return 'Đã gửi yêu cầu';
+                return 'Đã lên lịch';
             case 1:
                 return 'Đang tiến hành';
             case 2:
@@ -305,7 +305,7 @@ export default function DisbursementRequestDetail() {
                                         </div>
                                         <div className="flex items-center mb-2">
                                             <p className="text-gray-700 font-medium flex items-center w-1/2">
-                                                <CalendarDays className="mr-2 h-5 w-5 text-teal-500" /> Ngày hoạt động:
+                                                <CalendarDays className="mr-2 h-5 w-5 text-teal-500" /> Ngày hoạt động dự kiến:
                                             </p>
                                             <p className="text-teal-500 font-medium w-1/2">
                                                 {new Date(activity.activityDate).toLocaleDateString('vi-VN')}
@@ -423,6 +423,7 @@ export default function DisbursementRequestDetail() {
                                 setIsRejectDialogOpen(false);
                                 await handleAction('reject');
                             }}
+                            className="bg-red-500 text-white hover:bg-red-600"
                         >
                             Từ chối yêu cầu
                         </Button>
