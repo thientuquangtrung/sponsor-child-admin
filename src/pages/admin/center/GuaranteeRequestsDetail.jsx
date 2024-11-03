@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -195,14 +194,12 @@ const GuaranteeRequestsDetail = () => {
                                             <Input
                                                 id="bankName"
                                                 value={
-                                                    bankName.find(
-                                                        (t) => t.value === parseInt(requestData.bankName),
-                                                    )?.label || 'Không xác định'
+                                                    bankName.find((t) => t.value === parseInt(requestData.bankName))
+                                                        ?.label || 'Không xác định'
                                                 }
                                                 readOnly
                                                 className="h-12 text-lg bg-gray-50"
                                             />
-
                                         </div>
 
                                         <div className="space-y-2">
@@ -218,9 +215,7 @@ const GuaranteeRequestsDetail = () => {
                                                 readOnly
                                                 className="h-12 text-lg bg-gray-50"
                                             />
-
                                         </div>
-
                                     </CardContent>
                                 </Card>
 
@@ -248,14 +243,20 @@ const GuaranteeRequestsDetail = () => {
                                                 <Label className="text-lg font-medium text-gray-700">
                                                     Kinh nghiệm tình nguyện:
                                                 </Label>
-                                                <a
-                                                    href={requestData.volunteerExperienceFiles}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="ml-2 text-blue-600 hover:underline"
-                                                >
-                                                    Xem tài liệu: {requestData.volunteerExperienceFiles}
-                                                </a>
+                                                {requestData.volunteerExperienceFiles?.split(',').map((link) => (
+                                                    <>
+                                                        <br />
+                                                        <a
+                                                            href={link}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="ml-2 text-blue-600 hover:underline"
+                                                            key={link}
+                                                        >
+                                                            {link}
+                                                        </a>
+                                                    </>
+                                                ))}
                                             </div>
                                         </div>
                                     </CardContent>
@@ -368,14 +369,12 @@ const GuaranteeRequestsDetail = () => {
                                             <Input
                                                 id="bankName"
                                                 value={
-                                                    bankName.find(
-                                                        (t) => t.value === parseInt(requestData.bankName),
-                                                    )?.label || 'Không xác định'
+                                                    bankName.find((t) => t.value === parseInt(requestData.bankName))
+                                                        ?.label || 'Không xác định'
                                                 }
                                                 readOnly
                                                 className="h-12 text-lg bg-gray-50"
                                             />
-
                                         </div>
                                         <div className="space-y-2">
                                             <Label
@@ -425,14 +424,20 @@ const GuaranteeRequestsDetail = () => {
                                                 <Label className="text-lg font-medium text-gray-700">
                                                     Kinh nghiệm tình nguyện:
                                                 </Label>
-                                                <a
-                                                    href={requestData.volunteerExperienceFiles}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="ml-2 text-blue-600 hover:underline"
-                                                >
-                                                    Xem tài liệu: {requestData.volunteerExperienceFiles}
-                                                </a>
+                                                {requestData.volunteerExperienceFiles?.split(',').map((link) => (
+                                                    <>
+                                                        <br />
+                                                        <a
+                                                            href={link}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="ml-2 text-blue-600 hover:underline"
+                                                            key={link}
+                                                        >
+                                                            {link}
+                                                        </a>
+                                                    </>
+                                                ))}
                                             </div>
                                         </div>
                                     </CardContent>
