@@ -11,6 +11,12 @@ const UPLOAD_FOLDER = {
     getUserIdentificationDocFolder: (userID) => `users/${userID}/identification_docs`,
     getUserExperienceFolder: (userID) => `users/${userID}/experiences`,
     getGuaranteeContractFolder: (userID) => `users/${userID}/contracts`,
+
+    //campaign
+    getCampaignFolder: (campaignID) => `campaigns/${campaignID}`,
+    getCampaignMediaFolder: (campaignID) => `campaigns/${campaignID}/media`,
+    getCampaignDocumentFolder: (campaignID) => `campaigns/${campaignID}/documents`,
+    getCampaignChildFolder: (campaignID) => `campaigns/${campaignID}/child`,
 };
 
 const UPLOAD_NAME = {
@@ -20,6 +26,12 @@ const UPLOAD_NAME = {
     SIGNATURE_GUARANTEE: 'signature_guarantee',
     REGISTRATION_CONTRACT_SOFT: 'registration_contract_soft',
     REGISTRATION_CONTRACT_HARD: 'registration_contract_hard',
+    //campaign
+    THUMBNAIL: 'thumbnail',
+    CAMPAIGN_CONTRACT_SOFT: 'campaign_contract_soft',
+    CAMPAIGN_CONTRACT_HARD: 'campaign_contract_hard',
+    IDENTIFICATION_FILE: 'identification_file',
+
 };
 
 // Create a Cloudinary instance and set your cloud name.

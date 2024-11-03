@@ -100,3 +100,20 @@ export const bankName = [
     { label: 'Eximbank', value: 13 },
     { label: 'OceanBank', value: 14 },
 ];
+//disbursement
+
+export const disbursementStageStatus = [
+    { label: 'Đã lên lịch', value: 0 },
+    { label: 'Đang tiến hành', value: 1 },
+    { label: 'Đã hoàn thành', value: 2 },
+    { label: 'Thất bại', value: 3 },
+    { label: 'Đã hủy', value: 4 },
+    { label: 'Đã thay thế', value: 5 },
+];
+//activity 
+export const activityStatus = [
+    { label: 'Đã lên lịch', value: 0 },
+    { label: 'Đang tiến hành', value: 1 },
+    { label: 'Đã hoàn thành', value: 2 },
+    { label: 'Đã hủy', value: 3 },
+];
