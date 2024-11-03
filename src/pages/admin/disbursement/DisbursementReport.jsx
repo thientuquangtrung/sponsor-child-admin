@@ -14,10 +14,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DataTablePagination } from '@/components/datatable/DataTablePagination';
 import { DataTableColumnHeader } from '@/components/datatable/DataTableColumnHeader';
-import { useGetAllDisbursementRequestQuery } from '@/redux/guarantee/disbursementRequestApi';
+import { useGetAllDisbursementReportQuery } from '@/redux/guarantee/disbursementReportApi';
 import { Eye, MoreHorizontal } from 'lucide-react';
 
-const getRequestStatusVariant = (status) => {
+const getReportStatusVariant = (status) => {
     switch (status) {
         case 0:
             return 'bg-yellow-500 text-yellow-100 hover:bg-normal';
@@ -30,22 +30,21 @@ const getRequestStatusVariant = (status) => {
     }
 };
 
-const getRequestStatusLabel = (status) => {
+const getReportStatusLabel = (status) => {
     switch (status) {
         case 0:
-            return 'Đã gửi yêu cầu';
+            return 'Chờ duyệt';
         case 1:
             return 'Đã phê duyệt';
         case 2:
-            return 'Đã từ chối';
+            return 'Yêu cầu chỉnh sửa';
         default:
             return 'Không xác định';
     }
 };
 
-export function DisbursementRequests() {
-    const { data: disbursementRequests = [], isLoading, error } = useGetAllDisbursementRequestQuery();
-    const [sorting, setSorting] = React.useState([{ id: 'requestDate', desc: true }]);
+export function DisbursementReport() {
+    const { data: disbursementReports = [], isLoading, error } = useGetAllDisbursementReportQuery();
 
     const columns = [
         {
@@ -68,48 +67,28 @@ export function DisbursementRequests() {
             enableHiding: false,
         },
         {
-            accessorFn: (row) => row.campaign?.guaranteeName,
-            id: 'guaranteeName',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Tên của Guarantee" />,
-            cell: ({ row }) => <div>{row.getValue('guaranteeName')}</div>,
+            accessorFn: (row) => row.guarantee?.fullname,
+            id: 'fullname',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Nhà Bão Lãnh" />,
+            cell: ({ row }) => <div>{row.getValue('fullname')}</div>,
         },
         {
-            accessorKey: 'bankAccountName',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Tên tài khoản ngân hàng" />,
-            cell: ({ row }) => <div className="font-medium">{row.getValue('bankAccountName')}</div>,
+            accessorKey: 'totalAmountUsed',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Tổng tiền sử dụng" />,
+            cell: ({ row }) => <div className="font-medium">{row.getValue('totalAmountUsed')}</div>,
         },
         {
-            accessorKey: 'bankAccountNumber',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="STK ngân hàng" />,
-            cell: ({ row }) => <div>{row.getValue('bankAccountNumber')}</div>,
-        },
+            accessorKey: 'createdAt',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Ngày báo cáo" />,
+            cell: ({ row }) => <div>{new Date(row.getValue('createdAt')).toLocaleDateString('vi-VN')}</div>,
+        },        
         {
-            accessorKey: 'requestDate',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Ngày yêu cầu" />,
-            cell: ({ row }) => <div>{new Date(row.getValue('requestDate')).toLocaleDateString('vi-VN')}</div>,
-        },
-        {
-            accessorFn: (row) => row.disbursementStage?.scheduledDate,
-            id: 'customScheduledDate', 
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Ngày dự kiến" />,
-            cell: ({ row }) => {
-                const date = row.getValue('customScheduledDate');
-                return date ? new Date(date).toLocaleDateString('vi-VN') : 'N/A';
-            },
-        },
-        
-        {
-            accessorKey: 'bankName',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Tên ngân hàng" />,
-            cell: ({ row }) => <div>{row.getValue('bankName')}</div>,
-        },
-        {
-            accessorKey: 'requestStatus',
+            accessorKey: 'reportStatus',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Trạng thái" />,
             cell: ({ row }) => {
-                const statusValue = row.getValue('requestStatus');
+                const statusValue = row.getValue('reportStatus');
                 return (
-                    <Badge className={getRequestStatusVariant(statusValue)}>{getRequestStatusLabel(statusValue)}</Badge>
+                    <Badge className={getReportStatusVariant(statusValue)}>{getReportStatusLabel(statusValue)}</Badge>
                 );
             },
         },
@@ -130,7 +109,7 @@ export function DisbursementRequests() {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => navigate(`/disbursement-requests/${row.original.id}`)}>
+                    <DropdownMenuItem onClick={() => navigate(`/disbursement-reports/${row.original.id}`)}>
                         <Eye className="mr-2 h-4 w-4" />
                         Xem chi tiết
                     </DropdownMenuItem>
@@ -140,14 +119,11 @@ export function DisbursementRequests() {
     };
 
     const table = useReactTable({
-        data: disbursementRequests,
+        data: disbursementReports,
         columns,
-        onSortingChange: setSorting,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
-        state: {
-            sorting,
-        },
+        
     });
 
     if (isLoading) {
@@ -161,7 +137,7 @@ export function DisbursementRequests() {
     return (
         <div className="w-full space-y-4">
             <h1 className="text-4xl text-center font-bold py-8 bg-gradient-to-b from-teal-500 to-rose-300 text-transparent bg-clip-text">
-                Danh sách yêu cầu giải ngân
+                Danh sách báo cáo giải ngân
             </h1>
 
             <div className="overflow-x-auto rounded-md border">
@@ -206,4 +182,4 @@ export function DisbursementRequests() {
     );
 }
 
-export default DisbursementRequests;
+export default DisbursementReport;

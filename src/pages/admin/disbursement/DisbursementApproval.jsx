@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -98,7 +98,7 @@ const DisbursementApproval = ({ disbursementRequest }) => {
         <div>
             <div className="bg-white rounded-lg p-6 flex flex-col items-center">
                 <div className="text-teal-600 font-semibold italic mb-4">
-                    Yêu cầu giải ngân đã được phê duyệt! Vui lòng điền minh chứng đã giải ngân.
+                    Yêu cầu giải ngân đã được phê duyệt! Vui lòng thực hiện giải ngân và tải lên minh chứng!.
                 </div>
 
                 <div className="flex items-center">
@@ -112,7 +112,7 @@ const DisbursementApproval = ({ disbursementRequest }) => {
                 </div>
 
                 <Label htmlFor="upload" className="mt-4 font-medium">
-                    Tải ảnh:
+                    Tải ảnh chuyển khoản:
                 </Label>
                 <div
                     className="relative w-full h-[200px] md:w-[300px] mt-2 border-dashed border-2 border-gray-300 rounded-lg p-4 flex items-center justify-center"
