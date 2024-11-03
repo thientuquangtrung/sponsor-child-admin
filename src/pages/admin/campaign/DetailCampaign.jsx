@@ -57,8 +57,7 @@ const DetailCampaign = () => {
         return null;
     }
 
-    const { disbursementPlans } = campaignData;
-
+    const { disbursementPlans, activities } = campaignData;
     const campaignStatusObj = campaignStatus.find((status) => status.value === campaignData.status);
     const campaignTypeObj = campaignTypes.find((type) => type.value === campaignData.campaignType);
     const guaranteeTypeObj = guaranteeTypes.find((type) => type.value === campaignData.guaranteeType);
@@ -253,15 +252,37 @@ const DetailCampaign = () => {
                             <CardHeader className="bg-teal-600 text-white">
                                 <CardTitle className="text-2xl font-semibold">Thông tin bảo lãnh</CardTitle>
                             </CardHeader>
-                            <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="guaranteeName" className="text-lg font-medium text-gray-700">Tên đơn vị bảo lãnh:</Label>
-                                    <Input id="guaranteeName" value={campaignData.guaranteeName} readOnly className="h-12 text-lg bg-gray-50" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="guaranteeType" className="text-lg font-medium text-gray-700">Loại đơn vị bảo lãnh:</Label>
-                                    <Input id="guaranteeType" value={guaranteeTypeObj?.label || ''} readOnly className="h-12 text-lg bg-gray-50" />
-                                </div>
+                            <CardContent className="p-6">
+                                {campaignData.guaranteeName ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="guaranteeName" className="text-lg font-medium text-gray-700">
+                                                Tên đơn vị bảo lãnh:
+                                            </Label>
+                                            <Input
+                                                id="guaranteeName"
+                                                value={campaignData.guaranteeName}
+                                                readOnly
+                                                className="h-12 text-lg bg-gray-50"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="guaranteeType" className="text-lg font-medium text-gray-700">
+                                                Loại đơn vị bảo lãnh:
+                                            </Label>
+                                            <Input
+                                                id="guaranteeType"
+                                                value={guaranteeTypeObj?.label || ''}
+                                                readOnly
+                                                className="h-12 text-lg bg-gray-50"
+                                            />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-4">
+                                        <p className="text-lg text-gray-600">Chưa có Bảo Lãnh</p>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                         <Card className="shadow-lg border-0">
@@ -340,13 +361,21 @@ const DetailCampaign = () => {
                                                             </TableCell>
                                                             <TableCell>
                                                                 <span className={`px-3 py-1 rounded-full text-sm font-semibold
-                                                                    ${stage.status === 0 ? 'bg-yellow-100 text-yellow-800' :
-                                                                        stage.status === 1 ? 'bg-green-100 text-green-800' :
-                                                                            'bg-red-100 text-red-800'}`}>
-                                                                    {stage.status === 0 ? 'Chờ giải ngân' :
-                                                                        stage.status === 1 ? 'Đã giải ngân' : 'Đã hủy'}
+                                                                     ${stage.status === 0 ? 'bg-blue-100 text-blue-800' :
+                                                                        stage.status === 1 ? 'bg-yellow-100 text-yellow-800' :
+                                                                            stage.status === 2 ? 'bg-green-100 text-green-800' :
+                                                                                stage.status === 3 ? 'bg-red-100 text-red-800' :
+                                                                                    stage.status === 4 ? 'bg-gray-100 text-gray-800' :
+                                                                                        'bg-purple-100 text-purple-800'}`}>
+                                                                    {stage.status === 0 ? 'Đã lên lịch' :
+                                                                        stage.status === 1 ? 'Đang tiến hành' :
+                                                                            stage.status === 2 ? 'Đã hoàn thành' :
+                                                                                stage.status === 3 ? 'Thất bại' :
+                                                                                    stage.status === 4 ? 'Đã hủy' :
+                                                                                        'Đã thay thế'}
                                                                 </span>
                                                             </TableCell>
+
                                                         </TableRow>
                                                     ))}
                                             </TableBody>
@@ -355,144 +384,200 @@ const DetailCampaign = () => {
                                 ))}
                             </CardContent>
                         </Card>
+                        <Card className="shadow-lg border-0 mb-6">
+                            <CardHeader className="bg-teal-600 text-white">
+                                <CardTitle className="text-2xl font-semibold">Hoạt động Dự Kiến</CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-6">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Ngày thực hiện</TableHead>
+                                            <TableHead>Mô tả hoạt động</TableHead>
+                                            <TableHead>Trạng thái</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {[...activities]
+                                            .sort((a, b) => new Date(a.activityDate) - new Date(b.activityDate))
+                                            .map((activity) => (
+                                                <TableRow key={activity.activityID}>
+                                                    <TableCell>
+                                                        {new Date(activity.activityDate).toLocaleDateString('vi-VN')}
+                                                    </TableCell>
+                                                    <TableCell>{activity.description}</TableCell>
+                                                    <TableCell>
+                                                        <span className={`px-3 py-1 rounded-full text-sm font-semibold
+                                                            ${activity.status === 0 ? 'bg-blue-100 text-blue-800' :
+                                                                activity.status === 1 ? 'bg-yellow-100 text-yellow-800' :
+                                                                    activity.status === 2 ? 'bg-green-100 text-green-800' :
+                                                                        'bg-red-100 text-red-800'}`}>
+                                                            {activity.status === 0 ? 'Đã lên lịch' :
+                                                                activity.status === 1 ? 'Đang tiến hành' :
+                                                                    activity.status === 2 ? 'Đã hoàn thành' :
+                                                                        'Đã hủy'}
+                                                        </span>
+                                                    </TableCell>
+
+                                                </TableRow>
+                                            ))}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                        {campaignData.rejectionReason && (
+                            <Card className="shadow-lg border-0">
+                                <CardHeader className="bg-teal-600 text-white">
+                                    <CardTitle className="text-2xl font-semibold">Lý do từ chối</CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-6">
+                                    <div className="bg-red-50 text-red-800 p-4 rounded-lg whitespace-pre-line">
+                                        {campaignData.rejectionReason}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
                         <div className="mt-6 flex justify-end space-x-4">
-                            {showAcceptButton && (
-                                <Button
-                                    onClick={handleAccept}
-                                    className="bg-teal-600 hover:bg-green-700 text-white"
-                                    disabled={isLoading}
-                                >
-                                    {isLoading ? (
-                                        <>
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Đang xử lý
-                                        </>
-                                    ) : (
-                                        'Chấp nhận đơn'
+                            {campaignData?.guaranteeName && (
+                                <>
+                                    {showAcceptButton && (
+                                        <Button
+                                            onClick={handleAccept}
+                                            className="bg-teal-600 hover:bg-green-700 text-white"
+                                            disabled={isLoading}
+                                        >
+                                            {isLoading ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Đang xử lý
+                                                </>
+                                            ) : (
+                                                'Chấp nhận đơn'
+                                            )}
+                                        </Button>
                                     )}
-                                </Button>
-                            )}
 
+                                    {showRejectButton && (
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button className="bg-gray-800 hover:bg-gray-900 text-white">
+                                                    Từ chối yêu cầu
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Xác nhận từ chối</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        Vui lòng nhập lý do từ chối chiến dịch này.
+                                                        Hành động này không thể hoàn tác.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <div className="my-4">
+                                                    <Textarea
+                                                        placeholder="Nhập lý do từ chối..."
+                                                        value={rejectionReason}
+                                                        onChange={(e) => setRejectionReason(e.target.value)}
+                                                        className="min-h-[100px]"
+                                                    />
+                                                </div>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Hủy</AlertDialogCancel>
+                                                    <AlertDialogAction
+                                                        onClick={handleReject}
+                                                        disabled={isLoading || !rejectionReason.trim()}
+                                                    >
+                                                        {isLoading ? (
+                                                            <>
+                                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                                Đang xử lý
+                                                            </>
+                                                        ) : (
+                                                            'Xác nhận từ chối'
+                                                        )}
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    )}
 
-                            {showRejectButton && (
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <Button className="bg-gray-800 hover:bg-gray-900 text-white">
-                                            Từ chối yêu cầu
-                                        </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>Xác nhận từ chối</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                Vui lòng nhập lý do từ chối chiến dịch này.
-                                                Hành động này không thể hoàn tác.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <div className="my-4">
-                                            <Textarea
-                                                placeholder="Nhập lý do từ chối..."
-                                                value={rejectionReason}
-                                                onChange={(e) => setRejectionReason(e.target.value)}
-                                                className="min-h-[100px]"
-                                            />
-                                        </div>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Hủy</AlertDialogCancel>
-                                            <AlertDialogAction
-                                                onClick={handleReject}
-                                                disabled={isLoading || !rejectionReason.trim()}
-                                            >
-                                                {isLoading ? (
-                                                    <>
-                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                        Đang xử lý
-                                                    </>
-                                                ) : (
-                                                    'Xác nhận từ chối'
-                                                )}
-                                            </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            )}
+                                    {showCancelButton && (
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button className="bg-red-600 hover:bg-red-700 text-white">
+                                                    Hủy chiến dịch
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Xác nhận hủy chiến dịch</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        Vui lòng nhập lý do hủy chiến dịch này.
+                                                        Hành động này sẽ thay đổi trạng thái chiến dịch.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <div className="my-4">
+                                                    <Textarea
+                                                        placeholder="Nhập lý do hủy..."
+                                                        value={rejectionReason}
+                                                        onChange={(e) => setRejectionReason(e.target.value)}
+                                                        className="min-h-[100px]"
+                                                    />
+                                                </div>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Không</AlertDialogCancel>
+                                                    <AlertDialogAction
+                                                        onClick={handleCancel}
+                                                        disabled={isLoading || !rejectionReason.trim()}
+                                                    >
+                                                        {isLoading ? (
+                                                            <>
+                                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                                Đang xử lý
+                                                            </>
+                                                        ) : (
+                                                            'Xác nhận hủy'
+                                                        )}
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    )}
 
-                            {showCancelButton && (
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <Button className="bg-red-600 hover:bg-red-700 text-white">
-                                            Hủy chiến dịch
-                                        </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>Xác nhận hủy chiến dịch</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                Vui lòng nhập lý do hủy chiến dịch này.
-                                                Hành động này sẽ thay đổi trạng thái chiến dịch.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <div className="my-4">
-                                            <Textarea
-                                                placeholder="Nhập lý do hủy..."
-                                                value={rejectionReason}
-                                                onChange={(e) => setRejectionReason(e.target.value)}
-                                                className="min-h-[100px]"
-                                            />
-                                        </div>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Không</AlertDialogCancel>
-                                            <AlertDialogAction
-                                                onClick={handleCancel}
-                                                disabled={isLoading || !rejectionReason.trim()}
-                                            >
-                                                {isLoading ? (
-                                                    <>
-                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                        Đang xử lý
-                                                    </>
-                                                ) : (
-                                                    'Xác nhận hủy'
-                                                )}
-                                            </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            )}
-
-                            {showPauseButton && (
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <Button className="bg-yellow-600 hover:bg-yellow-700 text-white">
-                                            Tạm Ngưng
-                                        </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>Xác nhận tạm ngưng</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                Bạn có chắc chắn muốn tạm ngưng chiến dịch này?
-                                                Chiến dịch sẽ được chuyển sang trạng thái tạm ngưng.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Không</AlertDialogCancel>
-                                            <AlertDialogAction
-                                                onClick={handlePause}
-                                                disabled={isLoading}
-                                            >
-                                                {isLoading ? (
-                                                    <>
-                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                        Đang xử lý
-                                                    </>
-                                                ) : (
-                                                    'Xác nhận tạm ngưng'
-                                                )}
-                                            </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
+                                    {showPauseButton && (
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button className="bg-yellow-600 hover:bg-yellow-700 text-white">
+                                                    Tạm Ngưng
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Xác nhận tạm ngưng</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        Bạn có chắc chắn muốn tạm ngưng chiến dịch này?
+                                                        Chiến dịch sẽ được chuyển sang trạng thái tạm ngưng.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Không</AlertDialogCancel>
+                                                    <AlertDialogAction
+                                                        onClick={handlePause}
+                                                        disabled={isLoading}
+                                                    >
+                                                        {isLoading ? (
+                                                            <>
+                                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                                Đang xử lý
+                                                            </>
+                                                        ) : (
+                                                            'Xác nhận tạm ngưng'
+                                                        )}
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    )}
+                                </>
                             )}
                         </div>
                     </div>

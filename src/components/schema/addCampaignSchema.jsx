@@ -31,12 +31,8 @@ const addCampaignSchema = z.object({
     startDate: z.date({
         required_error: "Vui lòng chọn ngày bắt đầu",
     }),
-    startDate: z.date({
-        required_error: "Vui lòng chọn ngày bắt đầu",
-    }),
     endDate: z.date({
         required_error: "Vui lòng chọn ngày kết thúc",
-        invalid_type_error: "Vui lòng chọn ngày kết thúc",
     }),
     thumbnailUrl: z.any().refine((val) => val !== null, "Bạn vui lòng tải lên hình ảnh cho chiến dịch")
         .refine((val) => val && val.size <= 10 * 1024 * 1024, "Kích thước tệp không được vượt quá 10MB"),

@@ -17,6 +17,8 @@ import { formatNumber } from '@/lib/utils';
 import ChildInfo from '@/pages/children-manager/campaign/ChildInfo';
 import CampaignDetailInfo from '@/pages/children-manager/campaign/CampaignDetailInfo';
 import DisbursementInfo from '@/pages/children-manager/campaign/DisbursementInfo';
+import { UPLOAD_FOLDER, UPLOAD_NAME, uploadFile, uploadMultipleFiles } from '@/lib/cloudinary';
+import { v4 as uuidv4 } from 'uuid';
 
 const CampaignInfo = () => {
     const navigate = useNavigate();
@@ -186,33 +188,7 @@ const CampaignInfo = () => {
         remove(index);
     };
 
-    const uploadToCloudinary = async (file, folder) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', import.meta.env.VITE_UPLOAD_PRESET_NAME);
-        formData.append('folder', folder);
-        try {
-            setIsUploading(true);
 
-            const response = await fetch(
-                `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUD_NAME}/image/upload`,
-                {
-                    method: 'POST',
-                    body: formData,
-                },
-            );
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            return data.secure_url;
-        } catch (error) {
-            console.error('Error uploading to Cloudinary:', error);
-            throw error;
-        }
-    };
 
     const onDropChildFile = useCallback(
         (acceptedFiles) => {
@@ -291,35 +267,41 @@ const CampaignInfo = () => {
                 return;
             }
 
-            const userFolder = `manager_${user.userID}`;
-            const tempCampaignId = `c_${Date.now()}`; //timestamp
+            const campaignID = uuidv4();
+            const campaignFolder = UPLOAD_FOLDER.getCampaignFolder(campaignID);
+            const campaignMediaFolder = UPLOAD_FOLDER.getCampaignMediaFolder(campaignID);
+            const campaignChildFolder = UPLOAD_FOLDER.getCampaignChildFolder(campaignID);
+
+            setIsUploading(true);
 
             // Upload thumbnail
-            const thumbnailUrl = await uploadToCloudinary(
-                data.thumbnailUrl,
-                `${userFolder}/campaign/${tempCampaignId}`,
-            );
+            const thumbnailResponse = await uploadFile({
+                file: data.thumbnailUrl,
+                folder: campaignFolder,
+                customFilename: UPLOAD_NAME.THUMBNAIL
+            });
 
-            // Upload imagesFolderUrl
-            const imageUrls = await Promise.all(
-                data.imagesFolderUrl.map((file) =>
-                    uploadToCloudinary(file, `${userFolder}/campaign/${tempCampaignId}/images-supported`),
-                ),
-            );
 
-            const childIdentificationUrl = await uploadToCloudinary(
-                data.childIdentificationInformationFile,
-                `${userFolder}/campaign/${tempCampaignId}/child-identification`,
-            );
+            const imageResponses = await uploadMultipleFiles({
+                files: data.imagesFolderUrl,
+                folder: campaignMediaFolder
+            });
 
-            // Prepare the final data object
+            // Upload child identification document
+            const childDocResponse = await uploadFile({
+                file: data.childIdentificationInformationFile,
+                folder: campaignChildFolder,
+                customFilename: UPLOAD_NAME.IDENTIFICATION_FILE
+            });
+
             const finalData = {
+                id: campaignID,
                 managerID: user.userID,
                 childName: data.childName,
                 childBirthYear: parseInt(data.childBirthYear),
                 childGender: data.childGender,
                 childLocation: data.childLocation,
-                childIdentificationInformationFile: childIdentificationUrl,
+                childIdentificationInformationFile: childDocResponse.secure_url,
                 childWard: selectedWard.name,
                 childDistrict: selectedDistrict.name,
                 childProvince: selectedProvince.name,
@@ -330,8 +312,8 @@ const CampaignInfo = () => {
                 endDate: data.endDate ? data.endDate.toISOString() : null,
                 status: 0,
                 campaignType: data.campaignType,
-                thumbnailUrl,
-                imagesFolderUrl: imageUrls.join(','),
+                thumbnailUrl: thumbnailResponse.secure_url,
+                imagesFolderUrl: imageResponses.map(img => img.secure_url).join(','),
                 plannedStartDate: data.plannedStartDate.toISOString(),
                 plannedEndDate: data.plannedEndDate.toISOString(),
                 disbursementStages: data.disbursementStages.map((stage) => ({
@@ -341,18 +323,16 @@ const CampaignInfo = () => {
                 })),
             };
 
-            console.log('Final data to be sent to backend:', finalData);
             const response = await createCampaign(finalData).unwrap();
-            console.log('Campaign created:', response);
             form.reset();
             setThumbnail(null);
             setImagesFolderUrl([]);
 
-            toast.success('Chiến dịch được tạo thành công!');
+            toast.success('Chiến dịch được tạo thành công!');
             navigate('/campaigns');
         } catch (error) {
-            console.error('failed:', error);
-            toast.error('Đã xảy ra lỗi! Vui lòng thử lại.');
+            console.error('Failed to create campaign:', error);
+            toast.error('Đã xảy ra lỗi! Vui lòng thử lại.');
         } finally {
             setIsUploading(false);
         }
