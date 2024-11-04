@@ -116,8 +116,14 @@ const ContractDetail = () => {
             // Upload hard contract
             const hardContractData = await uploadFile({
                 file: hardContractFile,
-                folder: UPLOAD_FOLDER.getGuaranteeContractFolder(contract.partyBID),
-                customFilename: UPLOAD_NAME.REGISTRATION_CONTRACT_HARD,
+                folder:
+                    contract.contractType === 0
+                        ? UPLOAD_FOLDER.getGuaranteeContractFolder(contract.partyBID)
+                        : UPLOAD_FOLDER.getCampaignDocumentFolder(contract.campaignID),
+                customFilename:
+                    contract.contractType === 0
+                        ? UPLOAD_NAME.REGISTRATION_CONTRACT_HARD
+                        : UPLOAD_NAME.CAMPAIGN_CONTRACT_HARD,
                 resourceType: 'raw',
             });
 

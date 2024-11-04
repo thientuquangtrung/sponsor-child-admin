@@ -67,8 +67,14 @@ const ContractSign = ({ contractID }) => {
                         const pdfBlob = pdf.output('blob');
                         const pdfData = await uploadFile({
                             file: pdfBlob,
-                            folder: UPLOAD_FOLDER.getGuaranteeContractFolder(contractDetails.partyBID),
-                            customFilename: UPLOAD_NAME.REGISTRATION_CONTRACT_SOFT,
+                            folder:
+                                contractDetails.contractType === 0
+                                    ? UPLOAD_FOLDER.getGuaranteeContractFolder(contractDetails.partyBID)
+                                    : UPLOAD_FOLDER.getCampaignDocumentFolder(contractDetails.campaignID),
+                            customFilename:
+                                contractDetails.contractType === 0
+                                    ? UPLOAD_NAME.REGISTRATION_CONTRACT_SOFT
+                                    : UPLOAD_NAME.CAMPAIGN_CONTRACT_SOFT,
                             resourceType: 'raw',
                         });
                         pdfUrl = pdfData.secure_url;
