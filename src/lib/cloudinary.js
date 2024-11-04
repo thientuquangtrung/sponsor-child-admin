@@ -17,6 +17,9 @@ const UPLOAD_FOLDER = {
     getCampaignMediaFolder: (campaignID) => `campaigns/${campaignID}/media`,
     getCampaignDocumentFolder: (campaignID) => `campaigns/${campaignID}/documents`,
     getCampaignChildFolder: (campaignID) => `campaigns/${campaignID}/child`,
+
+    //disbursement
+    getDisbursementFolder: (campaignID) => `campaigns/${campaignID}/disbursements`,
 };
 
 const UPLOAD_NAME = {
@@ -32,6 +35,8 @@ const UPLOAD_NAME = {
     CAMPAIGN_CONTRACT_HARD: 'campaign_contract_hard',
     IDENTIFICATION_FILE: 'identification_file',
 
+    //disbursement
+    DISBURSEMENT_RECEIPT: 'receipt_phase',
 };
 
 // Create a Cloudinary instance and set your cloud name.

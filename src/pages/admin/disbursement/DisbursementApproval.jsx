@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { CircleDollarSign, Upload, Undo2 } from 'lucide-react';
 import { useUpdateDisbursementStageMutation } from '@/redux/guarantee/disbursementStageApi';
+import { UPLOAD_FOLDER, UPLOAD_NAME, uploadFile } from '@/lib/cloudinary';
 
 const DisbursementApproval = ({ disbursementRequest }) => {
     const navigate = useNavigate();
@@ -31,31 +32,6 @@ const DisbursementApproval = ({ disbursementRequest }) => {
         }
     };
 
-    const uploadFile = async (file, folder) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', import.meta.env.VITE_UPLOAD_PRESET_NAME);
-        formData.append('folder', folder);
-
-        try {
-            const response = await fetch(
-                `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUD_NAME}/image/upload`,
-                {
-                    method: 'POST',
-                    body: formData,
-                },
-            );
-            const result = await response.json();
-            if (!response.ok) {
-                throw new Error(result.error.message);
-            }
-            return result.secure_url;
-        } catch (error) {
-            console.error('Upload failed:', error);
-            throw error;
-        }
-    };
-
     const handleUpload = async () => {
         if (!file) {
             setUploadError('Vui lòng chọn một tệp để tải lên.');
@@ -67,7 +43,11 @@ const DisbursementApproval = ({ disbursementRequest }) => {
         setUploadSuccess(null);
 
         try {
-            const uploadResult = await uploadFile(file, 'admin/disbursements');
+            const uploadResult = await uploadFile({
+                file,
+                folder: UPLOAD_FOLDER.getDisbursementFolder(disbursementRequest.campaign.campaignID),
+                customFilename: `${UPLOAD_NAME.DISBURSEMENT_RECEIPT}_${disbursementRequest.disbursementStage.stageNumber}`,
+            });
 
             if (!uploadResult) {
                 throw new Error('Không nhận được link tải lên.');
@@ -78,7 +58,7 @@ const DisbursementApproval = ({ disbursementRequest }) => {
                 body: {
                     status: 2,
                     actualDisbursementAmount: disbursementRequest.disbursementStage.disbursementAmount || 0,
-                    transferReceiptUrl: uploadResult,
+                    transferReceiptUrl: uploadResult.secure_url,
                 },
             }).unwrap();
 

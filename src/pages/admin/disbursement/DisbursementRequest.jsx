@@ -33,7 +33,7 @@ const getRequestStatusVariant = (status) => {
 const getRequestStatusLabel = (status) => {
     switch (status) {
         case 0:
-            return 'Đã gửi yêu cầu';
+            return 'Gửi yêu cầu';
         case 1:
             return 'Đã phê duyệt';
         case 2:
@@ -70,12 +70,12 @@ export function DisbursementRequests() {
         {
             accessorFn: (row) => row.campaign?.guaranteeName,
             id: 'guaranteeName',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Tên của Guarantee" />,
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Tên nhà bảo lãnh" />,
             cell: ({ row }) => <div>{row.getValue('guaranteeName')}</div>,
         },
         {
             accessorKey: 'bankAccountName',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Tên tài khoản ngân hàng" />,
+            header: ({ column }) => <DataTableColumnHeader column={column} title="TK ngân hàng" />,
             cell: ({ row }) => <div className="font-medium">{row.getValue('bankAccountName')}</div>,
         },
         {
@@ -90,14 +90,14 @@ export function DisbursementRequests() {
         },
         {
             accessorFn: (row) => row.disbursementStage?.scheduledDate,
-            id: 'customScheduledDate', 
+            id: 'customScheduledDate',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Ngày dự kiến" />,
             cell: ({ row }) => {
                 const date = row.getValue('customScheduledDate');
                 return date ? new Date(date).toLocaleDateString('vi-VN') : 'N/A';
             },
         },
-        
+
         {
             accessorKey: 'bankName',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Tên ngân hàng" />,
