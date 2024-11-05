@@ -20,6 +20,8 @@ const formatDate = (dateString) => {
 
 const ContractCampaignContent = ({ signatureA, campaignDetails, contractDetails }) => {
     const disbursementPlan = campaignDetails?.disbursementPlans?.[0] || {};
+    const activities = campaignDetails?.activities || [];
+
     const stages = disbursementPlan?.stages || [];
     const { user } = useSelector((state) => state.auth);
     const {
@@ -163,18 +165,24 @@ const ContractCampaignContent = ({ signatureA, campaignDetails, contractDetails 
                         3.2. Tổng số tiền giải ngân: {formatCurrency(disbursementPlan.totalPlannedAmount) || "................."}
                         <br />
                         3.3. Các giai đoạn giải ngân:
-                        {stages.map((stage, index) => (
-                            <React.Fragment key={index}>
-                                <br />
-                                Giai đoạn {index + 1}:
-                                <br />
-                                - Số tiền: {formatCurrency(stage.disbursementAmount) || "........................"}
-                                <br />
-                                - Ngày dự kiến: {formatDate(stage.scheduledDate)}
-                                <br />
-                                - Hoạt động: {stage.description || "......................"}
-                            </React.Fragment>
-                        ))}
+                        {stages.map((stage, index) => {
+                            const matchingActivity = activities.find(
+                                activity => new Date(activity.activityDate).getTime() === new Date(stage.scheduledDate).getTime()
+                            );
+
+                            return (
+                                <React.Fragment key={index}>
+                                    <br />
+                                    Giai đoạn {index + 1}:
+                                    <br />
+                                    - Số tiền: {formatCurrency(stage.disbursementAmount) || "........................"}
+                                    <br />
+                                    - Ngày dự kiến: {formatDate(stage.scheduledDate)}
+                                    <br />
+                                    - Hoạt động: {matchingActivity?.description || "......................"}
+                                </React.Fragment>
+                            );
+                        })}
                     </p>
                 </div>
 
@@ -207,17 +215,19 @@ const ContractCampaignContent = ({ signatureA, campaignDetails, contractDetails 
                 <div className="mb-4 mt-4">
                     <h4 className="font-semibold">ĐIỀU 5: ĐIỀU KHOẢN CHUNG</h4>
                     <p>
-                        5.1. Hợp đồng có hiệu lực từ ngày ký
+                        5.1. Thời gian hiệu lực hợp đồng:
+                        <br />
+                        - Thời gian bắt đầu: {formatDate(campaignDetails.startDate)}
+                        <br />
+                        - Thời gian kết thúc: {formatDate(disbursementPlan.plannedEndDate)}
                         <br />
                         5.2. Mọi thay đổi trong kế hoạch giải ngân phải được sự đồng ý của cả hai bên
                         <br />
                         5.3. Trường hợp có tranh chấp, hai bên sẽ giải quyết trên tinh thần hợp tác
                         <br />
                         5.4. Hợp đồng này được lập thành 03 bản, bên Bảo lãnh giữ 01 bản, bên Quản trị nền tảng SponsorChild giữ 02 bản và có giá trị pháp lý như nhau.
-
                     </p>
                 </div>
-
                 <div className="flex justify-between mt-12 mb-40">
 
                     <div className="text-center">
