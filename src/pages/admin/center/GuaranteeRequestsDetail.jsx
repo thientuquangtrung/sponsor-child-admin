@@ -11,6 +11,7 @@ import { useGetGuaranteeProfileQuery, useUpdateGuaranteeStatusMutation } from '@
 import { guaranteeTypes, organizationTypes, bankName } from '@/config/combobox';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import { toast } from 'sonner';
+import ImageAlbum from './ImageAlbum';
 
 const GuaranteeRequestsDetail = () => {
     const { id } = useParams();
@@ -424,20 +425,7 @@ const GuaranteeRequestsDetail = () => {
                                                 <Label className="text-lg font-medium text-gray-700">
                                                     Kinh nghiệm tình nguyện:
                                                 </Label>
-                                                {requestData.volunteerExperienceFiles?.split(',').map((link) => (
-                                                    <>
-                                                        <br />
-                                                        <a
-                                                            href={link}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="ml-2 text-blue-600 hover:underline"
-                                                            key={link}
-                                                        >
-                                                            {link}
-                                                        </a>
-                                                    </>
-                                                ))}
+                                                <ImageAlbum files={requestData.volunteerExperienceFiles} />
                                             </div>
                                         </div>
                                     </CardContent>

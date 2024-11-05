@@ -27,8 +27,7 @@ const ContractGuaranteeContent = ({ signatureA, contractDetails }) => {
     }
 
     const formattedToday = format(contractDetails.signDate, "dd' tháng 'MM' năm 'yyyy");
-
-
+    const formattedExpiryDate = format(contractDetails.endDate, "dd' tháng 'MM' năm 'yyyy");
     const renderPartyB = () => {
         if (!guaranteeProfile) {
             return {
@@ -89,7 +88,7 @@ const ContractGuaranteeContent = ({ signatureA, contractDetails }) => {
 
             <h3 className="text-lg font-semibold text-center mb-8">HỢP ĐỒNG THAM GIA BẢO LÃNH</h3>
             <div className="ml-6 text-sm">
-                <p className="mb-4">Số: {contractDetails?.contractNumber || "....."}/HĐ-BLCD</p>
+                <p className="mb-4">Số: {101 || "..."}/HĐ-BLCD</p>
                 <p className="mb-6">Hôm nay, ngày {formattedToday}, tại TP. Hồ Chí Minh</p>
                 <p className="font-semibold mb-4">Chúng tôi gồm có:</p>
 
@@ -195,6 +194,19 @@ const ContractGuaranteeContent = ({ signatureA, contractDetails }) => {
                     <h4 className="font-semibold">Điều 7: Cam kết chung</h4>
                     <p>
                         Cả Bên A và Bên B đều xác nhận rằng tất cả thông tin trong hợp đồng là chính xác và hợp pháp. Cả hai bên cam kết thực hiện đầy đủ các điều khoản đã thỏa thuận.
+                    </p>
+                </div>
+                <div className="mb-6 mt-2">
+                    <h4 className="font-semibold">Điều 8: Thời hạn hợp đồng</h4>
+                    <p>
+                        8.1. <strong>Hiệu lực hợp đồng:</strong> <br />
+                        - Hợp đồng có hiệu lực kể từ ngày {formattedToday} và kéo dài trong thời hạn 02 (hai) năm. <br />
+                        - Ngày hết hiệu lực: {formattedExpiryDate}
+                        <br />
+                        <br />
+                        8.2. <strong>Gia hạn hợp đồng:</strong> <br />
+                        - Trước khi hết hạn 30 ngày, hai bên sẽ đánh giá việc thực hiện hợp đồng và thảo luận về việc gia hạn. <br />
+                        - Việc gia hạn hợp đồng sẽ được thực hiện thông qua phụ lục hợp đồng hoặc ký kết hợp đồng mới.
                     </p>
                 </div>
 

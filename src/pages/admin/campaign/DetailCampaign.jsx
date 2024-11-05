@@ -33,7 +33,8 @@ import {
 } from "@/components/ui/table";
 import FileViewer from '@/pages/admin/campaign/FileViewer';
 import { useSelector } from 'react-redux';
-import ImageGallery from './ImageGallery';
+import ImageGallery from '@/pages/admin/campaign/ImageGallery';
+import ChildSearch from '@/pages/admin/campaign/ChildSearch';
 
 const DetailCampaign = () => {
     const { id } = useParams();
@@ -155,6 +156,7 @@ const DetailCampaign = () => {
                     </div>
 
                     <div className="space-y-6 max-w-7xl mx-auto">
+                        <ChildSearch />
                         <Card className="shadow-lg border-0 overflow-hidden">
 
                             <CardContent className="p-0">
