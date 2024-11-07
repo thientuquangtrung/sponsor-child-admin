@@ -7,7 +7,7 @@ export const disbursementRequestApi = baseApi.injectEndpoints({
         }),
 
         getDisbursementRequestById: builder.query({
-            query: (id) => `/disbursementRequest/${id}`,
+            query: (id) => `/disbursementRequest/${id}/simplified`,
         }),
 
         updateDisbursementRequest: builder.mutation({

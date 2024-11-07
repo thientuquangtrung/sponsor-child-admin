@@ -43,6 +43,17 @@ export const campaignApi = baseApi.injectEndpoints({
                 }
             }),
         }),
+        searchCampaigns: builder.query({
+            query: (params) => ({
+                url: '/campaign/search',
+                method: 'GET',
+                params: {
+                    childName: params.childName,
+                    childLocation: params.childLocation,
+                    childBirthYear: params.childBirthYear
+                }
+            }),
+        }),
     }),
 });
 
@@ -54,4 +65,5 @@ export const {
     useUpdateCampaignMutation,
     useDeleteCampaignMutation,
     useFilterAdminCampaignsQuery,
+    useSearchCampaignsQuery,
 } = campaignApi;

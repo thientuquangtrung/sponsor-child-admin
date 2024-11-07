@@ -19,6 +19,7 @@ const DisbursementApproval = ({ disbursementRequest }) => {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [updateDisbursementStage] = useUpdateDisbursementStageMutation();
 
+
     const handleFileChange = (event) => {
         const selectedFile = event.target.files[0];
         if (selectedFile) {
@@ -45,7 +46,7 @@ const DisbursementApproval = ({ disbursementRequest }) => {
         try {
             const uploadResult = await uploadFile({
                 file,
-                folder: UPLOAD_FOLDER.getDisbursementFolder(disbursementRequest.campaign.campaignID),
+                folder: UPLOAD_FOLDER.getDisbursementFolder(disbursementRequest.campaigns.campaignID),
                 customFilename: `${UPLOAD_NAME.DISBURSEMENT_RECEIPT}_${disbursementRequest.disbursementStage.stageNumber}`,
             });
 
@@ -124,9 +125,8 @@ const DisbursementApproval = ({ disbursementRequest }) => {
 
                 {!isSubmitted && (
                     <Button
-                        className={`mt-4 bg-teal-600 text-white font-semibold py-2 px-4 rounded hover:bg-teal-700 transition duration-200 ${
-                            uploading || !file ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
+                        className={`mt-4 bg-teal-600 text-white font-semibold py-2 px-4 rounded hover:bg-teal-700 transition duration-200 ${uploading || !file ? 'opacity-50 cursor-not-allowed' : ''
+                            }`}
                         onClick={handleUpload}
                         disabled={uploading || !file}
                     >
