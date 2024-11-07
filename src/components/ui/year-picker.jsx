@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -19,6 +19,9 @@ const YearPicker = React.forwardRef(({
     const [currentDecadeStart, setCurrentDecadeStart] = useState(
         Math.floor((date?.getFullYear() || new Date().getFullYear()) / 10) * 10
     );
+    useEffect(() => {
+        setSelectedDate(date);
+    }, [date]);
 
     const handlePreviousDecade = () => {
         setCurrentDecadeStart(currentDecadeStart - 10);

@@ -1,74 +1,54 @@
-import React, { useState } from 'react';
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, AlertCircle, X, RotateCcw, ChevronUp, ChevronDown } from "lucide-react";
-import {
-    Alert,
-    AlertDescription,
-    AlertTitle,
-} from "@/components/ui/alert";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
+import { Search, AlertCircle, RotateCcw, ChevronUp, ChevronDown } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { YearPicker } from '@/components/ui/year-picker';
+import { useSearchCampaignsQuery } from '@/redux/campaign/campaignApi';
 
-const ChildSearch = ({ onProceed }) => {
+const ChildSearch = () => {
+    const navigate = useNavigate();
     const [searchParams, setSearchParams] = useState({
-        name: '',
-        birthYear: '',
-        address: ''
+        childName: '',
+        childBirthYear: '',
+        childLocation: ''
     });
-    const [searchResults, setSearchResults] = useState(null);
+    const [shouldSearch, setShouldSearch] = useState(false);
     const [showWarning, setShowWarning] = useState(false);
-    const [isSearching, setIsSearching] = useState(false);
     const [isExpanded, setIsExpanded] = useState(true);
+    const [selectedYear, setSelectedYear] = useState(null);
+    const [showResults, setShowResults] = useState(false);
+    const { data: searchResults, isLoading: isSearching } = useSearchCampaignsQuery(
+        searchParams,
+        { skip: !shouldSearch }
+    );
 
-    const handleSearch = async () => {
-        if (!searchParams.name && !searchParams.birthYear && !searchParams.address) {
+    const handleSearch = () => {
+        if (!searchParams.childName && !searchParams.childBirthYear && !searchParams.childLocation) {
             setShowWarning(true);
             return;
         }
         setShowWarning(false);
-        setIsSearching(true);
-
-        try {
-
-            setSearchResults([
-                {
-                    id: 1,
-                    name: "Nguyễn Văn A",
-                    birthYear: "2015",
-                    address: "123 Đường ABC, Phường XYZ, Quận 1, TP.HCM",
-                    existingCampaigns: 1
-                }
-            ]);
-        } catch (error) {
-            console.error('Error searching child info:', error);
-        } finally {
-            setIsSearching(false);
-        }
+        setShouldSearch(true);
+        setShowResults(true);
     };
 
     const handleReset = () => {
         setSearchParams({
-            name: '',
-            birthYear: '',
-            address: ''
+            childName: '',
+            childBirthYear: '',
+            childLocation: ''
         });
-        setSearchResults(null);
+        setSelectedYear(null);
+        setShouldSearch(false);
         setShowWarning(false);
+        setShowResults(false);
     };
+
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -77,6 +57,29 @@ const ChildSearch = ({ onProceed }) => {
             [name]: value
         }));
         setShowWarning(false);
+    };
+
+    const handleYearChange = (year) => {
+        const selectedYear = year.getFullYear();
+        setSelectedYear(selectedYear);
+        setSearchParams(prev => ({
+            ...prev,
+            childBirthYear: selectedYear.toString()
+        }));
+    };
+
+    // const handleViewDetails = (campaignID) => {
+    //     navigate(`/campaign/${campaignID}`, {
+    //         state: {
+    //             fromSearch: true,
+    //             campaignData: searchResults.find(result => result.campaignID === campaignID)
+    //         },
+    //         replace: true
+    //     });
+    // };
+    const handleViewDetails = (campaignID) => {
+        const campaignData = searchResults.find(result => result.campaignID === campaignID);
+        window.location.href = `/campaign/${campaignID}`;
     };
 
     const toggleExpand = () => {
@@ -105,40 +108,38 @@ const ChildSearch = ({ onProceed }) => {
                 <CardContent className="p-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <div className="space-y-2">
-                            <Label htmlFor="name" className="text-gray-700">
+                            <Label htmlFor="childName" className="text-gray-700">
                                 Họ và tên
                             </Label>
                             <Input
-                                id="name"
-                                name="name"
+                                id="childName"
+                                name="childName"
                                 placeholder="Nhập họ và tên"
-                                value={searchParams.name}
+                                value={searchParams.childName}
                                 onChange={handleInputChange}
                                 className="h-10"
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="birthYear" className="text-gray-700">
+                            <Label htmlFor="childBirthYear" className="text-gray-700">
                                 Năm sinh
                             </Label>
-                            <Input
-                                id="birthYear"
-                                name="birthYear"
-                                placeholder="Nhập năm sinh"
-                                value={searchParams.birthYear}
-                                onChange={handleInputChange}
-                                className="h-10"
+                            <YearPicker
+                                date={selectedYear ? new Date(selectedYear, 0, 1) : undefined}
+                                onYearSelect={handleYearChange}
+                                fromYear={new Date().getFullYear() - 16}
+                                toYear={new Date().getFullYear()}
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="address" className="text-gray-700">
+                            <Label htmlFor="childLocation" className="text-gray-700">
                                 Địa chỉ
                             </Label>
                             <Input
-                                id="address"
-                                name="address"
+                                id="childLocation"
+                                name="childLocation"
                                 placeholder="Nhập địa chỉ"
-                                value={searchParams.address}
+                                value={searchParams.childLocation}
                                 onChange={handleInputChange}
                                 className="h-10"
                             />
@@ -174,7 +175,7 @@ const ChildSearch = ({ onProceed }) => {
                         </Button>
                     </div>
 
-                    {searchResults && searchResults.length > 0 && (
+                    {showResults && searchResults && searchResults.length > 0 && (
                         <div className="mt-6">
                             <h3 className="text-lg font-semibold mb-4">Kết quả tìm kiếm:</h3>
                             <Table>
@@ -183,36 +184,23 @@ const ChildSearch = ({ onProceed }) => {
                                         <TableHead>Họ và tên</TableHead>
                                         <TableHead>Năm sinh</TableHead>
                                         <TableHead>Địa chỉ</TableHead>
-                                        <TableHead>Số chiến dịch hiện có</TableHead>
-                                        <TableHead>Thao tác</TableHead>
+                                        <TableHead>Tiêu đề chiến dịch</TableHead>
+                                        <TableHead></TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {searchResults.map((result) => (
-                                        <TableRow key={result.id}>
-                                            <TableCell>{result.name}</TableCell>
-                                            <TableCell>{result.birthYear}</TableCell>
-                                            <TableCell>{result.address}</TableCell>
-                                            <TableCell>
-                                                <span className={`px-2 py-1 rounded-full text-sm ${result.existingCampaigns > 0
-                                                    ? 'bg-red-100 text-red-800'
-                                                    : 'bg-green-100 text-green-800'
-                                                    }`}>
-                                                    {result.existingCampaigns}
-                                                </span>
-                                            </TableCell>
+                                        <TableRow key={result.campaignID}>
+                                            <TableCell>{result.childName}</TableCell>
+                                            <TableCell>{result.childBirthYear}</TableCell>
+                                            <TableCell>{result.childLocation}</TableCell>
+                                            <TableCell>{result.title}</TableCell>
                                             <TableCell>
                                                 <Button
-                                                    onClick={() => {
-                                                        onProceed?.(result);
-                                                        setIsExpanded(false);
-                                                    }}
+                                                    onClick={() => handleViewDetails(result.campaignID)}
                                                     className="bg-teal-600 hover:bg-teal-700 text-white"
-                                                    disabled={result.existingCampaigns > 0}
                                                 >
-                                                    {result.existingCampaigns > 0
-                                                        ? 'Đã có chiến dịch'
-                                                        : 'Tiếp tục'}
+                                                    Xem chi tiết
                                                 </Button>
                                             </TableCell>
                                         </TableRow>
@@ -222,7 +210,7 @@ const ChildSearch = ({ onProceed }) => {
                         </div>
                     )}
 
-                    {searchResults && searchResults.length === 0 && (
+                    {showResults && searchResults && searchResults.length === 0 && (
                         <Alert className="mt-6">
                             <AlertCircle className="h-4 w-4" />
                             <AlertTitle>Không tìm thấy kết quả</AlertTitle>

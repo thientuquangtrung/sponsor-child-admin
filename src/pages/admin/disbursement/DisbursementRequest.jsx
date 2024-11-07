@@ -16,31 +16,32 @@ import { DataTablePagination } from '@/components/datatable/DataTablePagination'
 import { DataTableColumnHeader } from '@/components/datatable/DataTableColumnHeader';
 import { useGetAllDisbursementRequestQuery } from '@/redux/guarantee/disbursementRequestApi';
 import { Eye, MoreHorizontal } from 'lucide-react';
+import { disbursementRequestStatus } from '@/config/combobox';
 
 const getRequestStatusVariant = (status) => {
     switch (status) {
         case 0:
-            return 'bg-yellow-500 text-yellow-100 hover:bg-normal';
+            return 'bg-yellow-500 text-yellow-100';
         case 1:
-            return 'bg-teal-500 text-white hover:bg-normal';
+            return 'bg-green-500 text-white';
         case 2:
-            return 'bg-secondary text-white hover:bg-normal';
+            return 'bg-red-500 text-white';
+        case 3:
+            return 'bg-orange-500 text-white';
+        case 4:
+            return 'bg-blue-500 text-white';
+        case 5:
+            return 'bg-teal-600 text-white';
         default:
-            return 'bg-gray-200 text-gray-800 hover:bg-normal';
+            return 'bg-gray-200 text-gray-800';
     }
 };
 
+
+
 const getRequestStatusLabel = (status) => {
-    switch (status) {
-        case 0:
-            return 'Gửi yêu cầu';
-        case 1:
-            return 'Đã phê duyệt';
-        case 2:
-            return 'Đã từ chối';
-        default:
-            return 'Không xác định';
-    }
+    const statusItem = disbursementRequestStatus.find(item => item.value === status);
+    return statusItem ? statusItem.label : 'Không xác định';
 };
 
 export function DisbursementRequests() {
@@ -68,7 +69,7 @@ export function DisbursementRequests() {
             enableHiding: false,
         },
         {
-            accessorFn: (row) => row.campaign?.guaranteeName,
+            accessorFn: (row) => row.disbursementStage?.campaignResponseDTO?.guaranteeName,
             id: 'guaranteeName',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Tên nhà bảo lãnh" />,
             cell: ({ row }) => <div>{row.getValue('guaranteeName')}</div>,

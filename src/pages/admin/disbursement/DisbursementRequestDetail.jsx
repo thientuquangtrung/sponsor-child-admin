@@ -20,16 +20,19 @@ import {
     Pill,
     User,
 } from 'lucide-react';
-import DisbursementApproval from './DisbursementApproval';
+import DisbursementApproval from '@/pages/admin/disbursement/DisbursementApproval';
+import { disbursementStageStatus, disbursementRequestStatus, activityStatus } from '@/config/combobox';
+import DisbursementReport from '@/pages/admin/disbursement/DisbursementReport';
 
 export default function DisbursementRequestDetail() {
     const { id } = useParams();
     const [reason, setReason] = useState('');
     const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
     const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
+    const [isEditRequestDialogOpen, setIsEditRequestDialogOpen] = useState(false);
+    const [isReasonEmpty, setIsReasonEmpty] = useState(false);
     const { data: disbursementRequest, isLoading, error, refetch } = useGetDisbursementRequestByIdQuery(id);
     const [updateDisbursementRequest] = useUpdateDisbursementRequestMutation();
-
     if (isLoading) {
         return <LoadingScreen />;
     }
@@ -39,75 +42,100 @@ export default function DisbursementRequestDetail() {
     }
 
     const handleAction = async (actionType) => {
+        if (actionType === 'reject' || actionType === 'edit') {
+            if (!reason.trim()) {
+                setIsReasonEmpty(true);
+                return;
+            }
+        }
+
         try {
-            const approvalDate = new Date().toISOString();
-            const requestStatus = actionType === 'approve' ? 1 : 2;
+            const userID = disbursementRequest.guarantee.userID;
+            let requestStatus;
+            switch (actionType) {
+                case 'approve':
+                    requestStatus = 1;
+                    break;
+                case 'reject':
+                    requestStatus = 2;
+                    break;
+                case 'edit':
+                    requestStatus = 3;
+                    break;
+                default:
+                    requestStatus = 0;
+            }
+
             await updateDisbursementRequest({
                 id,
                 body: {
                     requestStatus: requestStatus,
-                    approvalDate: approvalDate,
-                    rejectionReason: actionType === 'reject' ? reason : '',
+                    userID: userID,
+                    rejectionReason: actionType !== 'approve' ? reason : '',
                 },
             }).unwrap();
-            toast.success(actionType === 'approve' ? 'Yêu cầu đã được phê duyệt!' : 'Yêu cầu đã bị từ chối!');
+
+            let successMessage;
+            switch (actionType) {
+                case 'approve':
+                    successMessage = 'Yêu cầu đã được phê duyệt!';
+                    break;
+                case 'reject':
+                    successMessage = 'Yêu cầu đã bị từ chối!';
+                    break;
+                case 'edit':
+                    successMessage = 'Đã gửi yêu cầu chỉnh sửa!';
+                    break;
+                default:
+                    successMessage = 'Cập nhật thành công!';
+            }
+
+            toast.success(successMessage);
             refetch();
+            setReason('');
+            setIsReasonEmpty(false);
         } catch (error) {
             console.error('Lỗi khi cập nhật yêu cầu:', error);
             toast.error('Có lỗi xảy ra khi cập nhật yêu cầu.');
         }
     };
-
-    const getPlanStatus = (status) => {
-        switch (status) {
-            case 0:
-                return 'Đã lên lịch';
-            case 1:
-                return 'Đang xử lý';
-            case 2:
-                return 'Đã hoàn thành';
-            case 3:
-                return 'Thất bại';
-            case 4:
-                return 'Đã hủy';
-            case 5:
-                return 'Đã thay thế';
-            default:
-                return 'Không xác định';
-        }
+    const getStatusLabel = (status, options) => {
+        const option = options.find(o => o.value === status);
+        return option ? option.label : 'Không xác định';
     };
 
-    const getStageStatus = (status) => {
-        switch (status) {
-            case 0:
-                return 'Đã lên lịch';
-            case 1:
-                return 'Đang xử lý';
-            case 2:
-                return 'Đã hoàn thành';
-            case 3:
-                return 'Thất bại';
-            case 4:
-                return 'Đã hủy';
-            case 5:
-                return 'Đã thay thế';
+    const getStatusColorClass = (status, type) => {
+        switch (type) {
+            case 'stage':
+                switch (status) {
+                    case 0: return 'text-yellow-600';
+                    case 1: return 'text-blue-600';
+                    case 2: return 'text-green-600';
+                    case 3: return 'text-red-600';
+                    case 4: return 'text-gray-600';
+                    case 5: return 'text-purple-600';
+                    default: return 'text-gray-600';
+                }
+            case 'request':
+                switch (status) {
+                    case 0: return 'text-yellow-600';
+                    case 1: return 'text-green-600';
+                    case 2: return 'text-red-600';
+                    case 3: return 'text-orange-600';
+                    case 4: return 'text-blue-600';
+                    case 5: return 'text-teal-600';
+                    default: return 'text-gray-600';
+                }
+            case 'activity':
+                switch (status) {
+                    case 0: return 'text-yellow-600';
+                    case 1: return 'text-blue-600';
+                    case 2: return 'text-green-600';
+                    case 3: return 'text-red-600';
+                    default: return 'text-gray-600';
+                }
             default:
-                return 'Không xác định';
-        }
-    };
-
-    const getActivityStatus = (status) => {
-        switch (status) {
-            case 0:
-                return 'Đã lên lịch';
-            case 1:
-                return 'Đang tiến hành';
-            case 2:
-                return 'Đã hoàn thành';
-            case 3:
-                return 'Đã hủy';
-            default:
-                return 'Không xác định';
+                return 'text-gray-600';
         }
     };
 
@@ -115,14 +143,12 @@ export default function DisbursementRequestDetail() {
         <div className="space-y-4">
             <div>
                 <h2 className="text-4xl py-4 font-bold text-center bg-gradient-to-l from-teal-500 to-rose-400 text-transparent bg-clip-text">
-                    Kế hoạch giải ngân cho dự án {disbursementRequest.campaign.title}
+                    Kế hoạch giải ngân cho dự án {disbursementRequest.campaigns.title}
                 </h2>
                 <h3 className="flex items-center justify-end">
-                    <CircleUser name="icon-name" className="mr-2" />
+                    <CircleUser className="mr-2" />
                     Nhà Bảo Lãnh:{' '}
-                    <span className="text-teal-500 ml-2 font-semibold">
-                        {disbursementRequest.campaign.guaranteeName}
-                    </span>
+                    <span className="text-teal-500 ml-2 font-semibold">{disbursementRequest.guarantee.fullname}</span>
                 </h3>
             </div>
             <div className="p-6 bg-white rounded-lg shadow-lg">
@@ -130,15 +156,13 @@ export default function DisbursementRequestDetail() {
                 <div className="relative mt-4">
                     <div className="absolute left-1/2 transform -translate-x-1/2 h-full border-l-2 border-gray-300"></div>
 
-                    {disbursementRequest.campaign.disbursementPlans[0].stages
-                        ?.slice()
+                    {disbursementRequest.disbursementPlan.disbursementStages
+                        .slice()
                         .sort((a, b) => a.stageNumber - b.stageNumber)
                         .map((stage, index) => (
                             <div
-                                key={stage.stageNumber}
-                                className={`flex justify-between items-center w-full mb-8 ${
-                                    index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'
-                                }`}
+                                key={stage.stageID}
+                                className={`flex justify-between items-center w-full mb-8 ${index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'}`}
                             >
                                 <div className="w-5/12">
                                     <div className="bg-white p-6 rounded shadow-lg">
@@ -152,27 +176,10 @@ export default function DisbursementRequestDetail() {
                                                 {stage.disbursementAmount.toLocaleString('vi-VN')} VND
                                             </span>
                                         </p>
-
                                         <p className="mt-2 text-black">
                                             Trạng thái:{' '}
-                                            <span
-                                                className={`font-semibold ${
-                                                    stage.status === 0
-                                                        ? 'text-yellow-500'
-                                                        : stage.status === 1
-                                                        ? 'text-blue-500'
-                                                        : stage.status === 2
-                                                        ? 'text-green-600'
-                                                        : stage.status === 3
-                                                        ? 'text-red-500'
-                                                        : stage.status === 4
-                                                        ? 'text-gray-500'
-                                                        : stage.status === 5
-                                                        ? 'text-purple-500'
-                                                        : 'text-black'
-                                                }`}
-                                            >
-                                                {getPlanStatus(stage.status)}
+                                            <span className={`font-semibold ${getStatusColorClass(stage.status, 'stage')}`}>
+                                                {getStatusLabel(stage.status, disbursementStageStatus)}
                                             </span>
                                         </p>
                                     </div>
@@ -188,27 +195,15 @@ export default function DisbursementRequestDetail() {
 
             <div>
                 <div className="my-10 border rounded-lg shadow-sm bg-gray-50">
-                    {disbursementRequest.requestStatus === 1 ? (
-                        <h3 className="text-2xl text-center bg-gradient-to-l from-rose-200 to-teal-100 py-4 font-semibold text-gray-800 rounded-tl-lg rounded-tr-lg">
-                            Đợt giải ngân đã được phê duyệt
-                        </h3>
-                    ) : disbursementRequest.requestStatus === 2 ? (
-                        <h3 className="text-2xl text-center bg-gradient-to-l from-rose-200 to-teal-100 py-4 font-semibold text-gray-800 rounded-tl-lg rounded-tr-lg">
-                            Đợt giải ngân đã bị từ chối
-                        </h3>
-                    ) : (
-                        <h3 className="text-2xl text-center bg-gradient-to-l from-rose-200 to-teal-100 py-4 font-semibold text-gray-800 rounded-tl-lg rounded-tr-lg">
-                            Đợt giải ngân đang chờ phê duyệt
-                        </h3>
-                    )}
+                    <h3 className="text-2xl text-center bg-gradient-to-l from-rose-200 to-teal-100 py-4 font-semibold text-gray-800 rounded-tl-lg rounded-tr-lg">
+                        {getStatusLabel(disbursementRequest.requestStatus, disbursementRequestStatus)}
+                    </h3>
 
                     <div className="grid grid-cols-2 gap-8 p-4 bg-white rounded-lg shadow-lg">
                         <div className="p-6 bg-gray-50 rounded-lg shadow-sm">
                             <h4 className="text-2xl font-semibold text-gray-900 mb-4">
                                 Đợt {disbursementRequest.disbursementStage.stageNumber} - Ngày{' '}
-                                {new Date(disbursementRequest.disbursementStage.scheduledDate).toLocaleDateString(
-                                    'vi-VN',
-                                )}
+                                {new Date(disbursementRequest.disbursementStage.scheduledDate).toLocaleDateString('vi-VN')}
                             </h4>
                             <div className="space-y-4">
                                 <div className="flex items-center">
@@ -251,10 +246,7 @@ export default function DisbursementRequestDetail() {
                                         Số tiền giải ngân:
                                     </p>
                                     <p className="text-teal-500 font-medium w-1/2">
-                                        {disbursementRequest.disbursementStage.disbursementAmount.toLocaleString(
-                                            'vi-VN',
-                                        )}{' '}
-                                        VND
+                                        {disbursementRequest.disbursementStage.disbursementAmount.toLocaleString('vi-VN')} VND
                                     </p>
                                 </div>
                                 <div className="flex items-center">
@@ -262,26 +254,8 @@ export default function DisbursementRequestDetail() {
                                         <PieChart className="mr-2 h-5 w-5 text-teal-500" />
                                         Trạng thái:
                                     </p>
-                                    <p className="w-1/2 font-medium">
-                                        <span
-                                            className={
-                                                disbursementRequest.disbursementStage.status === 0
-                                                    ? 'text-yellow-500'
-                                                    : disbursementRequest.disbursementStage.status === 1
-                                                    ? 'text-blue-500'
-                                                    : disbursementRequest.disbursementStage.status === 2
-                                                    ? 'text-green-600'
-                                                    : disbursementRequest.disbursementStage.status === 3
-                                                    ? 'text-red-500'
-                                                    : disbursementRequest.disbursementStage.status === 4
-                                                    ? 'text-gray-500'
-                                                    : disbursementRequest.disbursementStage.status === 5
-                                                    ? 'text-purple-500'
-                                                    : 'text-black'
-                                            }
-                                        >
-                                            {getStageStatus(disbursementRequest.disbursementStage.status)}
-                                        </span>
+                                    <p className={`w-1/2 font-medium ${getStatusColorClass(disbursementRequest.disbursementStage.status, 'stage')}`}>
+                                        {getStatusLabel(disbursementRequest.disbursementStage.status, disbursementStageStatus)}
                                     </p>
                                 </div>
                             </div>
@@ -292,52 +266,47 @@ export default function DisbursementRequestDetail() {
                                 Hoạt động cho đợt {disbursementRequest.disbursementStage.stageNumber}
                             </h4>
                             <div>
-                                {disbursementRequest.activities.map((activity, index) => (
-                                    <div
-                                        key={index}
-                                        className="p-4 space-y-4 bg-white rounded-lg shadow border border-gray-200"
-                                    >
+                                {disbursementRequest.disbursementStage.stageActivity ? (
+                                    <div className="p-4 space-y-4 bg-white rounded-lg shadow border border-gray-200">
                                         <div className="flex items-center mb-2">
                                             <p className="text-gray-700 font-medium flex items-center w-1/2">
                                                 <Pill className="mr-2 h-5 w-5 text-teal-500" /> Mục đích sử dụng:
                                             </p>
-                                            <p className="text-teal-500 font-medium w-1/2">{activity.description}</p>
+                                            <p className="text-teal-500 font-medium w-1/2">
+                                                {disbursementRequest.disbursementStage.stageActivity.description}
+                                            </p>
                                         </div>
                                         <div className="flex items-center mb-2">
                                             <p className="text-gray-700 font-medium flex items-center w-1/2">
                                                 <CalendarDays className="mr-2 h-5 w-5 text-teal-500" /> Ngày hoạt động dự kiến:
                                             </p>
                                             <p className="text-teal-500 font-medium w-1/2">
-                                                {new Date(activity.activityDate).toLocaleDateString('vi-VN')}
+                                                {new Date(disbursementRequest.disbursementStage.stageActivity.activityDate).toLocaleDateString('vi-VN')}
                                             </p>
                                         </div>
                                         <div className="flex items-center font-medium">
-                                            <p className="text-gray-700  flex items-center w-1/2">
+                                            <p className="text-gray-700 flex items-center w-1/2">
                                                 <PieChart className="mr-2 h-5 w-5 text-teal-500" /> Trạng thái:
                                             </p>
-                                            <p
-                                                className={
-                                                    activity.status === 0
-                                                        ? 'text-yellow-500'
-                                                        : activity.status === 1
-                                                        ? 'text-blue-500'
-                                                        : activity.status === 2
-                                                        ? 'text-teal-500'
-                                                        : activity.status === 3
-                                                        ? 'text-red-500'
-                                                        : 'text-gray-500'
-                                                }
-                                            >
-                                                {getActivityStatus(activity.status)}
+                                            <p className={`w-1/2 ${getStatusColorClass(disbursementRequest.disbursementStage.stageActivity.status, 'activity')}`}>
+                                                {getStatusLabel(disbursementRequest.disbursementStage.stageActivity.status, activityStatus)}
                                             </p>
                                         </div>
                                     </div>
-                                ))}
+                                ) : (
+                                    <div className="text-center py-4 text-gray-500">
+                                        Không có hoạt động nào được định nghĩa cho đợt này.
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
                 </div>
-
+                {disbursementRequest && (
+                    <DisbursementReport
+                        disbursementReports={disbursementRequest.disbursementReports}
+                    />
+                )}
                 <div>
                     {disbursementRequest.requestStatus === 1 ? (
                         disbursementRequest.disbursementStage.transferReceiptUrl ? (
@@ -375,8 +344,22 @@ export default function DisbursementRequestDetail() {
                         )
                     ) : disbursementRequest.requestStatus === 2 ? (
                         <div className="text-red-500 font-semibold">Yêu cầu giải ngân đã bị từ chối!</div>
-                    ) : (
-                        <div className="flex space-x-4 justify-end">
+                    ) : disbursementRequest.requestStatus !== 3 && disbursementRequest.requestStatus !== 4 ? (
+                        <div className="flex space-x-4 justify-end pt-5">
+                            <Button
+                                variant="success"
+                                onClick={() => setIsApproveDialogOpen(true)}
+                                className="bg-green-500 text-white hover:bg-green-600"
+                            >
+                                Đồng ý giải ngân
+                            </Button>
+                            <Button
+                                variant="warning"
+                                onClick={() => setIsEditRequestDialogOpen(true)}
+                                className="bg-yellow-300 text-gray-600 hover:bg-yellow-600"
+                            >
+                                Yêu cầu chỉnh sửa
+                            </Button>
                             <Button
                                 variant="danger"
                                 onClick={() => setIsRejectDialogOpen(true)}
@@ -384,17 +367,12 @@ export default function DisbursementRequestDetail() {
                             >
                                 Từ chối
                             </Button>
-                            <Button
-                                variant="success"
-                                onClick={() => setIsApproveDialogOpen(true)}
-                                className="bg-teal-500 text-white hover:bg-teal-600"
-                            >
-                                Đồng ý giải ngân
-                            </Button>
                         </div>
-                    )}
+                    ) : null}
+
                 </div>
             </div>
+
 
             <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
                 <DialogContent>
@@ -405,27 +383,88 @@ export default function DisbursementRequestDetail() {
                     <div>
                         <Textarea
                             value={reason}
-                            onChange={(e) => setReason(e.target.value)}
+                            onChange={(e) => {
+                                setReason(e.target.value);
+                                setIsReasonEmpty(false);
+                            }}
                             className="w-full p-2 border rounded"
                             placeholder="Nhập lý do từ chối..."
                         />
+                        {isReasonEmpty && (
+                            <div className="text-red-500 mt-2">Vui lòng nhập lý do từ chối.</div>
+                        )}
                     </div>
                     <DialogFooter>
                         <Button
                             variant="outline"
-                            onClick={() => setIsRejectDialogOpen(false)}
+                            onClick={() => {
+                                setIsRejectDialogOpen(false);
+                                setIsReasonEmpty(false);
+                            }}
                             className="hover:bg-gray-100"
                         >
                             Hủy
                         </Button>
                         <Button
                             onClick={async () => {
+                                if (!reason.trim()) {
+                                    setIsReasonEmpty(true);
+                                    return;
+                                }
                                 setIsRejectDialogOpen(false);
                                 await handleAction('reject');
                             }}
                             className="bg-red-500 text-white hover:bg-red-600"
                         >
                             Từ chối yêu cầu
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isEditRequestDialogOpen} onOpenChange={setIsEditRequestDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Yêu cầu chỉnh sửa</DialogTitle>
+                        <DialogClose />
+                    </DialogHeader>
+                    <div>
+                        <Textarea
+                            value={reason}
+                            onChange={(e) => {
+                                setReason(e.target.value);
+                                setIsReasonEmpty(false);
+                            }}
+                            className="w-full p-2 border rounded"
+                            placeholder="Nhập nội dung cần chỉnh sửa..."
+                        />
+                        {isReasonEmpty && (
+                            <div className="text-red-500 mt-2">Vui lòng nhập nội dung yêu cầu chỉnh sửa.</div>
+                        )}
+                    </div>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setIsEditRequestDialogOpen(false);
+                                setIsReasonEmpty(false);
+                            }}
+                            className="hover:bg-gray-100"
+                        >
+                            Hủy
+                        </Button>
+                        <Button
+                            onClick={async () => {
+                                if (!reason.trim()) {
+                                    setIsReasonEmpty(true);
+                                    return;
+                                }
+                                setIsEditRequestDialogOpen(false);
+                                await handleAction('edit');
+                            }}
+                            className="bg-orange-500 text-white hover:bg-orange-600"
+                        >
+                            Gửi yêu cầu chỉnh sửa
                         </Button>
                     </DialogFooter>
                 </DialogContent>

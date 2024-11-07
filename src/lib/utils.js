@@ -48,6 +48,19 @@ export const formatNumber = (value) => {
 };
 
 /**
+ * Formats an amount as VND currency
+ * @param {number} amount - The amount to format
+ * @returns {string} The formatted amount as currency
+ */
+export const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND'
+    }).format(amount);
+};
+
+
+/**
  * Generates a PDF from an HTML element
  * @param {HTMLElement} element - The HTML element to convert to PDF
  * @returns {Promise<jsPDF>} A promise that resolves with the generated PDF document
