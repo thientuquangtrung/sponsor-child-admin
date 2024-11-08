@@ -127,7 +127,7 @@ const DisbursementReport = ({ disbursementReports }) => {
                                             </TableCell>
                                             <TableCell className="text-right border border-gray-300">
                                                 {formatCurrency(report.disbursementReportDetails.reduce(
-                                                    (sum, detail) => sum + detail.actualAmountSpent,
+                                                    (sum, detail) => sum + (detail.actualAmountSpent || 0),
                                                     0
                                                 ))}
                                             </TableCell>
