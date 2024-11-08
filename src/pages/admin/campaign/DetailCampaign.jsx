@@ -22,19 +22,11 @@ import { useGetCampaignByIdQuery, useUpdateCampaignMutation } from '@/redux/camp
 import { campaignStatus, campaignTypes, guaranteeTypes } from '@/config/combobox';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import { toast } from 'sonner';
-
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
 import FileViewer from '@/pages/admin/campaign/FileViewer';
 import { useSelector } from 'react-redux';
 import ImageGallery from '@/pages/admin/campaign/ImageGallery';
 import ChildSearch from '@/pages/admin/campaign/ChildSearch';
+import DetailDisbursementPlan from '@/pages/admin/campaign/DetailDisbursementPlan';
 
 const DetailCampaign = () => {
     const { id } = useParams();
@@ -58,7 +50,7 @@ const DetailCampaign = () => {
         return null;
     }
 
-    const { disbursementPlans, activities } = campaignData;
+    const { disbursementPlans } = campaignData;
     const campaignStatusObj = campaignStatus.find((status) => status.value === campaignData.status);
     const campaignTypeObj = campaignTypes.find((type) => type.value === campaignData.campaignType);
     const guaranteeTypeObj = guaranteeTypes.find((type) => type.value === campaignData.guaranteeType);
@@ -300,133 +292,8 @@ const DetailCampaign = () => {
                         </Card>
 
 
+                        <DetailDisbursementPlan disbursementPlans={disbursementPlans} />
 
-                        <Card className="shadow-lg border-0 mb-6">
-                            <CardHeader className="bg-teal-600 text-white">
-                                <CardTitle className="text-2xl font-semibold">Kế hoạch giải ngân</CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-6">
-                                {disbursementPlans.map((plan, index) => (
-                                    <div key={index} className="mb-8">
-                                        <div className="mb-4 grid grid-cols-1 md:grid-cols-4 gap-4">
-                                            <div className="bg-teal-50 p-4 rounded-lg">
-                                                <p className="text-sm text-teal-600 font-medium">Ngày bắt đầu</p>
-                                                <p className="text-lg font-semibold">
-                                                    {new Date(plan.plannedStartDate).toLocaleDateString('vi-VN')}
-                                                </p>
-                                            </div>
-                                            <div className="bg-teal-50 p-4 rounded-lg">
-                                                <p className="text-sm text-teal-600 font-medium">Ngày kết thúc dự kiến</p>
-                                                <p className="text-lg font-semibold">
-                                                    {new Date(plan.plannedEndDate).toLocaleDateString('vi-VN')}
-                                                </p>
-                                            </div>
-                                            <div className="bg-teal-50 p-4 rounded-lg">
-                                                <p className="text-sm text-teal-600 font-medium">Ngày kết thúc thực tế</p>
-                                                <p className="text-lg font-semibold">
-                                                    {plan.actualEndDate ? new Date(plan.actualEndDate).toLocaleDateString('vi-VN') : '---'}
-                                                </p>
-                                            </div>
-                                            <div className="bg-teal-50 p-4 rounded-lg">
-                                                <p className="text-sm text-teal-600 font-medium">Tổng số tiền</p>
-                                                <p className="text-lg font-semibold">
-                                                    {plan.totalPlannedAmount.toLocaleString()} VNĐ
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead>Giai đoạn</TableHead>
-                                                    <TableHead>Số tiền giải ngân</TableHead>
-                                                    <TableHead>Ngày dự kiến</TableHead>
-                                                    <TableHead>Ngày giải ngân thực tế</TableHead>
-                                                    <TableHead>Trạng thái</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {[...plan.stages]
-                                                    .sort((a, b) => a.stageNumber - b.stageNumber)
-                                                    .map((stage) => (
-                                                        <TableRow key={stage.stageNumber}>
-                                                            <TableCell>Giai đoạn {stage.stageNumber}</TableCell>
-                                                            <TableCell>{stage.disbursementAmount.toLocaleString()} VNĐ</TableCell>
-                                                            <TableCell>
-                                                                {new Date(stage.scheduledDate).toLocaleDateString('vi-VN')}
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                {stage.actualDisbursementDate
-                                                                    ? new Date(stage.actualDisbursementDate).toLocaleDateString('vi-VN')
-                                                                    : '---'
-                                                                }
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <span className={`px-3 py-1 rounded-full text-sm font-semibold
-                                                                     ${stage.status === 0 ? 'bg-blue-100 text-blue-800' :
-                                                                        stage.status === 1 ? 'bg-yellow-100 text-yellow-800' :
-                                                                            stage.status === 2 ? 'bg-green-100 text-green-800' :
-                                                                                stage.status === 3 ? 'bg-red-100 text-red-800' :
-                                                                                    stage.status === 4 ? 'bg-gray-100 text-gray-800' :
-                                                                                        'bg-purple-100 text-purple-800'}`}>
-                                                                    {stage.status === 0 ? 'Đã lên lịch' :
-                                                                        stage.status === 1 ? 'Đang tiến hành' :
-                                                                            stage.status === 2 ? 'Đã hoàn thành' :
-                                                                                stage.status === 3 ? 'Thất bại' :
-                                                                                    stage.status === 4 ? 'Đã hủy' :
-                                                                                        'Đã thay thế'}
-                                                                </span>
-                                                            </TableCell>
-
-                                                        </TableRow>
-                                                    ))}
-                                            </TableBody>
-                                        </Table>
-                                    </div>
-                                ))}
-                            </CardContent>
-                        </Card>
-                        <Card className="shadow-lg border-0 mb-6">
-                            <CardHeader className="bg-teal-600 text-white">
-                                <CardTitle className="text-2xl font-semibold">Hoạt động Dự Kiến</CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-6">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Ngày thực hiện</TableHead>
-                                            <TableHead>Mô tả hoạt động</TableHead>
-                                            <TableHead>Trạng thái</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {[...activities]
-                                            .sort((a, b) => new Date(a.activityDate) - new Date(b.activityDate))
-                                            .map((activity) => (
-                                                <TableRow key={activity.activityID}>
-                                                    <TableCell>
-                                                        {new Date(activity.activityDate).toLocaleDateString('vi-VN')}
-                                                    </TableCell>
-                                                    <TableCell>{activity.description}</TableCell>
-                                                    <TableCell>
-                                                        <span className={`px-3 py-1 rounded-full text-sm font-semibold
-                                                            ${activity.status === 0 ? 'bg-blue-100 text-blue-800' :
-                                                                activity.status === 1 ? 'bg-yellow-100 text-yellow-800' :
-                                                                    activity.status === 2 ? 'bg-green-100 text-green-800' :
-                                                                        'bg-red-100 text-red-800'}`}>
-                                                            {activity.status === 0 ? 'Đã lên lịch' :
-                                                                activity.status === 1 ? 'Đang tiến hành' :
-                                                                    activity.status === 2 ? 'Đã hoàn thành' :
-                                                                        'Đã hủy'}
-                                                        </span>
-                                                    </TableCell>
-
-                                                </TableRow>
-                                            ))}
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
                         {campaignData.rejectionReason && (
                             <Card className="shadow-lg border-0">
                                 <CardHeader className="bg-teal-600 text-white">
