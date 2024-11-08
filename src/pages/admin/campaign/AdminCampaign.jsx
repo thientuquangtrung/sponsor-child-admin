@@ -371,52 +371,52 @@ export function AdminCampaign() {
 
     return (
         <>
-            <Breadcrumb breadcrumbs={breadcrumbs} />
-            <div className="w-full space-y-4 mx-3">
-                <div className="flex justify-end items-center mb-6">
+            <div className="grid grid-cols-1 gap-4">
+                <Breadcrumb breadcrumbs={breadcrumbs} />
+                <div className="flex justify-end  items-center">
                     <Button
                         className="bg-teal-600 hover:bg-teal-700 text-white"
                         onClick={() => navigate(`/create-campaign`)}
                     >
                         <BadgePlus className="w-4 h-4 mr-2" />
-                        Tạo Chiến dịch
+                        Tạo Chiến dịch
                     </Button>
                 </div>
                 <Tabs defaultValue="guaranteed" className="w-full">
                     <TabsList className="grid w-full max-w-[400px] grid-cols-2 bg-transparent">
                         <TabsTrigger value="guaranteed" className="relative px-4 py-2 rounded-none transition-colors duration-200
-                    data-[state=active]:bg-transparent 
-                    data-[state=active]:text-teal-500
-                    hover:text-teal-500
-                    after:content-['']
-                    after:absolute
-                    after:bottom-0
-                    after:left-0
-                    after:w-full
-                    after:h-0.5
-                    after:bg-teal-500
-                    after:scale-x-0
-                    data-[state=active]:after:scale-x-100
-                    after:transition-transform
-                    after:duration-300"
+                  data-[state=active]:bg-transparent 
+                  data-[state=active]:text-teal-500
+                  hover:text-teal-500
+                  after:content-['']
+                  after:absolute
+                  after:bottom-0
+                  after:left-0
+                  after:w-full
+                  after:h-0.5
+                  after:bg-teal-500
+                  after:scale-x-0
+                  data-[state=active]:after:scale-x-100
+                  after:transition-transform
+                  after:duration-300"
                         >
                             Có Bảo lãnh
                         </TabsTrigger>
                         <TabsTrigger value="non-guaranteed" className="relative px-4 py-2 rounded-none transition-colors duration-200
-                    data-[state=active]:bg-transparent 
-                    data-[state=active]:text-teal-500
-                    hover:text-teal-500
-                    after:content-['']
-                    after:absolute
-                    after:bottom-0
-                    after:left-0
-                    after:w-full
-                    after:h-0.5
-                    after:bg-teal-500
-                    after:scale-x-0
-                    data-[state=active]:after:scale-x-100
-                    after:transition-transform
-                    after:duration-300"
+                  data-[state=active]:bg-transparent 
+                  data-[state=active]:text-teal-500
+                  hover:text-teal-500
+                  after:content-['']
+                  after:absolute
+                  after:bottom-0
+                  after:left-0
+                  after:w-full
+                  after:h-0.5
+                  after:bg-teal-500
+                  after:scale-x-0
+                  data-[state=active]:after:scale-x-100
+                  after:transition-transform
+                  after:duration-300"
                         >
                             Chưa có Bảo lãnh
                         </TabsTrigger>
