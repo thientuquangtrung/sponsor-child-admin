@@ -9,15 +9,13 @@ import { AdminLayout } from '@/components/layouts/AdminLayout';
 // import { DEFAULT_PATH } from '../config/app';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import UpdateCampaign from '@/pages/admin/campaign/UpdateCampaign';
-import CampaignChildrenManager from '@/pages/children-manager/campaign/CampaignChildrenManager';
-import DetailCampaignChildrenManager from '@/pages/children-manager/campaign/DetailCampaignChildrenManager';
-import UpdateCampaignChildrenManager from '@/pages/children-manager/campaign/UpdateCampaignChildrenManager';
 import DisbursementRequest from '@/pages/admin/disbursement/DisbursementRequest';
 import DisbursementDetail from '@/pages/admin/disbursement/DisbursementRequestDetail';
 import DisbursementRequestDetail from '@/pages/admin/disbursement/DisbursementRequestDetail';
 import DisbursementReport from '@/pages/admin/disbursement/DisbursementReport';
 import DisbursementReportDetail from '@/pages/admin/disbursement/DisbursementReportDetail';
 import CampaignInfo from '@/pages/children-manager/campaign/CampaignInfo';
+import VisitDetail from '@/pages/children-manager/visitTrip/VisitDetail';
 
 const Loadable = (Component) => {
     const LoadableComponent = (props) => {
@@ -61,8 +59,9 @@ export default function Router() {
                 { element: <FinanceTransaction />, path: 'finance/transactions' },
                 { element: <FinanceReport />, path: 'finance/reports' },
                 { element: <FundDisbursement />, path: 'finance/disbursement' },
-                { element: <Visit />, path: 'visit' },
-                { element: <VisitForm />, path: 'visit/add-visit-form' },
+                { element: <Visit />, path: 'visits' },
+                { element: <VisitDetail />, path: 'visit/:id' },
+                { element: <VisitForm />, path: 'visit/create-visit-trip' },
                 { element: <AdminCenter />, path: 'center' },
                 { element: <GuaranteeRequests />, path: 'center/guarantee-requests' },
                 { element: <GuaranteeRequestsDetail />, path: 'center/guarantee-requests/:id' },
@@ -105,5 +104,5 @@ const ContractDetail = Loadable(lazy(() => import('@/pages/admin/center/Contract
 const DetailCampaign = Loadable(lazy(() => import('@/pages/admin/campaign/DetailCampaign')));
 
 //children-manager
-const Visit = Loadable(lazy(() => import('@/pages/children-manager/Visit')));
-const VisitForm = Loadable(lazy(() => import('@/pages/children-manager/VisitForm')));
+const Visit = Loadable(lazy(() => import('@/pages/children-manager/visitTrip/Visit')));
+const VisitForm = Loadable(lazy(() => import('@/pages/children-manager/visitTrip/VisitForm')));
