@@ -20,6 +20,9 @@ const UPLOAD_FOLDER = {
 
     //disbursement
     getDisbursementFolder: (campaignID) => `campaigns/${campaignID}/disbursements`,
+    //visitTrip
+    getVisitTripFolder: (eventID) => `events/${eventID}`,
+    getVisitTripMediaFolder: (eventID) => `events/${eventID}/media`,
 };
 
 const UPLOAD_NAME = {

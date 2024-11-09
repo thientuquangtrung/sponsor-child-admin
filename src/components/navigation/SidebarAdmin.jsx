@@ -36,7 +36,7 @@ const menuItems = [
     { icon: SquareUser, label: "Người dùng", path: "/users" },
     { icon: Heater, label: "Trung tâm Quản trị", path: "/center" },
     { icon: Settings, label: "Cài đặt", path: "/settings" },
-    { icon: Telescope, label: "Chuyến thăm", path: "/visit" },
+    { icon: Telescope, label: "Chuyến thăm", path: "/visits" },
     { icon: LogOut, label: 'Đăng xuất', path: '/logout' },
 ];
 
