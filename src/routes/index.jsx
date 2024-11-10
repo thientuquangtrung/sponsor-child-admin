@@ -16,6 +16,7 @@ import DisbursementReport from '@/pages/admin/disbursement/DisbursementReport';
 import DisbursementReportDetail from '@/pages/admin/disbursement/DisbursementReportDetail';
 import CampaignInfo from '@/pages/children-manager/campaign/CampaignInfo';
 import VisitDetail from '@/pages/children-manager/visitTrip/VisitDetail';
+import UserDetail from '@/pages/admin/finance/UserDetail';
 
 const Loadable = (Component) => {
     const LoadableComponent = (props) => {
@@ -52,6 +53,7 @@ export default function Router() {
                 { element: <Navigate to="/home" replace />, index: true },
                 { element: <AdminDashboard />, path: '/home' },
                 { element: <UserManagement />, path: 'users' },
+                { element: <UserDetail />, path: 'users/:id' },
                 { element: <AdminCampaign />, path: 'campaigns' },
                 { element: <DetailCampaign />, path: 'campaign/:id' },
                 { element: <UpdateCampaign />, path: 'campaign/edit/:id' },
