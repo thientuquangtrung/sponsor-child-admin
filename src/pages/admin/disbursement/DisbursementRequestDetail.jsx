@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import {
+    AlertCircle,
     Calendar,
     CalendarDays,
     CircleDollarSign,
@@ -94,6 +95,7 @@ export default function DisbursementRequestDetail() {
             refetch();
             setReason('');
             setIsReasonEmpty(false);
+            refetch();
         } catch (error) {
             console.error('Lỗi khi cập nhật yêu cầu:', error);
             toast.error('Có lỗi xảy ra khi cập nhật yêu cầu.');
@@ -196,8 +198,21 @@ export default function DisbursementRequestDetail() {
             <div>
                 <div className="my-10 border rounded-lg shadow-sm bg-gray-50">
                     <h3 className="text-2xl text-center bg-gradient-to-l from-rose-200 to-teal-100 py-4 font-semibold text-gray-800 rounded-tl-lg rounded-tr-lg">
-                        {getStatusLabel(disbursementRequest.requestStatus, disbursementRequestStatus)}
+                        {disbursementRequest.isEarlyRequest
+                            ? `${getStatusLabel(disbursementRequest.requestStatus, disbursementRequestStatus)} (Giải ngân sớm)`
+                            : getStatusLabel(disbursementRequest.requestStatus, disbursementRequestStatus)
+                        }
                     </h3>
+
+                    {disbursementRequest.isEarlyRequest && (
+                        <div className="flex items-center gap-2 bg-yellow-50 p-4 border-b">
+                            <AlertCircle className="h-5 w-5 text-yellow-500" />
+                            <p className="text-sm text-yellow-700">
+                                Đây là yêu cầu giải ngân sớm hơn so với ngày dự kiến
+                            </p>
+                        </div>
+                    )}
+
 
                     <div className="grid grid-cols-2 gap-8 p-4 bg-white rounded-lg shadow-lg">
                         <div className="p-6 bg-gray-50 rounded-lg shadow-sm">
@@ -254,8 +269,8 @@ export default function DisbursementRequestDetail() {
                                         <PieChart className="mr-2 h-5 w-5 text-teal-500" />
                                         Trạng thái:
                                     </p>
-                                    <p className={`w-1/2 font-medium ${getStatusColorClass(disbursementRequest.disbursementStage.status, 'stage')}`}>
-                                        {getStatusLabel(disbursementRequest.disbursementStage.status, disbursementStageStatus)}
+                                    <p className={`w-1/2 font-medium ${getStatusColorClass(disbursementRequest.requestStatus, 'request')}`}>
+                                        {getStatusLabel(disbursementRequest.requestStatus, disbursementRequestStatus)}
                                     </p>
                                 </div>
                             </div>
@@ -302,11 +317,13 @@ export default function DisbursementRequestDetail() {
                         </div>
                     </div>
                 </div>
-                {disbursementRequest && (
-                    <DisbursementReport
-                        disbursementReports={disbursementRequest.disbursementReports}
-                    />
-                )}
+                {
+                    disbursementRequest && (
+                        <DisbursementReport
+                            disbursementReports={disbursementRequest.disbursementReports}
+                        />
+                    )
+                }
                 <div>
                     {disbursementRequest.requestStatus === 1 ? (
                         disbursementRequest.disbursementStage.transferReceiptUrl ? (
@@ -340,11 +357,13 @@ export default function DisbursementRequestDetail() {
                                 </div>
                             </div>
                         ) : (
-                            <DisbursementApproval disbursementRequest={disbursementRequest} />
+                            <DisbursementApproval
+                                disbursementRequest={disbursementRequest}
+                                parentRefetch={refetch} />
                         )
                     ) : disbursementRequest.requestStatus === 2 ? (
                         <div className="text-red-500 font-semibold">Yêu cầu giải ngân đã bị từ chối!</div>
-                    ) : disbursementRequest.requestStatus !== 3 && disbursementRequest.requestStatus !== 4 ? (
+                    ) : disbursementRequest.requestStatus !== 3 && disbursementRequest.requestStatus !== 4 && disbursementRequest.requestStatus !== 5 ? (
                         <div className="flex space-x-4 justify-end pt-5">
                             <Button
                                 variant="success"
@@ -371,7 +390,7 @@ export default function DisbursementRequestDetail() {
                     ) : null}
 
                 </div>
-            </div>
+            </div >
 
 
             <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
@@ -501,6 +520,6 @@ export default function DisbursementRequestDetail() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </div>
+        </div >
     );
 }

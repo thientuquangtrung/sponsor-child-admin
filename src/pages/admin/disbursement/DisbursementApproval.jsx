@@ -8,7 +8,7 @@ import { CircleDollarSign, Upload, Undo2 } from 'lucide-react';
 import { useUpdateDisbursementStageMutation } from '@/redux/guarantee/disbursementStageApi';
 import { UPLOAD_FOLDER, UPLOAD_NAME, uploadFile } from '@/lib/cloudinary';
 
-const DisbursementApproval = ({ disbursementRequest }) => {
+const DisbursementApproval = ({ disbursementRequest, parentRefetch }) => {
     const navigate = useNavigate();
     const [file, setFile] = useState(null);
     const [fileUrl, setFileUrl] = useState(null);
@@ -62,7 +62,7 @@ const DisbursementApproval = ({ disbursementRequest }) => {
                     transferReceiptUrl: uploadResult.secure_url,
                 },
             }).unwrap();
-
+            await parentRefetch();
             setUploadSuccess('Gửi minh chứng thành công!');
             toast.success('Gửi minh chứng thành công!');
             setShowBackButton(true);
