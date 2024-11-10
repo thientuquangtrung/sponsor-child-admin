@@ -7,7 +7,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table';
-import { MoreHorizontal, Plus } from 'lucide-react';
+import { Eye, MoreHorizontal, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -18,10 +18,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { DataTablePagination } from '@/components/datatable/DataTablePagination';
-import { DataTableColumnHeader } from '@/components/datatable/DataTableColumnHeader';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -33,53 +29,28 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { DataTablePagination } from '@/components/datatable/DataTablePagination';
+import { DataTableColumnHeader } from '@/components/datatable/DataTableColumnHeader';
 import { DataTableToolbarAdmin } from '@/components/datatable/DataTableToolbarAdmin';
 import Breadcrumb from '@/pages/admin/Breadcrumb';
-
-const data = [
-    {
-        id: 'user001',
-        fullname: 'Nguyễn A',
-        email: 'a@example.com',
-        role: 'Donor',
-        status: 'Đang hoạt động',
-        phone: '0123456789',
-        address: '123 ',
-        dateOfBirth: new Date(1990, 1, 1).toISOString(),
-        bio: 'Một người bảo trợ tận tâm.',
-        imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ-L6DYDB3WQ-ltV0OHiNXfM9FEAfUnhjgUaA&s',
-    },
-    {
-        id: 'user002',
-        fullname: 'Trần Thị B',
-        email: 'b@example.com',
-        role: 'Guarantee',
-        status: 'Đang hoạt động',
-        phone: '0987654321',
-        address: '456 ',
-        dateOfBirth: new Date(1985, 5, 15).toISOString(),
-        bio: 'Người bảo lãnh đáng tin cậy.',
-        imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ-L6DYDB3WQ-ltV0OHiNXfM9FEAfUnhjgUaA&s',
-    },
-    {
-        id: 'user003',
-        fullname: 'Lê Văn C',
-        email: 'c@example.com',
-        role: 'Children Manager',
-        status: 'Ngừng hoạt động',
-        phone: '0912345678',
-        address: '789 ',
-        dateOfBirth: null,
-        bio: null,
-        imageUrl: null,
-    },
-];
+import { useGetUserQuery } from '@/redux/user/userApi';
+import { useNavigate } from 'react-router-dom';
 
 const roleColors = {
-    Guarantee: 'bg-yellow-200',
-    Donor: 'bg-blue-200',
-    'Children Manager': 'bg-green-300',
-    Admin: 'bg-red-500',
+    Guarantee: 'bg-rose-100 text-rose-400',
+    Donor: 'bg-sky-200 text-sky-600',
+    'Children Manager': 'bg-amber-100 text-yellow-700',
+    Admin: 'bg-emerald-100 text-emerald-600',
+};
+
+const getRoleDisplay = (role) => {
+    const formattedRole = role === 'ChildManager' ? 'Children Manager' : role;
+    return {
+        displayRole: formattedRole,
+        colorClass: roleColors[formattedRole] || 'bg-gray-200',
+    };
 };
 
 const columns = [
@@ -125,25 +96,16 @@ const columns = [
     {
         accessorKey: 'role',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Vai trò" />,
-        cell: ({ row }) => (
-            <Badge className={roleColors[row.getValue('role')] || 'bg-gray-200'}>
-                {row.getValue('role')}
-            </Badge>
-        ),
-        filterFn: (row, id, value) => {
-            return value.includes(row.getValue(id));
+        cell: ({ row }) => {
+            const { displayRole, colorClass } = getRoleDisplay(row.getValue('role'));
+            return <Badge className={colorClass}>{displayRole}</Badge>;
         },
+        filterFn: (row, id, value) => {
+            const role = getRoleDisplay(row.getValue(id)).displayRole; 
+            return value.includes(role);
+        }
     },
 
-    {
-        accessorKey: 'status',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Trạng thái" />,
-        cell: ({ row }) => (
-            <Badge variant={row.getValue('status') === 'Đang hoạt động' ? 'default' : 'secondary'}>
-                {row.getValue('status')}
-            </Badge>
-        ),
-    },
     {
         id: 'actions',
         cell: ({ row }) => <ActionMenu row={row} />,
@@ -151,55 +113,54 @@ const columns = [
 ];
 
 const ActionMenu = ({ row }) => {
-    const handleBlockUser = () => {
-        //handle block user
+    const navigate = useNavigate();
+    const handleDelete = (e) => {
+        console.log(row);
     };
-
-    const handleClick = () => {
-    };
-
     return (
-
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0" onClick={handleClick}>
+                <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-normal">
                     <span className="sr-only">Mở menu</span>
                     <MoreHorizontal className="h-4 w-4" />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Hành động</DropdownMenuLabel>
-                {row.getValue('role') === 'Donor' && (
-                    <DropdownMenuItem >
-                        Duyệt thành Guarantee
-                    </DropdownMenuItem>
-                )}
+                <DropdownMenuItem onClick={() => navigate(`/users/${row.original.userID}`)}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    Xem chi tiết
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600">
-                            Vô hiệu hóa
-                        </DropdownMenuItem>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Bạn có chắc chắn muốn vô hiệu hoá?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Hành động này có thể hoàn tác. Người dùng sẽ bị vô hiệu hóa.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Hủy</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleBlockUser}>Tiếp tục vô hiệu hóa người dùng này?</AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <DropdownMenuItem
+                                onSelect={(e) => e.preventDefault()}
+                                className="text-destructive focus:text-destructive"
+                            >
+                                Delete asset
+                            </DropdownMenuItem>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete your asset.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
             </DropdownMenuContent>
         </DropdownMenu>
     );
 };
 
 export function UserManagement() {
+    const { data: users, isLoading, error } = useGetUserQuery();
     const [sorting, setSorting] = React.useState([]);
     const [columnFilters, setColumnFilters] = React.useState([]);
     const [columnVisibility, setColumnVisibility] = React.useState({});
@@ -210,7 +171,7 @@ export function UserManagement() {
     ];
 
     const table = useReactTable({
-        data,
+        data: users || [],
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -233,11 +194,10 @@ export function UserManagement() {
             <Breadcrumb breadcrumbs={breadcrumbs} />
 
             <div className="w-full space-y-4 mx-3">
-
                 <DataTableToolbarAdmin table={table} type="Users" />
                 <div className="rounded-md border">
                     <Table>
-                        <TableHeader>
+                        <TableHeader className="bg-gradient-to-l from-rose-100 to-teal-100 hover:bg-normal">
                             {table.getHeaderGroups().map((headerGroup) => (
                                 <TableRow key={headerGroup.id}>
                                     {headerGroup.headers.map((header) => (
