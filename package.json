@@ -63,6 +63,7 @@
     "redux-persist": "^6.0.0",
     "redux-persist-transform-encrypt": "^5.1.1",
     "slick-carousel": "^1.8.1",
+    "socket.io-client": "^4.8.1",
     "sonner": "^1.5.0",
     "styled-components": "^6.1.12",
     "tailwind-merge": "^2.3.0",
