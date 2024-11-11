@@ -24,6 +24,7 @@ import {
 import DisbursementApproval from '@/pages/admin/disbursement/DisbursementApproval';
 import { disbursementStageStatus, disbursementRequestStatus, activityStatus } from '@/config/combobox';
 import DisbursementReport from '@/pages/admin/disbursement/DisbursementReport';
+import { useSelector } from 'react-redux';
 
 export default function DisbursementRequestDetail() {
     const { id } = useParams();
@@ -34,6 +35,8 @@ export default function DisbursementRequestDetail() {
     const [isReasonEmpty, setIsReasonEmpty] = useState(false);
     const { data: disbursementRequest, isLoading, error, refetch } = useGetDisbursementRequestByIdQuery(id);
     const [updateDisbursementRequest] = useUpdateDisbursementRequestMutation();
+    const { user } = useSelector((state) => state.auth);
+
     if (isLoading) {
         return <LoadingScreen />;
     }
@@ -51,7 +54,6 @@ export default function DisbursementRequestDetail() {
         }
 
         try {
-            const userID = disbursementRequest.guarantee.userID;
             let requestStatus;
             switch (actionType) {
                 case 'approve':
@@ -71,7 +73,7 @@ export default function DisbursementRequestDetail() {
                 id,
                 body: {
                     requestStatus: requestStatus,
-                    userID: userID,
+                    userID: user.userID,
                     rejectionReason: actionType !== 'approve' ? reason : '',
                 },
             }).unwrap();
@@ -228,41 +230,60 @@ export default function DisbursementRequestDetail() {
                                     </p>
                                     <p className="text-teal-500 font-medium w-1/2">{disbursementRequest.bankName}</p>
                                 </div>
-                                <div className="flex items-center">
-                                    <p className="text-gray-700 font-medium flex items-center w-1/2">
-                                        <CreditCard className="mr-2 h-5 w-5 text-teal-500" />
-                                        Số tài khoản ngân hàng:
-                                    </p>
-                                    <p className="text-teal-500 font-medium w-1/2">
-                                        {disbursementRequest.bankAccountNumber}
-                                    </p>
-                                </div>
-                                <div className="flex items-center">
-                                    <p className="text-gray-700 font-medium flex items-center w-1/2">
-                                        <User className="mr-2 h-5 w-5 text-teal-500" />
-                                        Tên tài khoản ngân hàng:
-                                    </p>
-                                    <p className="text-teal-500 font-medium w-1/2">
-                                        {disbursementRequest.bankAccountName}
-                                    </p>
-                                </div>
-                                <div className="flex items-center">
-                                    <p className="text-gray-700 font-medium flex items-center w-1/2">
-                                        <Calendar className="mr-2 h-5 w-5 text-teal-500" />
-                                        Ngày yêu cầu:
-                                    </p>
-                                    <p className="text-teal-500 font-medium w-1/2">
-                                        {new Date(disbursementRequest.requestDate).toLocaleDateString('vi-VN')}
-                                    </p>
-                                </div>
-                                <div className="flex items-center">
-                                    <p className="text-gray-700 font-medium flex items-center w-1/2">
-                                        <CircleDollarSign className="mr-2 h-5 w-5 text-teal-500" />
-                                        Số tiền giải ngân:
-                                    </p>
-                                    <p className="text-teal-500 font-medium w-1/2">
-                                        {disbursementRequest.disbursementStage.disbursementAmount.toLocaleString('vi-VN')} VND
-                                    </p>
+                                <div className="flex flex-col gap-4">
+                                    <div className="flex items-center">
+                                        <div className="flex items-center w-1/2">
+                                            <CreditCard className="mr-2 h-5 w-5 text-teal-500" />
+                                            <p className="text-gray-700 font-medium">Số tài khoản ngân hàng:</p>
+                                        </div>
+                                        <p className="text-teal-500 font-medium w-1/2">
+                                            {disbursementRequest.bankAccountNumber}
+                                        </p>
+                                    </div>
+
+                                    <div className="flex items-center">
+                                        <div className="flex items-center w-1/2">
+                                            <User className="mr-2 h-5 w-5 text-teal-500" />
+                                            <p className="text-gray-700 font-medium">Tên tài khoản ngân hàng:</p>
+                                        </div>
+                                        <p className="text-teal-500 font-medium w-1/2">
+                                            {disbursementRequest.bankAccountName}
+                                        </p>
+                                    </div>
+
+                                    <div className="flex items-center">
+                                        <div className="flex items-center w-1/2">
+                                            <Calendar className="mr-2 h-5 w-5 text-teal-500" />
+                                            <p className="text-gray-700 font-medium">Ngày yêu cầu:</p>
+                                        </div>
+                                        <p className="text-teal-500 font-medium w-1/2">
+                                            {new Date(disbursementRequest.requestDate).toLocaleDateString('vi-VN')}
+                                        </p>
+                                    </div>
+
+                                    <div className="flex items-center">
+                                        <div className="flex items-center w-1/2">
+                                            <CircleDollarSign className="mr-2 h-5 w-5 text-teal-500" />
+                                            <p className="text-gray-700 font-medium">
+                                                Số tiền giải ngân đợt {disbursementRequest?.disbursementStage?.stageNumber}:
+                                            </p>
+                                        </div>
+                                        <p className="text-teal-500 font-medium w-1/2">
+                                            {disbursementRequest?.disbursementStage?.disbursementAmount?.toLocaleString('vi-VN')} VNĐ
+                                        </p>
+                                    </div>
+
+                                    <div className="flex items-center">
+                                        <div className="flex items-center w-1/2">
+                                            <CircleDollarSign className="mr-2 h-5 w-5 text-teal-500" />
+                                            <p className="text-gray-700 font-medium">
+                                                Số tiền yêu cầu giải ngân:
+                                            </p>
+                                        </div>
+                                        <p className="text-teal-500 font-medium w-1/2">
+                                            {disbursementRequest?.disbursementStage?.actualDisbursementAmount?.toLocaleString('vi-VN')} VNĐ
+                                        </p>
+                                    </div>
                                 </div>
                                 <div className="flex items-center">
                                     <p className="text-gray-700 font-medium flex items-center w-1/2">

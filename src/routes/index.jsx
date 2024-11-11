@@ -8,6 +8,9 @@ import { AdminLayout } from '@/components/layouts/AdminLayout';
 // config
 // import { DEFAULT_PATH } from '../config/app';
 import LoadingScreen from '@/components/common/LoadingScreen';
+
+
+
 import UpdateCampaign from '@/pages/admin/campaign/UpdateCampaign';
 import DisbursementRequest from '@/pages/admin/disbursement/DisbursementRequest';
 import DisbursementDetail from '@/pages/admin/disbursement/DisbursementRequestDetail';
@@ -17,6 +20,7 @@ import DisbursementReportDetail from '@/pages/admin/disbursement/DisbursementRep
 import CampaignInfo from '@/pages/children-manager/campaign/CampaignInfo';
 import VisitDetail from '@/pages/children-manager/visitTrip/VisitDetail';
 import UserDetail from '@/pages/admin/finance/UserDetail';
+
 
 const Loadable = (Component) => {
     const LoadableComponent = (props) => {
@@ -72,9 +76,6 @@ export default function Router() {
                 { element: <CampaignInfo />, path: 'create-campaign' },
                 { element: <DisbursementRequest />, path: 'disbursement-requests' },
                 { element: <DisbursementRequestDetail />, path: 'disbursement-requests/:id' },
-                { element: <DisbursementReport />, path: 'disbursement-reports' },
-                { element: <DisbursementReportDetail />, path: 'disbursement-reports/:id' },
-
                 { path: '404', element: <Page404 /> },
             ],
         },
@@ -104,7 +105,12 @@ const GuaranteeRequestsDetail = Loadable(lazy(() => import('@/pages/admin/center
 const ContractManagement = Loadable(lazy(() => import('@/pages/admin/center/ContractManagement')));
 const ContractDetail = Loadable(lazy(() => import('@/pages/admin/center/ContractDetail')));
 const DetailCampaign = Loadable(lazy(() => import('@/pages/admin/campaign/DetailCampaign')));
+const UpdateCampaign = Loadable(lazy(() => import('@/pages/admin/campaign/UpdateCampaign')));
+const DisbursementRequest = Loadable(lazy(() => import('@/pages/admin/disbursement/DisbursementRequest')));
+const DisbursementRequestDetail = Loadable(lazy(() => import('@/pages/admin/disbursement/DisbursementRequestDetail')));
+const CampaignInfo = Loadable(lazy(() => import('@/pages/children-manager/campaign/CampaignInfo')));
 
 //children-manager
 const Visit = Loadable(lazy(() => import('@/pages/children-manager/visitTrip/Visit')));
 const VisitForm = Loadable(lazy(() => import('@/pages/children-manager/visitTrip/VisitForm')));
+const VisitDetail = Loadable(lazy(() => import('@/pages/children-manager/visitTrip/VisitDetail')));
