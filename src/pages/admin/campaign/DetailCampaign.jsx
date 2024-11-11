@@ -124,12 +124,22 @@ const DetailCampaign = () => {
             toast.error('Không thể tạm ngưng chiến dịch. Vui lòng thử lại sau.');
         }
     };
+    // const handleDisbursement = async () => {
+    //     try {
+    //         setIsLoading(true);
+    //         await updateCampaignStatus(8);
+    //     } catch (error) {
+    //         toast.error('Không thể tiến hành giải ngân chiến dịch. Vui lòng thử lại sau.');
+    //     }
+    // };
 
 
     const showAcceptButton = campaignData.status === 0;
     const showRejectButton = campaignData.status === 0;
     const showCancelButton = [0, 1, 2, 4].includes(campaignData.status);
     const showPauseButton = campaignData.status === 8;
+    // const showDisbursementButton = campaignData.status === 9;
+
 
     return (
         <>
@@ -411,7 +421,40 @@ const DetailCampaign = () => {
                                             </AlertDialogContent>
                                         </AlertDialog>
                                     )}
-
+                                    {/* {showDisbursementButton && (
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                                                    Tiến hành giải ngân
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Xác nhận tiến hành giải ngân</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        Bạn có chắc chắn muốn tiến hành giải ngân chiến dịch này?
+                                                        Chiến dịch sẽ được chuyển sang trạng thái giải ngân.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Không</AlertDialogCancel>
+                                                    <AlertDialogAction
+                                                        onClick={handleDisbursement}
+                                                        disabled={isLoading}
+                                                    >
+                                                        {isLoading ? (
+                                                            <>
+                                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                                Đang xử lý
+                                                            </>
+                                                        ) : (
+                                                            'Xác nhận tiến hành giải ngân'
+                                                        )}
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    )} */}
                                     {showPauseButton && (
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>

@@ -24,7 +24,7 @@ const DisbursementReport = ({ disbursementReports }) => {
 
     const formatTabDate = (dateString) => {
         const date = new Date(dateString);
-        return `KH_${date.getDate()}_${date.getMonth() + 1}_${date.getFullYear()}_${date.getHours()}_${date.getMinutes()}`;
+        return `KH_${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}_${date.getHours()}:${date.getMinutes()}`;
     };
 
     const formatDate = (dateString) => {
@@ -57,7 +57,7 @@ const DisbursementReport = ({ disbursementReports }) => {
                         key={report.id}
                         value={report.id}
                         className="relative px-4 py-2 rounded-none transition-colors duration-200
-                        data-[state=active]:bg-transparent 
+                        data-[state=active]:bg-transparent
                         data-[state=active]:text-teal-500
                         hover:text-teal-500
                         after:content-['']
@@ -151,9 +151,16 @@ const DisbursementReport = ({ disbursementReports }) => {
                             </Table>
 
                             {report.rejectionReason && (
-                                <Alert variant="destructive" className="mt-4">
-                                    <AlertDescription>
-                                        Lý do từ chối: {report.rejectionReason}
+                                <Alert className="mt-4">
+                                    <AlertDescription className="flex flex-col gap-2">
+                                        <div className="text-red-500">
+                                            <span className="font-semibold">Lý do yêu cầu chỉnh sửa:</span>{' '}
+                                            {report.rejectionReason}
+                                        </div>
+                                        <div className="text-red-500 text-sm">
+                                            <span className="font-medium">Được yêu cầu bởi quản trị viên:</span>{' '}
+                                            {report.adminName}
+                                        </div>
                                     </AlertDescription>
                                 </Alert>
                             )}
