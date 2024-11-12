@@ -75,7 +75,6 @@ const DetailCampaign = () => {
                 rejectionReason: reason,
                 userID: user.userID,
             }).unwrap();
-
             toast.success('Cập nhật chiến dịch thành công');
             navigate('/campaigns');
         } catch (error) {
@@ -424,7 +423,7 @@ const DetailCampaign = () => {
                                             className="bg-yellow-600 hover:bg-yellow-700 text-white"
                                             onClick={() => setShowSuspendForm(true)}
                                         >
-                                            Tạm Ngưng
+                                            Tạo kế hoạch
                                         </Button>
                                     )}
                                 </>

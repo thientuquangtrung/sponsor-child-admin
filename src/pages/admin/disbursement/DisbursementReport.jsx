@@ -51,7 +51,7 @@ const DisbursementReport = ({ disbursementReports }) => {
 
     return (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="flex w-full max-w-[800px] bg-transparent">
+            <TabsList className="flex max-w-[800px] bg-transparent justify-start">
                 {sortedReports.map((report) => (
                     <TabsTrigger
                         key={report.id}
