@@ -247,7 +247,8 @@ const DisbursementPlanTabs = ({ disbursementPlans, navigate }) => {
                     defaultValue={currentPlan ? formatPlanName(currentPlan.plannedStartDate) : ''}
                     className="w-full"
                 >
-                    <TabsList className="grid bg-transparent" style={{
+
+                    <TabsList className="flex max-w-[800px]  bg-transparent justify-start" style={{
                         gridTemplateColumns: `repeat(${allPlans.length}, minmax(0, 1fr))`
                     }}>
                         {allPlans.map((plan) => (
@@ -272,6 +273,11 @@ const DisbursementPlanTabs = ({ disbursementPlans, navigate }) => {
                                 whitespace-nowrap"
                             >
                                 {formatPlanName(plan.plannedStartDate)}
+                                {plan.isCurrent && (
+                                    <span className="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded">
+                                        Hiện tại
+                                    </span>
+                                )}
                             </TabsTrigger>
                         ))}
                     </TabsList>

@@ -12,6 +12,17 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { useCreateCampaignDisbursementPlanMutation, useGetCampaignEstimatedDisbursementPlanQuery } from '@/redux/campaign/campaignApi';
 import { createDisbursementSchema } from '@/components/schema/disbursementSchema';
 import { formatNumber, parseNumber } from '@/lib/utils';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
     const { data: estimatedPlan, isLoading: isLoadingPlan } = useGetCampaignEstimatedDisbursementPlanQuery(id);
@@ -24,7 +35,7 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
     const {
         control,
         handleSubmit,
-        formState: { errors, isSubmitting },
+        formState: { errors, isSubmitting, isValid },
         reset,
         watch,
         trigger
@@ -32,7 +43,6 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
         resolver: zodResolver(formSchema),
         mode: 'onChange',
         reValidateMode: 'onChange',
-
         defaultValues: {
             plannedStartDate: new Date(),
             plannedEndDate: new Date(),
@@ -87,6 +97,8 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
             </div>
         );
     }
+
+
     return (
         <div className="mt-6">
             <Card className="shadow-lg border-0">
@@ -94,7 +106,7 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
                     <CardTitle className="text-2xl font-semibold">Cập Nhật Kế Hoạch Giải Ngân</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
-                    <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-6">
+                    <form onSubmit={handleSubmit(async () => { await onSubmitForm(data); })} className="space-y-6">
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
@@ -259,20 +271,42 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
                             >
                                 Hủy
                             </Button>
-                            <Button
-                                type="submit"
-                                className="bg-yellow-600 hover:bg-yellow-700 text-white h-12"
-                                disabled={isSubmitting}
-                            >
-                                {isSubmitting ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Đang xử lý
-                                    </>
-                                ) : (
-                                    'Xác nhận'
-                                )}
-                            </Button>
+
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button
+                                        type="button"
+                                        className="bg-yellow-600 hover:bg-yellow-700 text-white h-12"
+                                    >
+                                        Tạo
+                                    </Button>
+                                </AlertDialogTrigger>
+
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Xác nhận</AlertDialogTitle>
+                                    </AlertDialogHeader>
+                                    <AlertDialogDescription>
+                                        Hành động này sẽ tạo ra kế hoạch giải ngân mới và đồng thời chiến dịch này sẽ chưa có người bảo lãnh.
+                                    </AlertDialogDescription>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Hủy</AlertDialogCancel>
+                                        <AlertDialogAction
+                                            onClick={handleSubmit(onSubmitForm)}
+                                            className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                                        >
+                                            {isSubmitting ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Đang xử lý
+                                                </>
+                                            ) : (
+                                                'Xác nhận'
+                                            )}
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                         </div>
                     </form>
                 </CardContent>
