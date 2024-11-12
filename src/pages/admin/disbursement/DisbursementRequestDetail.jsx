@@ -152,7 +152,7 @@ export default function DisbursementRequestDetail() {
                 <h3 className="flex items-center justify-end">
                     <CircleUser className="mr-2" />
                     Nhà Bảo Lãnh:{' '}
-                    <span className="text-teal-500 ml-2 font-semibold">{disbursementRequest.guarantee.fullname}</span>
+                    <span className="text-teal-500 ml-2 font-semibold">{disbursementRequest.guarantee?.fullname}</span>
                 </h3>
             </div>
             <div className="p-6 bg-white rounded-lg shadow-lg">
