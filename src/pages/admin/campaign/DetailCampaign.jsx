@@ -27,16 +27,17 @@ import { useSelector } from 'react-redux';
 import ImageGallery from '@/pages/admin/campaign/ImageGallery';
 import ChildSearch from '@/pages/admin/campaign/ChildSearch';
 import DetailDisbursementPlan from '@/pages/admin/campaign/DetailDisbursementPlan';
+import CampaignSuspended from './CampaignSuspended';
 
 const DetailCampaign = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [rejectionReason, setRejectionReason] = useState('');
-    const { data: campaignData, isLoading: campaignLoading, isError: campaignError } = useGetCampaignByIdQuery(id);
+    const { data: campaignData, isLoading: campaignLoading, isError: campaignError, refetch } = useGetCampaignByIdQuery(id);
     const [updateStatus] = useUpdateCampaignMutation();
     const { user } = useSelector((state) => state.auth);
-
+    const [showSuspendForm, setShowSuspendForm] = useState(false);
 
     if (campaignLoading) {
         return <LoadingScreen />;
@@ -59,11 +60,10 @@ const DetailCampaign = () => {
         { name: 'Chi tiết chiến dịch', path: null },
     ];
 
-
     const updateCampaignStatus = async (newStatus, reason = '') => {
         try {
             setIsLoading(true);
-            const response = await updateStatus({
+            await updateStatus({
                 id,
                 guaranteeID: campaignData.guaranteeID,
                 title: campaignData.title,
@@ -78,7 +78,6 @@ const DetailCampaign = () => {
 
             toast.success('Cập nhật chiến dịch thành công');
             navigate('/campaigns');
-
         } catch (error) {
             console.error('Error updating campaign status:', error);
             toast.error(error.data?.message || 'Có lỗi xảy ra khi cập nhật trạng thái chiến dịch');
@@ -87,235 +86,233 @@ const DetailCampaign = () => {
         }
     };
 
-    const handleAccept = async () => {
-        try {
-            setIsLoading(true);
-            await updateCampaignStatus(1);
-        } catch (error) {
-            toast.error('Không thể chấp nhận đơn. Vui lòng thử lại sau.');
-        }
-    };
-
-
-
-    const handleReject = async () => {
-        try {
-            setIsLoading(true);
-            await updateCampaignStatus(3, rejectionReason);
-        } catch (error) {
-            toast.error('Không thể từ chối chiến dịch. Vui lòng thử lại sau.');
-        }
-    };
-
-    const handleCancel = async () => {
-        try {
-            setIsLoading(true);
-            await updateCampaignStatus(6, rejectionReason);
-        } catch (error) {
-            toast.error('Không thể hủy chiến dịch. Vui lòng thử lại sau.');
-        }
-    };
-
-    const handlePause = async () => {
-        try {
-            setIsLoading(true);
-            await updateCampaignStatus(9);
-        } catch (error) {
-            toast.error('Không thể tạm ngưng chiến dịch. Vui lòng thử lại sau.');
-        }
-    };
-    // const handleDisbursement = async () => {
-    //     try {
-    //         setIsLoading(true);
-    //         await updateCampaignStatus(8);
-    //     } catch (error) {
-    //         toast.error('Không thể tiến hành giải ngân chiến dịch. Vui lòng thử lại sau.');
-    //     }
-    // };
+    const handleAccept = () => updateCampaignStatus(1);
+    const handleReject = () => updateCampaignStatus(3, rejectionReason);
+    const handleCancel = () => updateCampaignStatus(6, rejectionReason);
 
 
     const showAcceptButton = campaignData.status === 0;
     const showRejectButton = campaignData.status === 0;
-    const showCancelButton = [0, 1, 2, 4].includes(campaignData.status);
+    const showCancelButton = [7, 8, 9].includes(campaignData.status);
     const showPauseButton = campaignData.status === 8;
-    // const showDisbursementButton = campaignData.status === 9;
-
 
     return (
-        <>
+        <div className="min-h-screen bg-gray-50">
             <Breadcrumb breadcrumbs={breadcrumbs} />
 
-            <div className="min-h-screen bg-gray-50">
-                <div className="p-6">
-                    <div className="flex justify-end items-center mb-6">
-                        <Button
-                            className="bg-teal-600 hover:bg-teal-700 text-white"
-                            onClick={() => navigate(`/campaign/edit/${id}`)}
-                        >
-                            <Pencil className="w-4 h-4 mr-2" />
-                            Cập nhật Chiến dịch
-                        </Button>
-                    </div>
+            <div className="p-6">
+                <div className="flex justify-end items-center mb-6">
+                    <Button
+                        className="bg-teal-600 hover:bg-teal-700 text-white"
+                        onClick={() => navigate(`/campaign/edit/${id}`)}
+                    >
+                        <Pencil className="w-4 h-4 mr-2" />
+                        Cập nhật Chiến dịch
+                    </Button>
+                </div>
 
-                    <div className="space-y-6 max-w-7xl mx-auto">
-                        <ChildSearch />
-                        <Card className="shadow-lg border-0 overflow-hidden">
+                <div className="space-y-6 max-w-7xl mx-auto">
+                    <ChildSearch />
+                    <Card className="shadow-lg border-0 overflow-hidden">
+                        <CardContent className="p-0">
+                            <ImageGallery
+                                thumbnailUrl={campaignData.thumbnailUrl}
+                                imagesFolderUrl={campaignData.imagesFolderUrl}
+                            />
+                        </CardContent>
+                    </Card>
 
-                            <CardContent className="p-0">
-                                <ImageGallery
-                                    thumbnailUrl={campaignData.thumbnailUrl}
-                                    imagesFolderUrl={campaignData.imagesFolderUrl}
+                    <Card className="shadow-lg border-0 mb-6">
+                        <CardHeader className="bg-teal-600 text-white">
+                            <CardTitle className="text-2xl font-semibold">Thông tin trẻ em</CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+                            <div className="md:col-span-2 flex justify-center mb-4">
+                                <FileViewer fileUrl={campaignData.childIdentificationInformationFile} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-lg font-medium text-gray-700">Họ và tên:</Label>
+                                <Input value={campaignData.childName} readOnly className="h-12 text-lg bg-gray-50" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-lg font-medium text-gray-700">Năm sinh:</Label>
+                                <Input value={campaignData.childBirthYear} readOnly className="h-12 text-lg bg-gray-50" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-lg font-medium text-gray-700">Giới tính:</Label>
+                                <Input
+                                    value={campaignData.childGender === 0 ? "Nam" : "Nữ"}
+                                    readOnly
+                                    className="h-12 text-lg bg-gray-50"
                                 />
-                            </CardContent>
-                        </Card>
-                        <Card className="shadow-lg border-0 mb-6">
-                            <CardHeader className="bg-teal-600 text-white">
-                                <CardTitle className="text-2xl font-semibold">Thông tin trẻ em</CardTitle>
-                            </CardHeader>
-                            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-                                <div className="md:col-span-2 flex justify-center mb-4">
-                                    <FileViewer fileUrl={campaignData.childIdentificationInformationFile} />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-lg font-medium text-gray-700">Họ và tên:</Label>
-                                    <Input value={campaignData.childName} readOnly className="h-12 text-lg bg-gray-50" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-lg font-medium text-gray-700">Năm sinh:</Label>
-                                    <Input value={campaignData.childBirthYear} readOnly className="h-12 text-lg bg-gray-50" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-lg font-medium text-gray-700">Giới tính:</Label>
-                                    <Input
-                                        value={campaignData.childGender === 0 ? "Nam" : "Nữ"}
-                                        readOnly
-                                        className="h-12 text-lg bg-gray-50"
-                                    />
-                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-lg font-medium text-gray-700">Địa chỉ:</Label>
+                                <Input
+                                    value={`${campaignData.childLocation}, ${campaignData.childWard}, ${campaignData.childDistrict}, ${campaignData.childProvince}`}
+                                    readOnly
+                                    className="h-12 text-lg bg-gray-50"
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
 
-                                <div className="space-y-2">
-                                    <Label className="text-lg font-medium text-gray-700">Địa chỉ:</Label>
-                                    <Input
-                                        value={`${campaignData.childLocation}, ${campaignData.childWard}, ${campaignData.childDistrict}, ${campaignData.childProvince}`}
-                                        readOnly
-                                        className="h-12 text-lg bg-gray-50"
-                                    />
-                                </div>
-                            </CardContent>
-                        </Card>
-                        <Card className="shadow-lg border-0">
-                            <CardHeader className="bg-teal-600 text-white">
-                                <CardTitle className="text-2xl font-semibold">Thông tin chiến dịch</CardTitle>
-                            </CardHeader>
-                            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-                                <div className="space-y-2  md:col-span-2">
-                                    <Label htmlFor="title" className="text-lg font-medium text-gray-700">Tiêu đề:</Label>
-                                    <Input id="title" value={campaignData.title} readOnly className="h-12 text-lg bg-gray-50" />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="targetAmount" className="text-lg font-medium text-gray-700">Số tiền kêu gọi:</Label>
-                                    <Input id="targetAmount" value={`${campaignData.targetAmount.toLocaleString()} VNĐ`} readOnly className="h-12 text-lg bg-gray-50" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="raisedAmount" className="text-lg font-medium text-gray-700">Số tiền đã kêu gọi:</Label>
-                                    <Input id="raisedAmount" value={`${campaignData.raisedAmount.toLocaleString()} VNĐ`} readOnly className="h-12 text-lg bg-gray-50" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="campaignType" className="text-lg font-medium text-gray-700">Loại chiến dịch:</Label>
-                                    <Input id="campaignType" value={campaignTypeObj?.label || ''} readOnly className="h-12 text-lg bg-gray-50" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="status" className="text-lg font-medium text-gray-700">Trạng thái:</Label>
-                                    <div className="flex items-center h-12">
-                                        <span className={`px-4 py-2 rounded-full text-sm font-semibold
+                    <Card className="shadow-lg border-0">
+                        <CardHeader className="bg-teal-600 text-white">
+                            <CardTitle className="text-2xl font-semibold">Thông tin chiến dịch</CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+                            <div className="space-y-2 md:col-span-2">
+                                <Label htmlFor="title" className="text-lg font-medium text-gray-700">Tiêu đề:</Label>
+                                <Input id="title" value={campaignData.title} readOnly className="h-12 text-lg bg-gray-50" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="targetAmount" className="text-lg font-medium text-gray-700">
+                                    Số tiền kêu gọi:
+                                </Label>
+                                <Input
+                                    id="targetAmount"
+                                    value={`${campaignData.targetAmount.toLocaleString()} VNĐ`}
+                                    readOnly
+                                    className="h-12 text-lg bg-gray-50"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="raisedAmount" className="text-lg font-medium text-gray-700">
+                                    Số tiền đã kêu gọi:
+                                </Label>
+                                <Input
+                                    id="raisedAmount"
+                                    value={`${campaignData.raisedAmount.toLocaleString()} VNĐ`}
+                                    readOnly
+                                    className="h-12 text-lg bg-gray-50"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="campaignType" className="text-lg font-medium text-gray-700">
+                                    Loại chiến dịch:
+                                </Label>
+                                <Input
+                                    id="campaignType"
+                                    value={campaignTypeObj?.label || ''}
+                                    readOnly
+                                    className="h-12 text-lg bg-gray-50"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="status" className="text-lg font-medium text-gray-700">Trạng thái:</Label>
+                                <div className="flex items-center h-12">
+                                    <span className={`px-4 py-2 rounded-full text-sm font-semibold
                                         ${campaignData.status === 0 ? 'bg-blue-300 text-blue-800' :
-                                                campaignData.status === 1 ? 'bg-yellow-300 text-yellow-800' :
-                                                    campaignData.status === 2 ? 'bg-teal-300 text-teal-800' :
-                                                        campaignData.status === 3 ? 'bg-red-300 text-red-800' :
-                                                            campaignData.status === 4 ? 'bg-green-300 text-green-800' :
-
-                                                                'bg-rose-100 text-rose-800'}`}>
-                                            {campaignStatusObj?.label || ''}
-                                        </span>
-                                    </div>
+                                            campaignData.status === 1 ? 'bg-yellow-300 text-yellow-800' :
+                                                campaignData.status === 2 ? 'bg-teal-300 text-teal-800' :
+                                                    campaignData.status === 3 ? 'bg-red-300 text-red-800' :
+                                                        campaignData.status === 4 ? 'bg-green-300 text-green-800' :
+                                                            'bg-rose-100 text-rose-800'}`}>
+                                        {campaignStatusObj?.label || ''}
+                                    </span>
                                 </div>
-
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="startDate" className="text-lg font-medium text-gray-700">Ngày bắt đầu:</Label>
-                                    <Input id="startDate" value={new Date(campaignData.startDate).toLocaleDateString('vi-VN')} readOnly className="h-12 text-lg bg-gray-50" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="endDate" className="text-lg font-medium text-gray-700">Ngày kết thúc:</Label>
-                                    <Input id="endDate" value={new Date(campaignData.endDate).toLocaleDateString('vi-VN')} readOnly className="h-12 text-lg bg-gray-50" />
-                                </div>
-                            </CardContent>
-                        </Card>
-                        <Card className="shadow-lg border-0">
-                            <CardHeader className="bg-teal-600 text-white">
-                                <CardTitle className="text-2xl font-semibold">Thông tin bảo lãnh</CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-6">
-                                {campaignData.guaranteeName ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="guaranteeName" className="text-lg font-medium text-gray-700">
-                                                Tên đơn vị bảo lãnh:
-                                            </Label>
-                                            <Input
-                                                id="guaranteeName"
-                                                value={campaignData.guaranteeName}
-                                                readOnly
-                                                className="h-12 text-lg bg-gray-50"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="guaranteeType" className="text-lg font-medium text-gray-700">
-                                                Loại đơn vị bảo lãnh:
-                                            </Label>
-                                            <Input
-                                                id="guaranteeType"
-                                                value={guaranteeTypeObj?.label || ''}
-                                                readOnly
-                                                className="h-12 text-lg bg-gray-50"
-                                            />
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-4">
-                                        <p className="text-lg text-gray-600">Chưa có Bảo Lãnh</p>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-                        <Card className="shadow-lg border-0">
-                            <CardHeader className="bg-teal-600 text-white">
-                                <CardTitle className="text-2xl font-semibold">Câu chuyện</CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-6">
-                                <div
-                                    className="prose max-w-none text-lg bg-white rounded-lg p-6"
-                                    dangerouslySetInnerHTML={{ __html: campaignData.story }}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="startDate" className="text-lg font-medium text-gray-700">
+                                    Ngày bắt đầu:
+                                </Label>
+                                <Input
+                                    id="startDate"
+                                    value={new Date(campaignData.startDate).toLocaleDateString('vi-VN')}
+                                    readOnly
+                                    className="h-12 text-lg bg-gray-50"
                                 />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="endDate" className="text-lg font-medium text-gray-700">
+                                    Ngày kết thúc:
+                                </Label>
+                                <Input
+                                    id="endDate"
+                                    value={new Date(campaignData.endDate).toLocaleDateString('vi-VN')}
+                                    readOnly
+                                    className="h-12 text-lg bg-gray-50"
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="shadow-lg border-0">
+                        <CardHeader className="bg-teal-600 text-white">
+                            <CardTitle className="text-2xl font-semibold">Thông tin bảo lãnh</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-6">
+                            {campaignData.guaranteeName ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="guaranteeName" className="text-lg font-medium text-gray-700">
+                                            Tên đơn vị bảo lãnh:
+                                        </Label>
+                                        <Input
+                                            id="guaranteeName"
+                                            value={campaignData.guaranteeName}
+                                            readOnly
+                                            className="h-12 text-lg bg-gray-50"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="guaranteeType" className="text-lg font-medium text-gray-700">
+                                            Loại đơn vị bảo lãnh:
+                                        </Label>
+                                        <Input
+                                            id="guaranteeType"
+                                            value={guaranteeTypeObj?.label || ''}
+                                            readOnly
+                                            className="h-12 text-lg bg-gray-50"
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="text-center py-4">
+                                    <p className="text-lg text-gray-600">Chưa có Bảo Lãnh</p>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                    <Card className="shadow-lg border-0">
+                        <CardHeader className="bg-teal-600 text-white">
+                            <CardTitle className="text-2xl font-semibold">Câu chuyện</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-6">
+                            <div
+                                className="prose max-w-none text-lg bg-white rounded-lg p-6"
+                                dangerouslySetInnerHTML={{ __html: campaignData.story }}
+                            />
+                        </CardContent>
+                    </Card>
+
+                    <DetailDisbursementPlan disbursementPlans={disbursementPlans} />
+
+                    {campaignData.rejectionReason && (
+                        <Card className="shadow-lg border-0">
+                            <CardHeader className="bg-teal-600 text-white">
+                                <CardTitle className="text-2xl font-semibold">Lý do từ chối</CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-6">
+                                <div className="bg-red-50 text-red-800 p-4 rounded-lg whitespace-pre-line">
+                                    {campaignData.rejectionReason}
+                                </div>
                             </CardContent>
                         </Card>
+                    )}
 
-
-                        <DetailDisbursementPlan disbursementPlans={disbursementPlans} />
-
-                        {campaignData.rejectionReason && (
-                            <Card className="shadow-lg border-0">
-                                <CardHeader className="bg-teal-600 text-white">
-                                    <CardTitle className="text-2xl font-semibold">Lý do từ chối</CardTitle>
-                                </CardHeader>
-                                <CardContent className="p-6">
-                                    <div className="bg-red-50 text-red-800 p-4 rounded-lg whitespace-pre-line">
-                                        {campaignData.rejectionReason}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )}
+                    {showSuspendForm ? (
+                        <CampaignSuspended
+                            id={id}
+                            userID={user.userID}
+                            onCancel={() => setShowSuspendForm(false)}
+                            onSuccess={() => {
+                                setShowSuspendForm(false);
+                                refetch();
+                            }}
+                        />
+                    ) : (
                         <div className="mt-6 flex justify-end space-x-4">
                             {campaignData?.guaranteeName && (
                                 <>
@@ -421,81 +418,22 @@ const DetailCampaign = () => {
                                             </AlertDialogContent>
                                         </AlertDialog>
                                     )}
-                                    {/* {showDisbursementButton && (
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button className="bg-purple-600 hover:bg-purple-700 text-white">
-                                                    Tiến hành giải ngân
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Xác nhận tiến hành giải ngân</AlertDialogTitle>
-                                                    <AlertDialogDescription>
-                                                        Bạn có chắc chắn muốn tiến hành giải ngân chiến dịch này?
-                                                        Chiến dịch sẽ được chuyển sang trạng thái giải ngân.
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Không</AlertDialogCancel>
-                                                    <AlertDialogAction
-                                                        onClick={handleDisbursement}
-                                                        disabled={isLoading}
-                                                    >
-                                                        {isLoading ? (
-                                                            <>
-                                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                                Đang xử lý
-                                                            </>
-                                                        ) : (
-                                                            'Xác nhận tiến hành giải ngân'
-                                                        )}
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    )} */}
+
                                     {showPauseButton && (
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button className="bg-yellow-600 hover:bg-yellow-700 text-white">
-                                                    Tạm Ngưng
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Xác nhận tạm ngưng</AlertDialogTitle>
-                                                    <AlertDialogDescription>
-                                                        Bạn có chắc chắn muốn tạm ngưng chiến dịch này?
-                                                        Chiến dịch sẽ được chuyển sang trạng thái tạm ngưng.
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Không</AlertDialogCancel>
-                                                    <AlertDialogAction
-                                                        onClick={handlePause}
-                                                        disabled={isLoading}
-                                                    >
-                                                        {isLoading ? (
-                                                            <>
-                                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                                Đang xử lý
-                                                            </>
-                                                        ) : (
-                                                            'Xác nhận tạm ngưng'
-                                                        )}
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
+                                        <Button
+                                            className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                                            onClick={() => setShowSuspendForm(true)}
+                                        >
+                                            Tạm Ngưng
+                                        </Button>
                                     )}
                                 </>
                             )}
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
-        </>
+        </div>
     );
 };
 
