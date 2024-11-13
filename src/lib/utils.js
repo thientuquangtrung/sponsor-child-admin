@@ -44,9 +44,24 @@ export function humanFileSize(bytes, si = true, dp = 1) {
  * @returns {string} The formatted number string with commas
  */
 export const formatNumber = (value) => {
-    return value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    if (value === null || value === undefined) return '';
+    const numberString = value.toString();
+    const [integer, decimal] = numberString.split('.');
+    const formattedInteger = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return decimal ? `${formattedInteger}.${decimal}` : formattedInteger;
 };
 
+/**
+ * Parses a formatted number string back to a number
+ * @param {string} value - The formatted number string to parse
+ * @returns {number} The parsed number
+ */
+export const parseNumber = (value) => {
+    if (!value) return 0;
+    // Remove all commas and convert to number
+    const parsed = Number(value.toString().replace(/,/g, ''));
+    return isNaN(parsed) ? 0 : parsed;
+};
 /**
  * Formats an amount as VND currency
  * @param {number} amount - The amount to format

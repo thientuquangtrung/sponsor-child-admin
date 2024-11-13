@@ -8,6 +8,10 @@ export const campaignApi = baseApi.injectEndpoints({
         getCampaignById: builder.query({
             query: (id) => `/campaign/${id}`,
         }),
+
+        getCampaignEstimatedDisbursementPlan: builder.query({
+            query: (id) => `/campaign/${id}/estimated-disbursement-plan`,
+        }),
         createCampaign: builder.mutation({
             query: (data) => ({
                 url: '/campaign',
@@ -15,6 +19,17 @@ export const campaignApi = baseApi.injectEndpoints({
                 body: data,
             }),
         }),
+        createCampaignDisbursementPlan: builder.mutation({
+            query: ({ campaignId, ...data }) => ({
+                url: `/campaign/${campaignId}/create-disbursement-plan`,
+                method: 'POST',
+                body: data,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }),
+        }),
+
         updateCampaign: builder.mutation({
             query: ({ id, ...data }) => ({
                 url: `/campaign/update/${id}`,
@@ -66,4 +81,6 @@ export const {
     useDeleteCampaignMutation,
     useFilterAdminCampaignsQuery,
     useSearchCampaignsQuery,
+    useGetCampaignEstimatedDisbursementPlanQuery,
+    useCreateCampaignDisbursementPlanMutation,
 } = campaignApi;

@@ -58,7 +58,7 @@ const DisbursementApproval = ({ disbursementRequest, parentRefetch }) => {
                 stageId: disbursementRequest.disbursementStage.stageID,
                 body: {
                     status: 2,
-                    actualDisbursementAmount: disbursementRequest.disbursementStage.disbursementAmount || 0,
+                    actualDisbursementAmount: disbursementRequest.disbursementStage.actualDisbursementAmount || 0,
                     transferReceiptUrl: uploadResult.secure_url,
                 },
             }).unwrap();
@@ -88,7 +88,7 @@ const DisbursementApproval = ({ disbursementRequest, parentRefetch }) => {
                         Số tiền giải ngân:
                     </p>
                     <p className="text-teal-500 font-medium ml-4">
-                        {disbursementRequest.disbursementStage.disbursementAmount.toLocaleString('vi-VN')} VND
+                        {disbursementRequest?.disbursementStage?.actualDisbursementAmount?.toLocaleString('vi-VN')} VNĐ
                     </p>
                 </div>
 
