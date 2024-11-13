@@ -69,6 +69,17 @@ export const campaignApi = baseApi.injectEndpoints({
                 }
             }),
         }),
+        cancelCampaign: builder.mutation({
+            query: ({ campaignId, data }) => ({
+                url: `/campaign/cancel/${campaignId}`,
+                method: 'PUT',
+                body: data,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }),
+        }),
+
     }),
 });
 
@@ -83,4 +94,5 @@ export const {
     useSearchCampaignsQuery,
     useGetCampaignEstimatedDisbursementPlanQuery,
     useCreateCampaignDisbursementPlanMutation,
+    useCancelCampaignMutation,
 } = campaignApi;
