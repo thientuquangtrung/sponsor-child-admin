@@ -282,13 +282,21 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
                                     </Button>
                                 </AlertDialogTrigger>
 
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>Xác nhận</AlertDialogTitle>
+                                <AlertDialogContent className="bg-white p-6 rounded-lg shadow-lg">
+                                    <AlertDialogHeader className="border-b pb-2 mb-4">
+                                        <AlertDialogTitle className="text-xl font-semibold text-gray-800">
+                                            Xác nhận
+                                        </AlertDialogTitle>
                                     </AlertDialogHeader>
-                                    <AlertDialogDescription>
-                                        Hành động này sẽ tạo ra kế hoạch giải ngân mới và đồng thời chiến dịch này sẽ chưa có người bảo lãnh.
+                                    <AlertDialogDescription className="space-y-4">
+                                        <p className="text-gray-700">
+                                            - Hành động này sẽ tạm ngưng chiến dịch.
+                                        </p>
+                                        <p className="text-gray-700">
+                                            - Chiến dịch này sẽ tạm thời không có người bảo lãnh cho đến khi có người bảo lãnh mới.
+                                        </p>
                                     </AlertDialogDescription>
+
                                     <AlertDialogFooter>
                                         <AlertDialogCancel>Hủy</AlertDialogCancel>
                                         <AlertDialogAction
@@ -311,7 +319,7 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
                     </form>
                 </CardContent>
             </Card>
-        </div>
+        </div >
     );
 };
 

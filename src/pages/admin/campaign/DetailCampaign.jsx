@@ -391,7 +391,7 @@ const DetailCampaign = () => {
                                             className="bg-yellow-600 hover:bg-yellow-700 text-white"
                                             onClick={() => setShowSuspendForm(true)}
                                         >
-                                            Tạo kế hoạch
+                                            Tạo ngưng chiến dịch
                                         </Button>
                                     )}
                                 </>
