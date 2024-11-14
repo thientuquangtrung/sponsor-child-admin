@@ -137,6 +137,7 @@ export const visitStatus = [
     { label: 'Đã hoãn', value: 6 },
 ];
 
+
 export const transactionStatus = [
     { label: 'Đang chờ', value: 0 },
     { label: 'Thành công', value: 1 },
@@ -150,3 +151,9 @@ export const transactionType = [
     { label: 'Hoàn tiền', value: 2 },
 ];
 
+
+export const fundSourceType = [
+    { label: 'Cá nhân', value: 0 },
+    { label: 'Chiến dịch', value: 1 },
+    { label: 'Khác', value: 2 },
+];
