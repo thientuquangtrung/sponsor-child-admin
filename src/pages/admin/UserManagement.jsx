@@ -35,8 +35,11 @@ import { DataTablePagination } from '@/components/datatable/DataTablePagination'
 import { DataTableColumnHeader } from '@/components/datatable/DataTableColumnHeader';
 import { DataTableToolbarAdmin } from '@/components/datatable/DataTableToolbarAdmin';
 import Breadcrumb from '@/pages/admin/Breadcrumb';
-import { useGetUserQuery } from '@/redux/user/userApi';
-import { useNavigate } from 'react-router-dom';
+import { useDeleteUserMutation, useGetUserQuery } from '@/redux/user/userApi';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Textarea } from '@/components/ui/textarea';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 const roleColors = {
     Guarantee: 'bg-rose-100 text-rose-400',
@@ -101,9 +104,9 @@ const columns = [
             return <Badge className={colorClass}>{displayRole}</Badge>;
         },
         filterFn: (row, id, value) => {
-            const role = getRoleDisplay(row.getValue(id)).displayRole; 
+            const role = getRoleDisplay(row.getValue(id)).displayRole;
             return value.includes(role);
-        }
+        },
     },
 
     {
@@ -114,9 +117,28 @@ const columns = [
 
 const ActionMenu = ({ row }) => {
     const navigate = useNavigate();
-    const handleDelete = (e) => {
-        console.log(row);
+    const [deleteReason, setDeleteReason] = useState('');
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [deleteUser] = useDeleteUserMutation();
+
+    const handleDelete = async () => {
+        if (row.original.role === 'Admin') {
+            toast.warning('Không thể vô hiệu hóa tài khoản Admin.');
+            setIsDialogOpen(false);
+            return;
+        }
+
+        try {
+            // Call deleteUser API with user ID and reason
+            await deleteUser({ id: row.original.userID, rejectionReason: deleteReason });
+            setIsDialogOpen(false);
+            toast.success('Tài khoản đã bị vô hiệu hóa!');
+        } catch (error) {
+            console.error('Error disabling user:', error);
+            toast.error('Vô hiệu hóa tài khoản thất bại!');
+        }
     };
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -132,28 +154,34 @@ const ActionMenu = ({ row }) => {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
 
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <DropdownMenuItem
-                                onSelect={(e) => e.preventDefault()}
-                                className="text-destructive focus:text-destructive"
-                            >
-                                Delete asset
-                            </DropdownMenuItem>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete your asset.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+                <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <AlertDialogTrigger asChild>
+                        <DropdownMenuItem
+                            onSelect={(e) => e.preventDefault()}
+                            className="text-destructive focus:text-destructive"
+                        >
+                            Xóa tài khoản
+                        </DropdownMenuItem>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Bạn muốn xóa người dùng?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Hành động này sẽ vô hiệu hóa người dùng. Vui lòng cung cấp lý do vô hiệu hóa tài khoản này.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <Textarea
+                            className="w-full p-2 border rounded"
+                            placeholder="Nhập lý do vô hiệu hóa"
+                            value={deleteReason}
+                            onChange={(e) => setDeleteReason(e.target.value)}
+                        />
+                        <AlertDialogFooter>
+                            <AlertDialogCancel onClick={() => setIsDialogOpen(false)} className="hover:bg-gray-200">Trở lại</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleDelete} className="bg-red-500 text-white hover:bg-red-600">Xóa</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </DropdownMenuContent>
         </DropdownMenu>
     );
