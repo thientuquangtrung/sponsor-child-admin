@@ -60,6 +60,7 @@
     "react-signature-canvas": "^1.0.6",
     "react-slick": "^0.30.2",
     "react-wrap-balancer": "^1.1.1",
+    "recharts": "^2.13.3",
     "redux-persist": "^6.0.0",
     "redux-persist-transform-encrypt": "^5.1.1",
     "slick-carousel": "^1.8.1",

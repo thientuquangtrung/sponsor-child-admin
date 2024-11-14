@@ -17,7 +17,8 @@ import {
     ChevronDown,
     ChevronUp,
     Telescope,
-    CircleDollarSign
+    CircleDollarSign,
+    PiggyBank
 } from "lucide-react";
 
 const menuItems = [
@@ -28,9 +29,10 @@ const menuItems = [
         label: 'Tài chính',
         path: '/finance',
         subItems: [
+            { icon: PiggyBank, label: 'Quỹ chung', path: '/funds' },
             { icon: ReceiptText, label: 'Giao dịch', path: '/finance/transactions' },
             { icon: CircleDollarSign, label: 'Giải ngân', path: '/disbursement-requests' },
-            { icon: MessageSquareDot, label: 'Báo cáo', path: '/disbursement-reports' }
+            { icon: MessageSquareDot, label: 'Báo cáo', path: '/disbursement-reports' },
         ]
     },
     { icon: SquareUser, label: "Người dùng", path: "/users" },
