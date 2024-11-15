@@ -260,7 +260,8 @@ const Toolbar = ({ table, onFilterChange }) => {
 };
 
 const FundSourceTable = ({ data, onFilterChange }) => {
-    const [sorting, setSorting] = React.useState([]);
+    const [sorting, setSorting] = React.useState([{ id: 'dateAdded', desc: true }]);
+
     const [columnFilters, setColumnFilters] = React.useState([]);
     const [columnVisibility, setColumnVisibility] = React.useState({});
     const [rowSelection, setRowSelection] = React.useState({});

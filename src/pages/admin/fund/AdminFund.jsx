@@ -5,7 +5,7 @@ import LoadingScreen from '@/components/common/LoadingScreen';
 import { useGetAllFundSourcesQuery, useGetAllFundUsageHistoryQuery, useGetCommonFundsQuery } from '@/redux/fund/fundApi';
 import FundSourceTable from '@/pages/admin/fund/FundSourceTable';
 import FundUsageTable from '@/pages/admin/fund/FundUsageTable';
-import { WalletIcon } from 'lucide-react';
+import { PiggyBank, WalletIcon } from 'lucide-react';
 import { ChartFund } from '@/pages/admin/fund/ChartFund';
 
 export function AdminFund() {
@@ -64,16 +64,35 @@ export function AdminFund() {
         <>
             <div className="grid grid-cols-1 gap-4">
                 <Breadcrumb breadcrumbs={breadcrumbs} />
-                <div className="flex justify-center items-center bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
-                    <div className="flex items-center gap-2">
-                        <WalletIcon className="w-6 h-6 text-teal-500" />
-                        <div className="text-2xl font-bold text-green-600 text-center">
-                            Tổng quỹ: {totalFund} ₫
+                <div className="grid grid-cols-10 gap-4">
+                    <div className="col-span-7">
+                        <ChartFund />
+                    </div>
+
+                    <div className="col-span-3">
+                        <div className="h-full w-full p-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-br from-white to-gray-50">
+                            <div className="h-full flex flex-col justify-center bg-white p-6 rounded-lg border border-gray-100">
+                                <div className="space-y-4">
+                                    <div className="flex justify-center">
+                                        <PiggyBank className="w-16 h-16 text-yellow-500" />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <div className="text-lg text-gray-600 font-medium text-center">
+                                            Tổng quỹ hiện tại
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-[1.5rem] md:text-2xl lg:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-green-500 break-words overflow-hidden text-ellipsis leading-tight max-w-full">
+                                                {totalFund} ₫
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-
                 <Tabs defaultValue="sources" className="w-full" onValueChange={handleTabChange}>
                     <TabsList className="grid w-full max-w-[400px] grid-cols-2 bg-transparent">
                         <TabsTrigger value="sources" className="relative px-4 py-2 rounded-none transition-colors duration-200
@@ -142,9 +161,7 @@ export function AdminFund() {
                         />
                     </TabsContent>
                 </Tabs>
-                <div className='py-12'>
-                    <ChartFund />
-                </div>
+
             </div>
         </>
     );

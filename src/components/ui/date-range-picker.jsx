@@ -146,14 +146,14 @@ function DateRangePicker({ className, onRangeChange }) {
     }
 
     return (
-        <div className={cn("grid gap-2", className)}>
+        <div className={cn("grid gap-2 place-items-center", className)}>
             <Popover>
                 <PopoverTrigger asChild>
                     <Button
                         id="date"
                         variant="outline"
                         className={cn(
-                            "w-[300px] justify-start text-left font-normal",
+                            "w-[280px] justify-center text-center font-medium",
                             !date && "text-muted-foreground"
                         )}
                     >
@@ -172,7 +172,7 @@ function DateRangePicker({ className, onRangeChange }) {
                         )}
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-fit p-0" align="start">
+                <PopoverContent className="w-fit p-0" align="center">
                     <Calendar
                         mode="range"
                         defaultMonth={date?.from}
