@@ -23,6 +23,7 @@ import { DataTableColumnHeader } from '@/components/datatable/DataTableColumnHea
 import Breadcrumb from '@/pages/admin/Breadcrumb';
 import { transactionType, transactionStatus } from '@/config/combobox';
 import { useGetTransactionQuery } from '@/redux/transaction/transactionApi';
+import ToolbarForTransaction from '@/components/datatable/ToolbarForTransaction';
 
 // Helper functions to get the label based on value
 const getTransactionTypeLabel = (value) => {
@@ -46,7 +47,6 @@ const columns = [
         header: ({ column }) => <DataTableColumnHeader column={column} title="Ngày giao dịch" />,
         cell: ({ row }) => <div>{new Date(row.getValue('transactionDate')).toLocaleDateString('vi-VN')}</div>,
     },
-
     {
         accessorKey: 'amount',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Số tiền" />,
@@ -137,7 +137,7 @@ const ActionMenu = ({ row }) => {
 export function FinanceTransaction() {
     const navigate = useNavigate();
     const { data: transactionData = [], isLoading } = useGetTransactionQuery();
-    const [sorting, setSorting] = React.useState([]);
+    const [sorting, setSorting] = React.useState([{ id: 'transactionDate', desc: true }]); // Sắp xếp giảm dần theo ngày
     const [columnFilters, setColumnFilters] = React.useState([]);
     const [columnVisibility, setColumnVisibility] = React.useState({});
     const [rowSelection, setRowSelection] = React.useState({});
@@ -180,6 +180,7 @@ export function FinanceTransaction() {
                         Export Transaction
                     </Button>
                 </div>
+                <ToolbarForTransaction table={table} />
                 <div className="rounded-md border">
                     <Table>
                         <TableHeader className="bg-gradient-to-r from-rose-200 to-primary">
