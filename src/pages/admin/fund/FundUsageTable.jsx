@@ -13,13 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { DataTablePagination } from '@/components/datatable/DataTablePagination';
 import { DataTableColumnHeader } from '@/components/datatable/DataTableColumnHeader';
 import { useNavigate } from 'react-router-dom';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Eye, MoreHorizontal, Search } from 'lucide-react';
@@ -28,6 +22,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { formatNumber } from '@/lib/utils';
+import useDebounce from '@/hooks/useDebounce';
 
 const columns = [
     {
@@ -49,7 +44,6 @@ const columns = [
             />
         ),
         enableSorting: false,
-        enableHiding: false,
     },
     {
         accessorKey: 'campaignTitle',
@@ -62,40 +56,19 @@ const columns = [
         cell: ({ row }) => (
             <div className="text-right">{row.getValue('amountUsed').toLocaleString('vi-VN')} ₫</div>
         ),
-        filterFn: (row, columnId, filterValue) => {
-            if (!filterValue) return true;
-            const rowValue = row.getValue(columnId);
-            const filterNumber = parseInt(filterValue, 10);
-            return rowValue === filterNumber;
-        }
     },
     {
         accessorKey: 'dateUsed',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Ngày sử dụng" />,
         cell: ({ row }) => {
             const date = parseISO(row.getValue('dateUsed'));
-            return (
-                <div>{format(date, 'dd/MM/yyyy', { locale: vi })}</div>
-            );
-        },
-        sortingFn: (rowA, rowB) => {
-            const dateA = new Date(rowA.getValue('dateUsed'));
-            const dateB = new Date(rowB.getValue('dateUsed'));
-            return dateB.getTime() - dateA.getTime();
+            return <div>{format(date, 'dd/MM/yyyy', { locale: vi })}</div>;
         },
     },
     {
         accessorKey: 'purpose',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Mục đích" />,
-        cell: ({ row }) => (
-            <div className="max-w-[300px] truncate">{row.getValue('purpose')}</div>
-        ),
-        filterFn: (row, columnId, filterValue) => {
-            if (!filterValue) return true;
-            const rowValue = row.getValue(columnId)?.toString().toLowerCase() || '';
-            const searchValue = filterValue.toLowerCase();
-            return rowValue.includes(searchValue);
-        }
+        cell: ({ row }) => <div className="max-w-[300px] truncate">{row.getValue('purpose')}</div>,
     },
     {
         accessorKey: 'adminName',
@@ -134,51 +107,67 @@ const Toolbar = ({ table, onFilterChange }) => {
     const isFiltered = table.getState().columnFilters.length > 0;
     const [selectedDate, setSelectedDate] = React.useState(null);
     const [formattedAmount, setFormattedAmount] = React.useState('');
+    const [purposeSearch, setPurposeSearch] = React.useState('');
 
+    const debouncedPurposeSearch = useDebounce(purposeSearch, 1000);
 
+    React.useEffect(() => {
+        handlePurposeChange(debouncedPurposeSearch);
+    }, [debouncedPurposeSearch]);
 
-    const unformatNumber = (value) => {
-        if (!value) return '';
-        return value.replace(/,/g, '');
+    const handlePurposeInputChange = (e) => {
+        setPurposeSearch(e.target.value);
     };
+
     const handlePurposeChange = React.useCallback((value) => {
-        table.getColumn('purpose')?.setFilterValue(value);
         onFilterChange({
+            ...table.getState().columnFilters.reduce((acc, filter) => {
+                if (filter.id !== 'purpose') {
+                    acc[filter.id] = filter.value;
+                }
+                return acc;
+            }, {}),
             purpose: value || undefined
         });
-    }, [table, onFilterChange]);
+    }, [onFilterChange]);
+
+    const unformatNumber = (value) => value.replace(/,/g, '');
 
     const handleAmountChange = React.useCallback((e) => {
         const value = unformatNumber(e.target.value);
         if (value === '' || /^\d+$/.test(value)) {
             setFormattedAmount(formatNumber(value));
             const numericValue = value ? parseInt(value, 10) : undefined;
-            table.getColumn('amountUsed')?.setFilterValue(numericValue);
             onFilterChange({
+                ...table.getState().columnFilters.reduce((acc, filter) => {
+                    if (filter.id !== 'amountUsed') {
+                        acc[filter.id] = filter.value;
+                    }
+                    return acc;
+                }, {}),
                 amountUsed: numericValue
             });
         }
-    }, [table, onFilterChange]);
+    }, [onFilterChange]);
+
     const handleDateChange = (value) => {
         setSelectedDate(value);
-        if (value) {
-            const localDate = new Date(value.getFullYear(), value.getMonth(), value.getDate());
-            const formattedDate = format(localDate, 'yyyy-MM-dd');
-            table.getColumn('dateUsed')?.setFilterValue(formattedDate);
-            onFilterChange({
-                dateUsed: formattedDate
-            });
-        } else {
-            table.getColumn('dateUsed')?.setFilterValue(undefined);
-            onFilterChange({
-                dateUsed: undefined
-            });
-        }
+        const formattedDate = value ? format(value, 'yyyy-MM-dd') : undefined;
+        onFilterChange({
+            ...table.getState().columnFilters.reduce((acc, filter) => {
+                if (filter.id !== 'dateUsed') {
+                    acc[filter.id] = filter.value;
+                }
+                return acc;
+            }, {}),
+            dateUsed: formattedDate
+        });
     };
 
     const handleResetFilters = () => {
         setSelectedDate(null);
-        table.resetColumnFilters();
+        setPurposeSearch('');
+        setFormattedAmount('');
         onFilterChange({});
     };
 
@@ -187,15 +176,15 @@ const Toolbar = ({ table, onFilterChange }) => {
             <div className="flex flex-1 flex-col sm:flex-row gap-4 items-start sm:items-center">
                 <Input
                     placeholder="Tìm theo mục đích..."
-                    value={table.getColumn('purpose')?.getFilterValue() ?? ''}
-                    onChange={(e) => handlePurposeChange(e.target.value)}
+                    value={purposeSearch}
+                    onChange={handlePurposeInputChange}
                     className="max-w-sm"
                     endIcon={<Search className="h-4 w-4" />}
                 />
                 <Input
                     placeholder="Lọc theo số tiền..."
                     value={formattedAmount}
-                    onChange={(e) => handleAmountChange(e)}
+                    onChange={handleAmountChange}
                     className="max-w-[200px]"
                 />
                 <DatePicker
@@ -220,12 +209,8 @@ const Toolbar = ({ table, onFilterChange }) => {
 };
 
 const FundUsageTable = ({ data, onFilterChange }) => {
-    const [sorting, setSorting] = React.useState([
-        { id: 'dateUsed', desc: false }
-    ]);
+    const [sorting, setSorting] = React.useState([{ id: 'dateUsed', desc: true }]);
     const [columnFilters, setColumnFilters] = React.useState([]);
-    const [columnVisibility, setColumnVisibility] = React.useState({});
-    const [rowSelection, setRowSelection] = React.useState({});
 
     const table = useReactTable({
         data: data || [],
@@ -236,13 +221,9 @@ const FundUsageTable = ({ data, onFilterChange }) => {
         getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        onColumnVisibilityChange: setColumnVisibility,
-        onRowSelectionChange: setRowSelection,
         state: {
             sorting,
             columnFilters,
-            columnVisibility,
-            rowSelection,
         },
     });
 
@@ -265,7 +246,7 @@ const FundUsageTable = ({ data, onFilterChange }) => {
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {table.getRowModel().rows?.length ? (
+                        {table.getRowModel().rows.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
