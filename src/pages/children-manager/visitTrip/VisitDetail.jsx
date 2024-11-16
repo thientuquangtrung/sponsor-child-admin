@@ -10,6 +10,8 @@ import { useGetChildrenVisitTripsByIdQuery } from '@/redux/childrenVisitTrips/ch
 import ImageGallery from '@/pages/admin/campaign/ImageGallery';
 import Breadcrumb from '@/pages/admin/Breadcrumb';
 import { visitStatus } from '@/config/combobox';
+import ParticipantsList from '@/pages/children-manager/visitTrip/ParticipantsList';
+import PhysicalDonationsList from '@/pages/children-manager/visitTrip/PhysicalDonationsList';
 
 const VisitDetail = () => {
     const { id } = useParams();
@@ -65,7 +67,15 @@ const VisitDetail = () => {
 
             <div className="min-h-screen bg-gray-50">
                 <div className="p-6">
-
+                    <div className="flex justify-end items-center mb-6">
+                        <Button
+                            className="bg-teal-600 hover:bg-teal-700 text-white"
+                            onClick={() => navigate(`/visit/edit/${id}`)}
+                        >
+                            <Pencil className="w-4 h-4 mr-2" />
+                            Cập nhật Chuyến thăm
+                        </Button>
+                    </div>
                     <div className="space-y-6 max-w-7xl mx-auto">
                         <Card className="shadow-lg border-0 overflow-hidden">
                             <CardContent className="p-0">
@@ -97,15 +107,27 @@ const VisitDetail = () => {
                                         <Input value={visitData.province} readOnly className="h-12 text-lg bg-gray-50" />
                                     </div>
 
-
-                                    <div className="space-y-2">
-                                        <Label className="text-lg font-medium text-gray-700">Ngày bắt đầu:</Label>
-                                        <Input value={formatDate(visitData.startDate)} readOnly className="h-12 text-lg bg-gray-50" />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="bg-gray-50 p-4 rounded-lg">
+                                            <span className="text-lg font-medium text-gray-700">Ngày bắt đầu đăng ký:</span>
+                                            <Input value={formatDate(visitData.registrationStartDate)} readOnly className="h-12 text-lg bg-gray-50" />
+                                        </div>
+                                        <div className="bg-gray-50 p-4 rounded-lg">
+                                            <span className="text-lg font-medium text-gray-700">Ngày kết thúc đăng ký:</span>
+                                            <Input value={formatDate(visitData.registrationEndDate)} readOnly className="h-12 text-lg bg-gray-50" />
+                                        </div>
                                     </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                                    <div className="space-y-2">
-                                        <Label className="text-lg font-medium text-gray-700">Ngày kết thúc:</Label>
-                                        <Input value={formatDate(visitData.endDate)} readOnly className="h-12 text-lg bg-gray-50" />
+                                        <div className="space-y-2">
+                                            <Label className="text-lg font-medium text-gray-700">Ngày bắt đầu:</Label>
+                                            <Input value={formatDate(visitData.startDate)} readOnly className="h-12 text-lg bg-gray-50" />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label className="text-lg font-medium text-gray-700">Ngày kết thúc:</Label>
+                                            <Input value={formatDate(visitData.endDate)} readOnly className="h-12 text-lg bg-gray-50" />
+                                        </div>
                                     </div>
 
                                     <div className="space-y-2">
@@ -139,12 +161,12 @@ const VisitDetail = () => {
 
                         <Card className="shadow-lg border-0">
                             <CardHeader className="bg-teal-600 text-white">
-                                <CardTitle className="text-2xl font-semibold">Lịch trình chi tiết</CardTitle>
+                                <CardTitle className="text-2xl font-semibold">Lịch Trình Chi Tiết</CardTitle>
                             </CardHeader>
                             <CardContent className="p-6">
-                                {visitData.travelItineraryDetail && visitData.travelItineraryDetail.length > 0 ? (
+                                {visitData.travelItineraryDetails && visitData.travelItineraryDetails.length > 0 ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        {visitData.travelItineraryDetail.map((day, index) => (
+                                        {visitData.travelItineraryDetails.map((day, index) => (
                                             <div
                                                 key={index}
                                                 className={`bg-white rounded-lg shadow p-6 ${index % 2 === 0 ? 'md:mr-3' : 'md:ml-3'}`}
@@ -211,6 +233,14 @@ const VisitDetail = () => {
                                 )}
                             </CardContent>
                         </Card>
+
+                        <ParticipantsList
+                            registrations={visitData.visitRegistrations}
+                        />
+
+                        <PhysicalDonationsList
+                            donations={visitData.physicalDonations}
+                        />
                     </div>
                 </div >
             </div >

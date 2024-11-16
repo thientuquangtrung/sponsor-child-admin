@@ -1,8 +1,8 @@
 import * as z from 'zod';
 
 export const visitFormSchema = z.object({
-    title: z.string().min(1, "Bạn vui lòng nhập Tiêu đề chyến thăm"),
-    description: z.string().min(1, "Bạn vui lòng nhập thông tin chi tiết về chuyến thăm"),
+    title: z.string().min(1, "Bạn vui lòng nhập Tiêu đề chyến thăm"),
+    description: z.string().min(1, "Bạn vui lòng nhập thông tin chi tiết về chuyến thăm"),
     visitCost: z.string()
         .refine((val) => {
             const numericValue = parseFloat(val.replace(/,/g, ''));
@@ -22,6 +22,12 @@ export const visitFormSchema = z.object({
     }),
     endDate: z.date({
         required_error: "Vui lòng chọn ngày kết thúc",
+    }),
+    registrationStartDate: z.date({
+        required_error: "Vui lòng chọn ngày bắt đầu nhận đăng ký",
+    }),
+    registrationEndDate: z.date({
+        required_error: "Vui lòng chọn ngày kết thúc nhận đăng ký",
     }),
     maxParticipants: z.string()
         .min(1, "Vui lòng nhập số lượng người tham gia")
@@ -43,12 +49,46 @@ export const visitFormSchema = z.object({
         amount: z.string().min(1, "Số lượng phải lớn hơn 0"),
         unit: z.string().min(1, "Vui lòng nhập đơn vị")
     })),
-    thumbnailUrl: z.any().refine((val) => val !== null, "Bạn vui lòng tải lên hình ảnh cho chiến dịch")
-        .refine((val) => val && val.size <= 10 * 1024 * 1024, "Kích thước tệp không được vượt quá 10MB"),
+    thumbnailUrl: z.union([
+        z.string().url(),
+        z.instanceof(File).refine(
+            (file) => file.size <= 10 * 1024 * 1024,
+            "Kích thước tệp không được vượt quá 10MB"
+        )
+    ]).refine((val) => val !== null, "Bạn vui lòng tải lên hình ảnh cho chuyến thăm"),
     imagesFolderUrl: z.array(z.any()).optional(),
-}).refine((data) => {
-    return new Date(data.endDate) > new Date(data.startDate);
-}, {
-    message: "Thời gian kết thúc phải sau thời gian bắt đầu",
-    path: ["endDate"],
-});
+})
+    .refine(
+        (data) => {
+            const registrationEndDate = new Date(data.registrationEndDate);
+            const visitStartDate = new Date(data.startDate);
+            const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+            return visitStartDate.getTime() - registrationEndDate.getTime() >= sevenDaysInMs;
+        },
+        {
+            message: "Ngày đóng đăng ký phải ít nhất 7 ngày trước ngày bắt đầu chuyến thăm",
+            path: ["registrationEndDate"],
+        }
+    )
+    .refine(
+        (data) => {
+            const registrationStartDate = new Date(data.registrationStartDate);
+            const registrationEndDate = new Date(data.registrationEndDate);
+            return registrationStartDate < registrationEndDate;
+        },
+        {
+            message: "Ngày bắt đầu đăng ký phải trước ngày kết thúc đăng ký",
+            path: ["registrationStartDate"],
+        }
+    )
+    .refine(
+        (data) => {
+            const startDate = new Date(data.startDate);
+            const endDate = new Date(data.endDate);
+            return endDate > startDate;
+        },
+        {
+            message: "Thời gian kết thúc phải sau thời gian bắt đầu",
+            path: ["endDate"],
+        }
+    );

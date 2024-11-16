@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Clock } from 'lucide-react'; // Import icon từ lucide-react
 import Modal from 'react-modal';
 
+
 // Đảm bảo bạn gọi Modal.setAppElement cho accessibility
 Modal.setAppElement('#root');
 
@@ -11,6 +12,7 @@ const TimePicker = ({ value, onChange, className }) => {
 
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
+
 
     const handleTimeChange = (type, val) => {
         const updatedTime = { ...time, [type]: val };
@@ -53,7 +55,9 @@ const TimePicker = ({ value, onChange, className }) => {
                         })}
                     </div>
 
+
                     <h2 className="text-lg font-semibold">Chọn phút</h2>
+
 
                     {/* Chọn phút */}
                     <div className="flex space-x-4">
@@ -86,4 +90,6 @@ const TimePicker = ({ value, onChange, className }) => {
     );
 };
 
+
 export default TimePicker;
+
