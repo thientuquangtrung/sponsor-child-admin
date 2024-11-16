@@ -253,7 +253,7 @@ const VisitForm = () => {
                                                 name="visitCost"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Chi phí dự kiến (VNĐ)</FormLabel>
+                                                        <FormLabel>Chi phí dự kiến cho 1 người (VNĐ)</FormLabel>
                                                         <FormControl>
                                                             <Input
                                                                 type="text"
@@ -311,7 +311,7 @@ const VisitForm = () => {
 
                                 <div className="bg-white p-6 rounded-lg">
                                     <h3 className="text-xl font-semibold text-gray-700 mb-4">
-                                        Hình ảnh sự kiện
+                                        Hình ảnh cho chuyến thăm
                                     </h3>
                                     <EventImages
                                         form={form}

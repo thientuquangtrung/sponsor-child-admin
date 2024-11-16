@@ -10,6 +10,8 @@ import { AdminLayout } from '@/components/layouts/AdminLayout';
 import LoadingScreen from '@/components/common/LoadingScreen';
 
 import UserDetail from '@/pages/admin/finance/UserDetail';
+import FundSourceDetail from '@/pages/admin/fund/FundSourceDetail';
+import FundUsageDetail from '@/pages/admin/fund/FundUsageDetail';
 
 
 const Loadable = (Component) => {
@@ -66,6 +68,11 @@ export default function Router() {
                 { element: <CampaignInfo />, path: 'create-campaign' },
                 { element: <DisbursementRequests />, path: 'disbursement-requests' },
                 { element: <DisbursementRequestDetail />, path: 'disbursement-requests/:id' },
+                { element: <AdminFund />, path: 'funds' },
+                { element: <FundSourceDetail />, path: 'fund/source/:id' },
+                { element: <FundUsageDetail />, path: 'fund/usage/:id' },
+
+
                 { path: '404', element: <Page404 /> },
             ],
         },
@@ -99,6 +106,7 @@ const UpdateCampaign = Loadable(lazy(() => import('@/pages/admin/campaign/Update
 const DisbursementRequests = Loadable(lazy(() => import('@/pages/admin/disbursement/DisbursementRequest')));
 const DisbursementRequestDetail = Loadable(lazy(() => import('@/pages/admin/disbursement/DisbursementRequestDetail')));
 const CampaignInfo = Loadable(lazy(() => import('@/pages/children-manager/campaign/CampaignInfo')));
+const AdminFund = Loadable(lazy(() => import('@/pages/admin/fund/AdminFund')));
 
 //children-manager
 const Visit = Loadable(lazy(() => import('@/pages/children-manager/visitTrip/Visit')));

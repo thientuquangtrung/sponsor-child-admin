@@ -14,7 +14,7 @@ export const GiftRequests = ({ form }) => {
     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Yêu cầu quà tặng</h3>
+                <h3 className="text-lg font-semibold">Quà tặng phù hợp chuyến thăm</h3>
                 <Button
                     type="button"
                     className="hover:bg-teal-500 transition-colors bg-[#2fabab] text-white"

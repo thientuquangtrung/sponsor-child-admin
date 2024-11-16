@@ -148,7 +148,7 @@ const ActionMenu = ({ row }) => {
 export function Visit() {
     const navigate = useNavigate();
     const { data: visitTrips, isLoading, isError } = useGetAllChildrenVisitTripsQuery();
-    const [sorting, setSorting] = React.useState([]);
+    const [sorting, setSorting] = React.useState([{ id: 'startDate', desc: true }]);
     const [columnFilters, setColumnFilters] = React.useState([]);
     const [columnVisibility, setColumnVisibility] = React.useState({});
     const [rowSelection, setRowSelection] = React.useState({});

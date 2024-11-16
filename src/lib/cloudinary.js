@@ -37,7 +37,7 @@ const UPLOAD_NAME = {
     CAMPAIGN_CONTRACT_SOFT: 'campaign_contract_soft',
     CAMPAIGN_CONTRACT_HARD: 'campaign_contract_hard',
     IDENTIFICATION_FILE: 'identification_file',
-
+    EVIDENCE_IMAGE: 'evidence_image',
     //disbursement
     DISBURSEMENT_RECEIPT: 'receipt_phase',
 };

@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { addDays, format, isEqual } from "date-fns"
+import { format, isEqual } from "date-fns"
 import { vi } from "date-fns/locale"
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -33,10 +33,7 @@ function Calendar({
 
     const weekDays = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
 
-    const isDateInRange = (date, range) => {
-        if (!range?.from || !range?.to) return false
-        return date >= range.from && date <= range.to
-    }
+
 
     const isStartDate = (date) => {
         return selected?.from && isEqual(date, selected.from)
@@ -98,7 +95,7 @@ function Calendar({
         }
 
         return (
-            <div className="p-3">
+            <div className="p-3 w-[320px] h-[370px]">
                 <div className="text-center mb-2">
                     {monthNames[month]} {year}
                 </div>
@@ -115,7 +112,7 @@ function Calendar({
     }
 
     return (
-        <div className={cn("", className)} {...props}>
+        <div className={cn("w-fit", className)} {...props}>
             <div className="flex items-center justify-between px-3">
                 <Button
                     variant="ghost"
@@ -139,8 +136,8 @@ function Calendar({
 
 function DateRangePicker({ className, onRangeChange }) {
     const [date, setDate] = useState({
-        from: new Date(),
-        to: addDays(new Date(), 7),
+        from: new Date(2023, 0, 1),
+        to: new Date(),
     })
 
     const handleSelect = (range) => {
@@ -149,14 +146,14 @@ function DateRangePicker({ className, onRangeChange }) {
     }
 
     return (
-        <div className={cn("grid gap-2", className)}>
+        <div className={cn("grid gap-2 place-items-center", className)}>
             <Popover>
                 <PopoverTrigger asChild>
                     <Button
                         id="date"
                         variant="outline"
                         className={cn(
-                            "w-[300px] justify-start text-left font-normal",
+                            "w-[280px] justify-center text-center font-medium",
                             !date && "text-muted-foreground"
                         )}
                     >
@@ -175,7 +172,7 @@ function DateRangePicker({ className, onRangeChange }) {
                         )}
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-fit p-0" align="center">
                     <Calendar
                         mode="range"
                         defaultMonth={date?.from}

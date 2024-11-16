@@ -137,3 +137,23 @@ export const visitStatus = [
     { label: 'Đã hoãn', value: 6 },
 ];
 
+
+export const transactionStatus = [
+    { label: 'Đang chờ', value: 0 },
+    { label: 'Thành công', value: 1 },
+    { label: 'Thất bại', value: 2 },
+    { label: 'Đã hủy', value: 3 },
+];
+
+export const transactionType = [
+    { label: 'Thu tiền', value: 0 },
+    { label: 'Chi tiền', value: 1 },
+    { label: 'Hoàn tiền', value: 2 },
+];
+
+
+export const fundSourceType = [
+    { label: 'Cá nhân', value: 0 },
+    { label: 'Chiến dịch', value: 1 },
+    { label: 'Khác', value: 2 },
+];

@@ -27,7 +27,8 @@ import { useSelector } from 'react-redux';
 import ImageGallery from '@/pages/admin/campaign/ImageGallery';
 import ChildSearch from '@/pages/admin/campaign/ChildSearch';
 import DetailDisbursementPlan from '@/pages/admin/campaign/DetailDisbursementPlan';
-import CampaignSuspended from './CampaignSuspended';
+import CampaignSuspended from '@/pages/admin/campaign/CampaignSuspended';
+import CancelCampaign from '@/pages/admin/campaign/CancelCampaign';
 
 const DetailCampaign = () => {
     const { id } = useParams();
@@ -87,7 +88,6 @@ const DetailCampaign = () => {
 
     const handleAccept = () => updateCampaignStatus(1);
     const handleReject = () => updateCampaignStatus(3, rejectionReason);
-    const handleCancel = () => updateCampaignStatus(6, rejectionReason);
 
 
     const showAcceptButton = campaignData.status === 0;
@@ -376,46 +376,14 @@ const DetailCampaign = () => {
                                     )}
 
                                     {showCancelButton && (
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button className="bg-red-600 hover:bg-red-700 text-white">
-                                                    Hủy chiến dịch
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Xác nhận hủy chiến dịch</AlertDialogTitle>
-                                                    <AlertDialogDescription>
-                                                        Vui lòng nhập lý do hủy chiến dịch này.
-                                                        Hành động này sẽ thay đổi trạng thái chiến dịch.
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <div className="my-4">
-                                                    <Textarea
-                                                        placeholder="Nhập lý do hủy..."
-                                                        value={rejectionReason}
-                                                        onChange={(e) => setRejectionReason(e.target.value)}
-                                                        className="min-h-[100px]"
-                                                    />
-                                                </div>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Không</AlertDialogCancel>
-                                                    <AlertDialogAction
-                                                        onClick={handleCancel}
-                                                        disabled={isLoading || !rejectionReason.trim()}
-                                                    >
-                                                        {isLoading ? (
-                                                            <>
-                                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                                Đang xử lý
-                                                            </>
-                                                        ) : (
-                                                            'Xác nhận hủy'
-                                                        )}
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
+                                        <CancelCampaign
+                                            campaignId={id}
+                                            userId={user.userID}
+                                            onSuccess={() => {
+                                                refetch();
+                                                navigate('/campaigns');
+                                            }}
+                                        />
                                     )}
 
                                     {showPauseButton && (
@@ -423,7 +391,7 @@ const DetailCampaign = () => {
                                             className="bg-yellow-600 hover:bg-yellow-700 text-white"
                                             onClick={() => setShowSuspendForm(true)}
                                         >
-                                            Tạo kế hoạch
+                                            Tạo ngưng chiến dịch
                                         </Button>
                                     )}
                                 </>
