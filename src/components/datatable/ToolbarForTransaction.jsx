@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DataTableViewOptions } from '@/components/datatable/DataTableViewOptions';
 import { DataTableFacetedFilter } from '@/components/datatable/DataTableFacetedFilter';
-import { transactionType, transactionStatus } from '@/config/combobox';
-
 
 export function ToolbarForTransaction({ table }) {
     const isFiltered = table.getState().columnFilters.length > 0;
@@ -14,17 +12,20 @@ export function ToolbarForTransaction({ table }) {
     const filters = [
         {
             name: 'status',
-            options: transactionStatus.map(status => ({
-                value: status.value.toString(),
-                label: status.label
-            })),
+            options: [
+                { value: 'Đang chờ', label: 'Đang chờ' },
+                { value: 'Thất bại', label: 'Thất bại' },
+                { value: 'Thành công', label: 'Thành công' },
+                { value: 'Đã hủy', label: 'Đã hủy' },
+            ],
         },
         {
             name: 'type',
-            options: transactionType.map(type => ({
-                value: type.value.toString(),
-                label: type.label
-            })),
+            options: [
+                { value: 'Thu tiền', label: 'Thu tiền' },
+                { value: 'Chi tiền', label: 'Chi tiền' },
+                { value: 'Hoàn tiền', label: 'Hoàn tiền' },
+            ],
         },
     ];
 
