@@ -12,6 +12,8 @@ import LoadingScreen from '@/components/common/LoadingScreen';
 import UserDetail from '@/pages/admin/finance/UserDetail';
 import FundSourceDetail from '@/pages/admin/fund/FundSourceDetail';
 import FundUsageDetail from '@/pages/admin/fund/FundUsageDetail';
+import UpdateVisitForm from '@/pages/children-manager/visitTrip/UpdateVisitForm';
+import VisitRefundProof from '@/pages/children-manager/visitTrip/VisitRefundProof';
 
 
 const Loadable = (Component) => {
@@ -71,8 +73,8 @@ export default function Router() {
                 { element: <AdminFund />, path: 'funds' },
                 { element: <FundSourceDetail />, path: 'fund/source/:id' },
                 { element: <FundUsageDetail />, path: 'fund/usage/:id' },
-
-
+                { element: <UpdateVisitForm />, path: 'visit/edit/:id' },
+                { element: <VisitRefundProof />, path: 'visit-refund/:id' },
                 { path: '404', element: <Page404 /> },
             ],
         },
