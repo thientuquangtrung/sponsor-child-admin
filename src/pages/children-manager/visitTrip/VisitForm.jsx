@@ -162,7 +162,7 @@ const VisitForm = () => {
         <div className="container mx-auto py-8">
             <div className="max-w-7xl mx-auto">
                 <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-                    <div className="bg-gradient-to-r from-blue-100 to-green-100 p-6">
+                    <div className="bg-gradient-to-t from-rose-100 to-teal-100 hover:bg-normal p-6">
                         <h2 className="text-2xl uppercase text-center font-bold text-gray-800 mb-4">
                             Tạo chuyến thăm mới
                         </h2>
@@ -327,7 +327,7 @@ const VisitForm = () => {
                                 <div className="flex justify-center">
                                     <Button
                                         type="submit"
-                                        className={`w-1/2 ${isUploading || isCreatingVisitTrip ? 'bg-gray-400' : 'bg-[#2fabab]'} hover:bg-[#287176] text-white py-2 rounded-lg`}
+                                        className={`w-1/3 ${isUploading || isCreatingVisitTrip ? 'bg-gray-400' : 'bg-primary'} text-white text-lg py-2 rounded-lg`}
                                         disabled={isUploading || isCreatingVisitTrip}
                                     >
                                         {isUploading || isCreatingVisitTrip ? (
