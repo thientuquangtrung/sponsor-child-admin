@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { useFieldArray } from 'react-hook-form';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
@@ -13,10 +14,12 @@ export const Activities = ({ form }) => {
         name: 'travelItineraryDetails',
     });
 
+
     const [isExpanded, setIsExpanded] = useState(false);
     const toggleSection = () => {
         setIsExpanded((prev) => !prev);
     };
+
     return (
         <div className="space-y-6">
             <div>

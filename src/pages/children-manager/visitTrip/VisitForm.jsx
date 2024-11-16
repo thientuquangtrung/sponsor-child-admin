@@ -330,7 +330,9 @@ const VisitForm = () => {
                                 <div className="flex justify-center">
                                     <Button
                                         type="submit"
+
                                         className={`w-1/3 ${isUploading || isCreatingVisitTrip ? 'bg-gray-400' : 'bg-primary'} text-white text-lg py-2 rounded-lg`} disabled={isUploading || isCreatingVisitTrip}
+
                                     >
                                         {isUploading || isCreatingVisitTrip ? (
                                             <div className="flex items-center gap-2">

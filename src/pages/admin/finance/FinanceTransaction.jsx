@@ -23,11 +23,11 @@ import { DataTableColumnHeader } from '@/components/datatable/DataTableColumnHea
 import Breadcrumb from '@/pages/admin/Breadcrumb';
 import { transactionType, transactionStatus } from '@/config/combobox';
 import { useGetTransactionQuery } from '@/redux/transaction/transactionApi';
+import ToolbarForTransaction from '@/components/datatable/ToolbarForTransaction';
 
-// Helper functions to get the label based on value
 const getTransactionTypeLabel = (value) => {
     const type = transactionType.find((t) => t.value === value);
-    return type ? type.label : 'Unknown';
+    return type ? type.label : 'Không xác định';
 };
 
 const getTransactionStatusLabel = (value) => {
@@ -46,7 +46,6 @@ const columns = [
         header: ({ column }) => <DataTableColumnHeader column={column} title="Ngày giao dịch" />,
         cell: ({ row }) => <div>{new Date(row.getValue('transactionDate')).toLocaleDateString('vi-VN')}</div>,
     },
-
     {
         accessorKey: 'amount',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Số tiền" />,
@@ -77,6 +76,10 @@ const columns = [
 
             return <Badge className={`${bgColor} text-white`}>{label}</Badge>;
         },
+        filterFn: (row, id, value) => {
+            const type = getTransactionTypeLabel(row.getValue(id));
+            return value.includes(type);
+        },
     },
     {
         accessorKey: 'status',
@@ -86,7 +89,6 @@ const columns = [
             const label = getTransactionStatusLabel(statusValue);
             let bgColor = '';
 
-            // Apply background color based on status
             switch (statusValue) {
                 case 0: // Đang chờ
                     bgColor = 'bg-yellow-500';
@@ -106,6 +108,10 @@ const columns = [
             }
 
             return <Badge className={`${bgColor} text-white`}>{label}</Badge>;
+        },
+        filterFn: (row, id, value) => {
+            const status = getTransactionStatusLabel(row.getValue(id));
+            return value.includes(status);
         },
     },
     {
@@ -137,7 +143,7 @@ const ActionMenu = ({ row }) => {
 export function FinanceTransaction() {
     const navigate = useNavigate();
     const { data: transactionData = [], isLoading } = useGetTransactionQuery();
-    const [sorting, setSorting] = React.useState([]);
+    const [sorting, setSorting] = React.useState([{ id: 'transactionDate', desc: true }]); 
     const [columnFilters, setColumnFilters] = React.useState([]);
     const [columnVisibility, setColumnVisibility] = React.useState({});
     const [rowSelection, setRowSelection] = React.useState({});
@@ -180,6 +186,7 @@ export function FinanceTransaction() {
                         Export Transaction
                     </Button>
                 </div>
+                <ToolbarForTransaction table={table} />
                 <div className="rounded-md border">
                     <Table>
                         <TableHeader className="bg-gradient-to-r from-rose-200 to-primary">
