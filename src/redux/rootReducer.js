@@ -11,7 +11,7 @@ import baseApi from './baseApi';
 // ----------------------------------------------------------------------
 
 const rootPersistConfig = {
-    key: 'root',
+    key: 'sponsorchild-admin',
     storage,
     stateReconciler: autoMergeLevel2,
     keyPrefix: 'redux-',

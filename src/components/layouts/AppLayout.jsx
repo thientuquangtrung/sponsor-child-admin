@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 export function Applayout() {
     const { user } = useSelector((state) => state.auth);
 
-    if (!user) return <Navigate to="/auth/login" replace />;
+    // if (!user) return <Navigate to="/auth/login" replace />;
 
     return (
         <>

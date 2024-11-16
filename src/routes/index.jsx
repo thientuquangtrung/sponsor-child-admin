@@ -2,19 +2,17 @@ import { Suspense, lazy } from 'react';
 import { Navigate, useRoutes } from 'react-router-dom';
 
 // layouts
-import { Applayout } from '@/components/layouts/AppLayout';
 import { AuthLayout } from '@/components/layouts/AuthLayout';
-import { GuaranteeLayout } from '@/components/layouts/GuaranteeLayout';
-
-
+import { AdminLayout } from '@/components/layouts/AdminLayout';
 
 // config
-import { DEFAULT_PATH } from '../config/app';
+// import { DEFAULT_PATH } from '../config/app';
 import LoadingScreen from '@/components/common/LoadingScreen';
-import CampaignDetail from '@/components/landingpage/CampaignDetail';
-import DonateTarget from '@/components/landingpage/DonateTarget';
-import PageIntroduction from '@/components/landingpage/PageIntroduction';
-import RegistrationPage from '@/components/landingpage/RegistrationPage';
+
+import UserDetail from '@/pages/admin/finance/UserDetail';
+import FundSourceDetail from '@/pages/admin/fund/FundSourceDetail';
+import FundUsageDetail from '@/pages/admin/fund/FundUsageDetail';
+
 
 const Loadable = (Component) => {
     const LoadableComponent = (props) => {
@@ -45,98 +43,72 @@ export default function Router() {
             ],
         },
         {
-            path: '/guarantee',
-            element: <GuaranteeLayout />,
-            children: [
-                { element: <GuaranteeHome />, index: true },
-                { element: <GuaranteeCampaigns />, path: 'campaigns' },
-                { element: <DonationHistory />, path: 'donation-history' },
-                { element: <AddCampaign />, path: 'campaigns/add' },
-
-
-
-            ],
-        },
-        {
             path: '/',
-            element: <Applayout />,
+            element: <AdminLayout />,
             children: [
-                // { element: <Navigate to={DEFAULT_PATH} replace />, index: true },
+                { element: <Navigate to="/home" replace />, index: true },
+                { element: <AdminDashboard />, path: '/home' },
+                { element: <UserManagement />, path: 'users' },
+                { element: <UserDetail />, path: 'users/:id' },
+                { element: <AdminCampaign />, path: 'campaigns' },
+                { element: <DetailCampaign />, path: 'campaign/:id' },
+                { element: <UpdateCampaign />, path: 'campaign/edit/:id' },
+                { element: <AddFundrasing />, path: 'fundrasings/add' },
+                { element: <FinanceTransaction />, path: 'finance/transactions' },
+                { element: <FinanceReport />, path: 'finance/reports' },
+                { element: <FundDisbursement />, path: 'finance/disbursement' },
+                { element: <Visit />, path: 'visits' },
+                { element: <VisitDetail />, path: 'visit/:id' },
+                { element: <VisitForm />, path: 'visit/create-visit-trip' },
+                { element: <AdminCenter />, path: 'center' },
+                { element: <GuaranteeRequests />, path: 'center/guarantee-requests' },
+                { element: <GuaranteeRequestsDetail />, path: 'center/guarantee-requests/:id' },
+                { element: <ContractManagement />, path: 'center/contracts' },
+                { element: <ContractDetail />, path: 'center/contracts/:id' },
+                { element: <CampaignInfo />, path: 'create-campaign' },
+                { element: <DisbursementRequests />, path: 'disbursement-requests' },
+                { element: <DisbursementRequestDetail />, path: 'disbursement-requests/:id' },
+                { element: <AdminFund />, path: 'funds' },
+                { element: <FundSourceDetail />, path: 'fund/source/:id' },
+                { element: <FundUsageDetail />, path: 'fund/usage/:id' },
 
-                { element: <HomePage />, index: true },
 
-                {
-                    path: 'campaign-detail/:id',
-                    element: <CampaignDetail />,
-                },
-                {
-                    path: 'donate-target',
-                    element: <DonateTarget />,
-                },
-                {
-                    path: 'introduction',
-                    element: <PageIntroduction />,
-                },
-                {
-                    path: 'register',
-                    element: <RegistrationPage />,
-                },
-                {
-                    path: 'about',
-                    element: <AboutPage />,
-                },
-
-                {
-                    path: 'home',
-                    element: <HomePage />,
-                },
-                {
-                    path: 'assets',
-                    element: <PageMyAssets />,
-                },
-                {
-                    path: 'assets/add',
-                    element: <PageAddAsset />,
-                },
-                {
-                    path: 'assetshub',
-                    element: <PageAssetsHub />,
-                },
-                {
-                    path: 'profile',
-                    element: <PageMyProfile />,
-                },
-                {
-                    path: 'empty',
-                    element: <PageEmpty />,
-                },
                 { path: '404', element: <Page404 /> },
-                { path: '*', element: <Navigate to="/404" replace /> },
             ],
         },
+        { path: '404', element: <Page404 /> },
         { path: '*', element: <Navigate to="/404" replace /> },
     ]);
 }
+
+const Page404 = Loadable(lazy(() => import('../pages/NoMatch')));
 
 const LoginPage = Loadable(lazy(() => import('../pages/auth/Login')));
 const RegisterPage = Loadable(lazy(() => import('../pages/auth/Register')));
 const ResetPasswordPage = Loadable(lazy(() => import('../pages/auth/ResetPassword')));
 const NewPasswordPage = Loadable(lazy(() => import('../pages/auth/NewPassword')));
 
-const PageMyProfile = Loadable(lazy(() => import('../pages/asset-pages/MyProfile')));
-const PageMyAssets = Loadable(lazy(() => import('../pages/asset-pages/MyAssets')));
-const PageAddAsset = Loadable(lazy(() => import('../pages/asset-pages/AddAsset')));
-const PageAssetsHub = Loadable(lazy(() => import('../pages/asset-pages/AssetsHub')));
+//admin
+const AdminDashboard = Loadable(lazy(() => import('@/pages/admin/AdminDashboard')));
+const UserManagement = Loadable(lazy(() => import('@/pages/admin/UserManagement')));
+const AdminCampaign = Loadable(lazy(() => import('@/pages/admin/campaign/AdminCampaign')));
+const AddFundrasing = Loadable(lazy(() => import('@/pages/admin/AddFundrasing')));
+const FinanceTransaction = Loadable(lazy(() => import('@/pages/admin/finance/FinanceTransaction')));
+const FinanceReport = Loadable(lazy(() => import('@/pages/admin/finance/FinanceReport')));
+const FundDisbursement = Loadable(lazy(() => import('@/pages/admin/finance/FundDisbursement')));
+const AdminCenter = Loadable(lazy(() => import('@/pages/admin/center/AdminCenter')));
+const GuaranteeRequests = Loadable(lazy(() => import('@/pages/admin/center/GuaranteeRequests')));
+const GuaranteeRequestsDetail = Loadable(lazy(() => import('@/pages/admin/center/GuaranteeRequestsDetail')));
+const ContractManagement = Loadable(lazy(() => import('@/pages/admin/center/ContractManagement')));
+const ContractDetail = Loadable(lazy(() => import('@/pages/admin/center/ContractDetail')));
+const DetailCampaign = Loadable(lazy(() => import('@/pages/admin/campaign/DetailCampaign')));
+const UpdateCampaign = Loadable(lazy(() => import('@/pages/admin/campaign/UpdateCampaign')));
+const DisbursementRequests = Loadable(lazy(() => import('@/pages/admin/disbursement/DisbursementRequest')));
+const DisbursementRequestDetail = Loadable(lazy(() => import('@/pages/admin/disbursement/DisbursementRequestDetail')));
+const CampaignInfo = Loadable(lazy(() => import('@/pages/children-manager/campaign/CampaignInfo')));
+const AdminFund = Loadable(lazy(() => import('@/pages/admin/fund/AdminFund')));
 
-const PageEmpty = Loadable(lazy(() => import('../pages/Empty')));
-const Page404 = Loadable(lazy(() => import('../pages/NoMatch')));
-
-const HomePage = Loadable(lazy(() => import('../pages/HomePage')));
-const AboutPage = Loadable(lazy(() => import('../pages/AboutPage')));
-
-//guarantee
-const GuaranteeHome = Loadable(lazy(() => import('@/components/guarantee/GuaranteeHome')));
-const GuaranteeCampaigns = Loadable(lazy(() => import('@/components/guarantee/GuaranteeCampaigns')));
-const DonationHistory = Loadable(lazy(() => import('@/components/guarantee/DonationHistory')));
-const AddCampaign = Loadable(lazy(() => import('@/components/guarantee/AddCampaign')));
-
+//children-manager
+const Visit = Loadable(lazy(() => import('@/pages/children-manager/visitTrip/Visit')));
+const VisitForm = Loadable(lazy(() => import('@/pages/children-manager/visitTrip/VisitForm')));
+const VisitDetail = Loadable(lazy(() => import('@/pages/children-manager/visitTrip/VisitDetail')));
