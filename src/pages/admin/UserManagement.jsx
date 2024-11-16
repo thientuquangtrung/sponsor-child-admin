@@ -35,11 +35,12 @@ import { DataTablePagination } from '@/components/datatable/DataTablePagination'
 import { DataTableColumnHeader } from '@/components/datatable/DataTableColumnHeader';
 import { DataTableToolbarAdmin } from '@/components/datatable/DataTableToolbarAdmin';
 import Breadcrumb from '@/pages/admin/Breadcrumb';
-import { useDeleteUserMutation, useGetUserQuery } from '@/redux/user/userApi';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useDeleteUserMutation, useGetUserQuery, useReactivateUserMutation } from '@/redux/user/userApi';
+import { useNavigate } from 'react-router-dom';
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import LoadingScreen from '@/components/common/LoadingScreen';
 
 const roleColors = {
     Guarantee: 'bg-rose-100 text-rose-400',
@@ -108,7 +109,30 @@ const columns = [
             return value.includes(role);
         },
     },
+    {
+        accessorKey: 'isActive',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Trạng thái" />,
+        cell: ({ row }) => {
+            const isActive = row.getValue('isActive');
+            return (
+                <Badge
+                    className={
+                        isActive
+                            ? 'bg-green-100 text-green-600 hover:bg-normal'
+                            : 'bg-red-100 text-red-600 hover:bg-normal'
+                    }
+                >
+                    {isActive ? 'Đang hoạt động' : 'Vô hiệu hóa'}
+                </Badge>
+            );
+        },
+        filterFn: (row, id, value) => {
+            const isActive = row.getValue(id);
+            return value.includes(isActive ? 'Đang hoạt động' : 'Vô hiệu hóa');
+        },
 
+        enableSorting: false,
+    },
     {
         id: 'actions',
         cell: ({ row }) => <ActionMenu row={row} />,
@@ -118,24 +142,37 @@ const columns = [
 const ActionMenu = ({ row }) => {
     const navigate = useNavigate();
     const [deleteReason, setDeleteReason] = useState('');
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [isActivateDialogOpen, setIsActivateDialogOpen] = useState(false);
     const [deleteUser] = useDeleteUserMutation();
+    const [reactivateUser] = useReactivateUserMutation();
+    const isActive = row.original.isActive;
 
     const handleDelete = async () => {
         if (row.original.role === 'Admin') {
             toast.warning('Không thể vô hiệu hóa tài khoản Admin.');
-            setIsDialogOpen(false);
+            setIsDeleteDialogOpen(false);
             return;
         }
 
         try {
-            // Call deleteUser API with user ID and reason
             await deleteUser({ id: row.original.userID, rejectionReason: deleteReason });
-            setIsDialogOpen(false);
+            setIsDeleteDialogOpen(false);
             toast.success('Tài khoản đã bị vô hiệu hóa!');
         } catch (error) {
             console.error('Error disabling user:', error);
             toast.error('Vô hiệu hóa tài khoản thất bại!');
+        }
+    };
+
+    const handleActivate = async () => {
+        try {
+            await reactivateUser(row.original.userID).unwrap();
+            setIsActivateDialogOpen(false);
+            toast.success('Tài khoản đã được kích hoạt lại!');
+        } catch (error) {
+            console.error('Error reactivating user:', error);
+            toast.error('Kích hoạt tài khoản thất bại!');
         }
     };
 
@@ -153,42 +190,87 @@ const ActionMenu = ({ row }) => {
                     Xem chi tiết
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-
-                <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <AlertDialogTrigger asChild>
-                        <DropdownMenuItem
-                            onSelect={(e) => e.preventDefault()}
-                            className="text-destructive focus:text-destructive"
-                        >
-                            Xóa tài khoản
-                        </DropdownMenuItem>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Bạn muốn xóa người dùng?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Hành động này sẽ vô hiệu hóa người dùng. Vui lòng cung cấp lý do vô hiệu hóa tài khoản này.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <Textarea
-                            className="w-full p-2 border rounded"
-                            placeholder="Nhập lý do vô hiệu hóa"
-                            value={deleteReason}
-                            onChange={(e) => setDeleteReason(e.target.value)}
-                        />
-                        <AlertDialogFooter>
-                            <AlertDialogCancel onClick={() => setIsDialogOpen(false)} className="hover:bg-gray-200">Trở lại</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleDelete} className="bg-red-500 text-white hover:bg-red-600">Xóa</AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                {isActive ? (
+                    <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                        <AlertDialogTrigger asChild>
+                            <DropdownMenuItem
+                                onSelect={(e) => e.preventDefault()}
+                                className="text-destructive focus:text-destructive"
+                            >
+                                Xóa tài khoản
+                            </DropdownMenuItem>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Bạn muốn xóa người dùng?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Hành động này sẽ vô hiệu hóa người dùng. Vui lòng cung cấp lý do vô hiệu hóa tài
+                                    khoản này.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <Textarea
+                                className="w-full p-2 border rounded"
+                                placeholder="Nhập lý do vô hiệu hóa"
+                                value={deleteReason}
+                                onChange={(e) => setDeleteReason(e.target.value)}
+                            />
+                            <AlertDialogFooter>
+                                <AlertDialogCancel
+                                    onClick={() => setIsDeleteDialogOpen(false)}
+                                    className="hover:bg-gray-200"
+                                >
+                                    Trở lại
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={handleDelete}
+                                    className="bg-red-500 text-white hover:bg-red-600"
+                                >
+                                    Xóa
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                ) : (
+                    <AlertDialog open={isActivateDialogOpen} onOpenChange={setIsActivateDialogOpen}>
+                        <AlertDialogTrigger asChild>
+                            <DropdownMenuItem
+                                onSelect={(e) => e.preventDefault()}
+                                className="text-teal-500 focus:text-teal-500"
+                            >
+                                Kích hoạt tài khoản
+                            </DropdownMenuItem>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Bạn muốn kích hoạt lại tài khoản?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Hành động này sẽ kích hoạt lại tài khoản người dùng.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel
+                                    onClick={() => setIsDeleteDialogOpen(false)}
+                                    className="hover:bg-gray-200"
+                                >
+                                    Trở lại
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={handleActivate}
+                                    className="bg-teal-500 text-white hover:bg-teal-600"
+                                >
+                                    Kích hoạt
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                )}
             </DropdownMenuContent>
         </DropdownMenu>
     );
 };
 
 export function UserManagement() {
-    const { data: users, isLoading, error } = useGetUserQuery();
+    const { data: users, isLoading, error, refetch } = useGetUserQuery();
     const [sorting, setSorting] = React.useState([]);
     const [columnFilters, setColumnFilters] = React.useState([]);
     const [columnVisibility, setColumnVisibility] = React.useState({});
@@ -216,6 +298,12 @@ export function UserManagement() {
             rowSelection,
         },
     });
+
+    if (isLoading) return <LoadingScreen />;
+
+    if (error) {
+        return <div>Error: {error.message}</div>;
+    }
 
     return (
         <>

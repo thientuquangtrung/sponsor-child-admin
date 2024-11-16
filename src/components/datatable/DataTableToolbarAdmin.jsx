@@ -1,6 +1,5 @@
 import { Cross2Icon } from '@radix-ui/react-icons';
 import SearchIcon from '@/assets/icons/SearchIcon';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DataTableViewOptions } from '@/components/datatable/DataTableViewOptions';
@@ -9,15 +8,6 @@ import { DataTableFacetedFilter } from '@/components/datatable/DataTableFacetedF
 export function DataTableToolbarAdmin({
     table,
     type,
-    fundraisingFilters = [
-        {
-            name: 'status',
-            options: [
-                { value: 'Đang hoạt động', label: 'Đang hoạt động' },
-                { value: 'Lên kế hoạch', label: 'Lên kế hoạch' },
-            ]
-        },
-    ],
     userFilters = [
         {
             name: 'role',
@@ -26,7 +16,14 @@ export function DataTableToolbarAdmin({
                 { value: 'Guarantee', label: 'Guarantee' },
                 { value: 'Children Manager', label: 'Children Manager' },
                 { value: 'Admin', label: 'Admin' },
-            ]
+            ],
+        },
+        {
+            name: 'isActive',
+            options: [
+                { value: 'Đang hoạt động', label: 'Đang hoạt động' },
+                { value: 'Vô hiệu hóa', label: 'Vô hiệu hóa' },
+            ],
         },
     ],
 }) {
@@ -38,25 +35,26 @@ export function DataTableToolbarAdmin({
         <div className="flex items-center justify-between w-full">
             <div className="flex flex-1 flex-col sm:flex-row gap-y-4 items-center space-x-2 w-full">
                 <Input
-                    placeholder={type === 'Fundraising' ? "Tìm kiếm..." : "Tìm kiếm tên..."}
+                    placeholder={type === 'Fundraising' ? 'Tìm kiếm...' : 'Tìm kiếm tên...'}
                     value={table.getColumn(type === 'Fundraising' ? 'name' : 'fullname')?.getFilterValue() ?? ''}
                     onChange={(event) =>
-                        table.getColumn(type === 'Fundraising' ? 'name' : 'fullname')?.setFilterValue(event.target.value)
+                        table
+                            .getColumn(type === 'Fundraising' ? 'name' : 'fullname')
+                            ?.setFilterValue(event.target.value)
                     }
                     className="max-w-sm"
                     endIcon={<SearchIcon />}
                 />
 
                 <div className="flex space-x-2 w-full overflow-auto no-scrollbar">
-                    {filters?.length > 0 &&
-                        filters.map((f, i) => (
-                            <DataTableFacetedFilter
-                                key={i}
-                                column={table.getColumn(f.name)}
-                                title={f.name}
-                                options={f.options}
-                            />
-                        ))}
+                    {filters.map((f, i) => (
+                        <DataTableFacetedFilter
+                            key={i}
+                            column={table.getColumn(f.name)}
+                            title={f.name === 'isActive' ? 'Trạng thái Hoạt động' : 'Vai trò'}
+                            options={f.options}
+                        />
+                    ))}
 
                     {isFiltered && (
                         <Button

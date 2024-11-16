@@ -9,9 +9,10 @@ import { AdminLayout } from '@/components/layouts/AdminLayout';
 // import { DEFAULT_PATH } from '../config/app';
 import LoadingScreen from '@/components/common/LoadingScreen';
 
-import UserDetail from '@/pages/admin/finance/UserDetail';
+import UserDetail from '@/pages/admin/UserDetail';
 import FundSourceDetail from '@/pages/admin/fund/FundSourceDetail';
 import FundUsageDetail from '@/pages/admin/fund/FundUsageDetail';
+import SettingsPage from '@/pages/admin/Setting';
 
 
 const Loadable = (Component) => {
@@ -50,6 +51,7 @@ export default function Router() {
                 { element: <AdminDashboard />, path: '/home' },
                 { element: <UserManagement />, path: 'users' },
                 { element: <UserDetail />, path: 'users/:id' },
+                { element: <SettingsPage />, path: 'settings' },
                 { element: <AdminCampaign />, path: 'campaigns' },
                 { element: <DetailCampaign />, path: 'campaign/:id' },
                 { element: <UpdateCampaign />, path: 'campaign/edit/:id' },
