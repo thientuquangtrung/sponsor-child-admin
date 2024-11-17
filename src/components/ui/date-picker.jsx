@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
-import { format, isBefore, startOfDay } from 'date-fns';
+import { format, isBefore, startOfDay, isAfter } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -89,6 +89,7 @@ const DatePicker = React.forwardRef(({
             setIsOpen(false);
         }
     };
+
     const isToday = (day) => {
         const today = new Date();
         return day === today.getDate() &&
@@ -152,14 +153,19 @@ const DatePicker = React.forwardRef(({
                                 onClick={() => !isDateDisabled(day) && handleDateSelect(day)}
                                 disabled={isDateDisabled(day)}
                                 className={cn(
-                                    'h-10 w-10 flex items-center justify-center rounded-lg transition-colors',
+                                    'h-10 w-10 flex items-center justify-center rounded-lg transition-colors relative',
                                     isSelected(day) ? 'bg-teal-500 text-white hover:bg-teal-600' :
-                                        isToday(day) ? 'bg-teal-500 text-white' :
+                                        isToday(day) ? 'bg-teal-100 text-teal-800 font-bold ring-2 ring-teal-500' :
                                             isDateDisabled(day) ? 'text-gray-300 cursor-not-allowed' :
-                                                'hover:bg-blue-100 text-black cursor-pointer'
+                                                'hover:bg-gray-100 text-black cursor-pointer'
                                 )}
                             >
                                 {day}
+                                {isToday(day) && (
+                                    <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2">
+                                        <div className="h-1 w-1 bg-teal-500 rounded-full"></div>
+                                    </div>
+                                )}
                             </button>
                         ))}
                     </div>

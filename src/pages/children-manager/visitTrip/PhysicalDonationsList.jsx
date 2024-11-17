@@ -22,7 +22,7 @@ import { DataTableColumnHeader } from '@/components/datatable/DataTableColumnHea
 import { format } from 'date-fns';
 import { ToolbarForPhysicalDonationsList } from '@/components/datatable/ToolbarForPhysicalDonationsList';
 import { giftDeliveryMethod, giftStatus, giftType } from '@/config/combobox';
-import { CardHeader, CardTitle } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
 
 const getMethodDisplay = (method) => {
     const methodItem = giftDeliveryMethod.find(item => item.value === method);
@@ -53,26 +53,25 @@ const getGiftTypeDisplay = (type) => {
     return typeItem?.label || type;
 };
 
-// const ActionMenu = ({ row }) => {
-//     const handleViewDetails = () => {
-//     };
+const ActionMenu = ({ row }) => {
+    const navigate = useNavigate();
 
-//     return (
-//         <DropdownMenu>
-//             <DropdownMenuTrigger asChild>
-//                 <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-normal">
-//                     <span className="sr-only">Mở menu</span>
-//                     <MoreHorizontal className="h-4 w-4" />
-//                 </Button>
-//             </DropdownMenuTrigger>
-//             <DropdownMenuContent align="end">
-//                 <DropdownMenuItem onClick={handleViewDetails}>
-//                     Xem chi tiết
-//                 </DropdownMenuItem>
-//             </DropdownMenuContent>
-//         </DropdownMenu>
-//     );
-// };
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-normal">
+                    <span className="sr-only">Mở menu</span>
+                    <MoreHorizontal className="h-4 w-4" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => navigate(`/physical-donation/${row.original.id}`)}>
+                    Xem chi tiết
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+};
 
 const columns = [
     {
@@ -127,10 +126,10 @@ const columns = [
             <div>{format(new Date(row.getValue('createdAt')), 'dd/MM/yyyy HH:mm')}</div>
         ),
     },
-    // {
-    //     id: 'actions',
-    //     cell: ({ row }) => <ActionMenu row={row} />,
-    // },
+    {
+        id: 'actions',
+        cell: ({ row }) => <ActionMenu row={row} />,
+    },
 ];
 
 export const PhysicalDonationsList = ({ donations }) => {
@@ -160,9 +159,7 @@ export const PhysicalDonationsList = ({ donations }) => {
 
     return (
         <div className="w-full space-y-4">
-            <CardHeader className="bg-teal-600 text-white">
-                <CardTitle className="text-2xl font-semibold">Danh sách tặng quà</CardTitle>
-            </CardHeader>
+
             <ToolbarForPhysicalDonationsList table={table} />
             <div className="rounded-md border">
                 <Table>

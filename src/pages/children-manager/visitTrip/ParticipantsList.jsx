@@ -22,7 +22,6 @@ import { DataTableColumnHeader } from '@/components/datatable/DataTableColumnHea
 import { format } from 'date-fns';
 import { ToolbarForParticipantsList } from '@/components/datatable/ToolbarForParticipantsList';
 import { visitRegistrationStatus } from '@/config/combobox';
-import { CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 
 const statusColors = {
@@ -136,9 +135,7 @@ export const ParticipantsList = ({ registrations }) => {
 
     return (
         <div className="w-full space-y-4">
-            <CardHeader className="bg-teal-600 text-white">
-                <CardTitle className="text-2xl font-semibold">Danh sách tham gia</CardTitle>
-            </CardHeader>
+
             <ToolbarForParticipantsList table={table} />
             <div className="rounded-md border">
                 <Table>

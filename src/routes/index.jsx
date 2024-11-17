@@ -14,6 +14,7 @@ import FundUsageDetail from '@/pages/admin/fund/FundUsageDetail';
 import UpdateVisitForm from '@/pages/children-manager/visitTrip/UpdateVisitForm';
 import VisitRefundProof from '@/pages/children-manager/visitTrip/VisitRefundProof';
 import SettingsPage from '@/pages/admin/Setting';
+import PhysicalDonationDetail from '@/pages/children-manager/visitTrip/PhysicalDonationDetail';
 
 
 const Loadable = (Component) => {
@@ -76,6 +77,8 @@ export default function Router() {
                 { element: <FundUsageDetail />, path: 'fund/usage/:id' },
                 { element: <UpdateVisitForm />, path: 'visit/edit/:id' },
                 { element: <VisitRefundProof />, path: 'visit-refund/:id' },
+                { element: <PhysicalDonationDetail />, path: 'physical-donation/:id' },
+
                 { path: '404', element: <Page404 /> },
             ],
         },
