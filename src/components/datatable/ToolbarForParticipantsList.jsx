@@ -11,7 +11,7 @@ export function ToolbarForParticipantsList({ table }) {
 
     const filters = [
         {
-            name: 'status',
+            name: 'Trạng thái',
             options: visitRegistrationStatus.map(status => ({
                 value: status.value.toString(),
                 label: status.label

@@ -295,7 +295,7 @@ const FundSourceTable = ({ data, onFilterChange }) => {
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id} className="bg-slate-50 hover:bg-slate-50">
                                 {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id} className="h-10 px-2 text-slate-600">
+                                    <TableHead key={header.id} className="h-10  text-slate-600">
                                         {header.isPlaceholder
                                             ? null
                                             : flexRender(header.column.columnDef.header, header.getContext())}

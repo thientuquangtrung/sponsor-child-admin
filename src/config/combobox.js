@@ -152,7 +152,7 @@ export const giftDeliveryMethod = [
 export const giftStatus = [
     { label: 'Chờ xử lý', value: 0 },
     { label: 'Đang vận chuyển', value: 1 },
-    { label: 'Đã giao', value: 2 },
+    { label: 'Đã nhận quà', value: 2 },
     { label: 'Đã hủy', value: 3 },
     { label: 'Đã trả lại', value: 4 },
     { label: 'Không giao được', value: 5 },
