@@ -4,22 +4,35 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Pencil, ChevronDown } from "lucide-react";
+import { Pencil, ChevronDown, Loader2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
     Collapsible,
     CollapsibleContent,
     CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import LoadingScreen from '@/components/common/LoadingScreen';
-import { useGetChildrenVisitTripsByIdQuery } from '@/redux/childrenVisitTrips/childrenVisitTripsApi';
+import { useGetChildrenVisitTripsByIdQuery, useUpdateChildrenVisitTripStatusMutation } from '@/redux/childrenVisitTrips/childrenVisitTripsApi';
 import ImageGallery from '@/pages/admin/campaign/ImageGallery';
 import Breadcrumb from '@/pages/admin/Breadcrumb';
 import { visitStatus } from '@/config/combobox';
 import ParticipantsList from '@/pages/children-manager/visitTrip/ParticipantsList';
 import PhysicalDonationsList from '@/pages/children-manager/visitTrip/PhysicalDonationsList';
+import { toast } from 'sonner';
 
-const CollapsibleSection = ({ title, children, defaultOpen = true }) => {
-    const [isOpen, setIsOpen] = useState(defaultOpen);
+const CollapsibleSection = ({ title, children }) => {
+    const [isOpen, setIsOpen] = useState(true);
 
     return (
         <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
@@ -28,8 +41,7 @@ const CollapsibleSection = ({ title, children, defaultOpen = true }) => {
                     <CardHeader className="bg-teal-600 text-white flex flex-row items-center justify-between cursor-pointer">
                         <CardTitle className="text-2xl font-semibold">{title}</CardTitle>
                         <ChevronDown
-                            className={`w-6 h-6 transition-transform ${isOpen ? "transform rotate-180" : ""
-                                }`}
+                            className={`w-6 h-6 transition-transform ${isOpen ? "transform rotate-180" : ""}`}
                         />
                     </CardHeader>
                 </CollapsibleTrigger>
@@ -40,13 +52,15 @@ const CollapsibleSection = ({ title, children, defaultOpen = true }) => {
         </Collapsible>
     );
 };
-
 const VisitDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { data: visitData, isLoading, isError } = useGetChildrenVisitTripsByIdQuery(id);
+    const [isLoading, setIsLoading] = useState(false);
+    const [cancellationReason, setCancellationReason] = useState('');
+    const { data: visitData, isLoading: visitLoading, isError, refetch } = useGetChildrenVisitTripsByIdQuery(id);
+    const [updateVisitStatus] = useUpdateChildrenVisitTripStatusMutation();
 
-    if (isLoading) {
+    if (visitLoading) {
         return <LoadingScreen />;
     }
 
@@ -62,6 +76,44 @@ const VisitDetail = () => {
         { name: 'Chuyến thăm', path: '/visits' },
         { name: 'Chi tiết chuyến thăm', path: null },
     ];
+
+    const handleStartVisit = async () => {
+        try {
+            setIsLoading(true);
+            await updateVisitStatus({
+                id,
+                status: 3
+            }).unwrap();
+            toast.success('Bắt đầu chuyến thăm thành công');
+            refetch();
+        } catch (error) {
+            console.error('Error starting visit:', error);
+            toast.error('Có lỗi xảy ra khi bắt đầu chuyến thăm');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleCancelVisit = async () => {
+        try {
+            setIsLoading(true);
+            await updateVisitStatus({
+                id,
+                status: 5,
+                cancellationReason: cancellationReason
+            }).unwrap();
+            toast.success('Hủy chuyến thăm thành công');
+            navigate('/visits');
+        } catch (error) {
+            console.error('Error canceling visit:', error);
+            toast.error('Có lỗi xảy ra khi hủy chuyến thăm');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const showStartButton = visitData.status === 2;
+    const showCancelButton = [0, 2].includes(visitData.status);
 
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('vi-VN');
@@ -85,27 +137,29 @@ const VisitDetail = () => {
     return (
         <>
             <Breadcrumb breadcrumbs={breadcrumbs} />
-
             <div className="min-h-screen bg-gray-50">
                 <div className="p-6">
-                    <div className="flex justify-end items-center mb-6">
-                        <Button
-                            className="bg-teal-600 hover:bg-teal-700 text-white"
-                            onClick={() => navigate(`/visit/edit/${id}`)}
-                        >
-                            <Pencil className="w-4 h-4 mr-2" />
-                            Cập nhật Chuyến thăm
-                        </Button>
+                    <div className="flex justify-end items-center space-x-4 mb-6">
+
+                        {visitData.status === 0 && (
+                            <Button
+                                className="bg-teal-600 hover:bg-teal-700 text-white"
+                                onClick={() => navigate(`/visit/edit/${id}`)}
+                            >
+                                <Pencil className="w-4 h-4 mr-2" />
+                                Cập nhật Chuyến thăm
+                            </Button>
+                        )}
+
                     </div>
                     <div className="space-y-6 max-w-7xl mx-auto">
-                        <CollapsibleSection title="Hình ảnh chuyến thăm" defaultOpen={true}>
+                        <CollapsibleSection title="Hình ảnh chuyến thăm">
                             <ImageGallery
                                 thumbnailUrl={visitData.thumbnailUrl}
                                 imagesFolderUrl={visitData.imagesFolderUrl}
                             />
                         </CollapsibleSection>
-
-                        <CollapsibleSection title="Thông tin chuyến thăm" defaultOpen={true}>
+                        <CollapsibleSection title="Thông tin chuyến thăm" >
                             <div className="space-y-6">
                                 <div className="col-span-full space-y-2">
                                     <Label htmlFor="title" className="text-lg font-medium text-gray-700">Tiêu đề:</Label>
@@ -224,7 +278,7 @@ const VisitDetail = () => {
                                             </div>
                                             <div className="text-right">
                                                 <span className="inline-block px-4 py-2 bg-teal-50 text-teal-700 rounded-full">
-                                                    {gift.amount} {gift.unit}
+                                                    {gift.currentAmount}/{gift.amount} {gift.unit}
                                                 </span>
                                             </div>
                                         </div>
@@ -243,6 +297,82 @@ const VisitDetail = () => {
                             <PhysicalDonationsList donations={visitData.physicalDonations} />
                         </CollapsibleSection>
                     </div>
+                    {visitData.cancellationReason && (
+                        <Card className="shadow-lg border-0">
+                            <CardHeader className="bg-teal-600 text-white">
+                                <CardTitle className="text-2xl font-semibold">Lý do từ chối</CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-6">
+                                <div className="bg-red-50 text-red-800 p-4 rounded-lg whitespace-pre-line">
+                                    {visitData.cancellationReason}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                </div>
+                <div className="flex justify-end items-center space-x-4 mb-6">
+
+                    {showStartButton && (
+                        <Button
+                            className="bg-green-600 hover:bg-green-700 text-white"
+                            onClick={handleStartVisit}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Đang xử lý
+                                </>
+                            ) : (
+                                'Bắt đầu chuyến thăm'
+                            )}
+                        </Button>
+                    )}
+
+
+                    {showCancelButton && (
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button className="bg-red-600 hover:bg-red-700 text-white">
+                                    Hủy chuyến thăm
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Xác nhận hủy chuyến thăm</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Vui lòng nhập lý do hủy chuyến thăm này.
+                                        Hành động này không thể hoàn tác.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <div className="my-4">
+                                    <Textarea
+                                        placeholder="Nhập lý do hủy..."
+                                        value={cancellationReason}
+                                        onChange={(e) => setCancellationReason(e.target.value)}
+                                        className="min-h-[100px]"
+                                    />
+                                </div>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Hủy</AlertDialogCancel>
+                                    <AlertDialogAction
+                                        onClick={handleCancelVisit}
+                                        disabled={isLoading || !cancellationReason.trim()}
+                                    >
+                                        {isLoading ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Đang xử lý
+                                            </>
+                                        ) : (
+                                            'Xác nhận hủy'
+                                        )}
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    )}
                 </div>
             </div>
         </>
