@@ -4,13 +4,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Upload, Undo2, AlertCircle, MapPin, FileText, Landmark } from 'lucide-react';
+import { Upload, Undo2, AlertCircle, MapPin, FileText, Landmark, Banknote } from 'lucide-react';
 import { UPLOAD_FOLDER, UPLOAD_NAME, uploadFile } from '@/lib/cloudinary';
 import {
     useUpdateVisitTripRegistrationMutation,
     useGetVisitTripRegistrationByIdQuery
 } from '@/redux/visitTripRegistration/visitTripRegistrationApi';
-import { bankName, visitRegistrationStatus } from '@/config/combobox';
+import { bankName, visitRegistrationStatus, visitStatus } from '@/config/combobox';
 
 const VisitRefundProof = () => {
     const { id } = useParams();
@@ -91,71 +91,98 @@ const VisitRefundProof = () => {
     if (!registration) return null;
 
     const bankInfo = bankName.find(bank => bank.value === registration.bankName);
+    const calculateRefundPercentage = (refundAmount, visitCost) => {
+        return ((refundAmount / visitCost) * 100).toFixed(0);
+    };
 
     return (
-        <div className="rounded-lg p-6 flex flex-col items-center max-w-7xl min-h-screen  mx-auto">
+        <div className="rounded-lg p-6 flex flex-col items-center max-w-7xl min-h-screen mx-auto">
             <div className="text-teal-600 font-semibold italic mb-4">
                 Vui lòng tải lên minh chứng hoàn tiền cho chuyến thăm!
             </div>
-
             <div className="grid md:grid-cols-2 gap-6 w-full">
                 <div className="p-6 bg-teal-50 rounded-lg border border-teal-100">
-                    <div className="flex items-center gap-2 mb-4">
-                        <Landmark className="w-5 h-5 text-teal-500" />
-                        <h2 className="text-lg font-semibold text-teal-700">Thông tin chuyển khoản</h2>
+                    <div className='ml-4'>
+
+                        <div className="flex items-center gap-2 mb-4">
+                            <h2 className="text-lg font-semibold text-teal-700">Thông tin chuyến thăm</h2>
+                        </div>
+                        <div className="space-y-3">
+                            <div className="grid grid-cols-[180px,1fr] gap-2 items-center">
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium text-teal-700 whitespace-nowrap">Tiêu đề:</span>
+                                </div>
+                                <span className="text-gray-700 pl-2">{registration.visit.title}</span>
+                            </div>
+                            <div className="grid grid-cols-[180px,1fr] gap-2 items-center">
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium text-teal-700 whitespace-nowrap">Chi phí cho 1 người:</span>
+                                </div>
+                                <span className="text-gray-700 pl-2">{registration.visit.visitCost.toLocaleString('vi-VN')} VNĐ</span>
+                            </div>
+                            <div className="grid grid-cols-[180px,1fr] gap-2 items-center">
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium text-teal-700 whitespace-nowrap">Địa điểm:</span>
+                                </div>
+                                <span className="text-gray-700 pl-2">{registration.visit.province}</span>
+                            </div>
+                            <div className="grid grid-cols-[180px,1fr] gap-2 items-center">
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium text-teal-700 whitespace-nowrap">Trạng thái chuyến thăm:</span>
+                                </div>
+                                <span className="text-gray-700 pl-2">
+                                    {visitStatus.find(status => status.value === registration.visit.status)?.label}
+                                </span>
+                            </div>
+                            <div className="grid grid-cols-[180px,1fr] gap-2 items-center">
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium text-teal-700 whitespace-nowrap">Trạng thái đăng ký:</span>
+                                </div>
+                                <span className="text-gray-700 pl-2">
+                                    {visitRegistrationStatus.find(status => status.value === registration.status)?.label}
+                                </span>
+                            </div>
+                            <div className="grid grid-cols-[180px,1fr] gap-2 items-center">
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium text-teal-700 whitespace-nowrap">Lý do hủy:</span>
+                                </div>
+                                <span className="text-gray-700 pl-2">{registration.cancellationReason}</span>
+                            </div>
+                        </div>
                     </div>
-                    <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                            <span className="font-medium text-teal-700">Số tiền hoàn:</span>
-                            <span>{registration.refundAmount.toLocaleString('vi-VN')} VNĐ</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="font-medium text-teal-700">Tên tài khoản:</span>
-                            <span>{registration.bankAccountName}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="font-medium text-teal-700">Số tài khoản:</span>
-                            <span>{registration.bankAccountNumber}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="font-medium text-teal-700">Ngân hàng:</span>
-                            <span>{bankInfo?.label}</span>
-                        </div>
-                    </div>
+
                 </div>
 
-                <div className="p-6 bg-teal-50 rounded-lg border border-teal-100">
-                    <div className="flex items-center gap-2 mb-4">
-                        <MapPin className="w-5 h-5 text-teal-500" />
-                        <h2 className="text-lg font-semibold text-teal-700">Thông tin chuyến thăm</h2>
-                    </div>
-                    <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                            <FileText className="w-4 h-4 text-teal-500" />
-                            <span className="font-medium text-teal-700">Tiêu đề:</span>
-                            <span>{registration.visit.title}</span>
+                <div className="p-6  bg-teal-50 rounded-lg border border-teal-100">
+                    <div className='ml-4'>
+                        <div className="flex items-center gap-2 mb-4">
+                            <Landmark className="w-5 h-5 text-teal-500" />
+                            <h2 className="text-lg font-semibold text-teal-700">Thông tin chuyển khoản</h2>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <MapPin className="w-4 h-4 text-teal-500" />
-                            <span className="font-medium text-teal-700">Địa điểm:</span>
-                            <span>{registration.visit.province}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4 text-teal-500" />
-                            <span className="font-medium text-teal-700">Trạng thái đăng ký:</span>
-                            <span>
-                                {visitRegistrationStatus.find(status => status.value === registration.status)?.label}
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4 text-teal-500" />
-                            <span className="font-medium text-teal-700">Lý do hủy:</span>
-                            <span>{registration.cancellationReason}</span>
+                        <div className="space-y-3">
+                            <div className="grid grid-cols-[140px,1fr] gap-2 items-center">
+                                <span className="font-medium text-teal-700 whitespace-nowrap">Số tiền hoàn:</span>
+                                <span className="text-gray-700 pl-2">
+                                    {registration.refundAmount.toLocaleString('vi-VN')} VNĐ
+                                    ({calculateRefundPercentage(registration.refundAmount, registration.visit.visitCost)}%)
+                                </span>
+                            </div>
+                            <div className="grid grid-cols-[140px,1fr] gap-2 items-center">
+                                <span className="font-medium text-teal-700 whitespace-nowrap">Tên tài khoản:</span>
+                                <span className="text-gray-700 pl-2">{registration.bankAccountName}</span>
+                            </div>
+                            <div className="grid grid-cols-[140px,1fr] gap-2 items-center">
+                                <span className="font-medium text-teal-700 whitespace-nowrap">Số tài khoản:</span>
+                                <span className="text-gray-700 pl-2">{registration.bankAccountNumber}</span>
+                            </div>
+                            <div className="grid grid-cols-[140px,1fr] gap-2 items-center">
+                                <span className="font-medium text-teal-700 whitespace-nowrap">Ngân hàng:</span>
+                                <span className="text-gray-700 pl-2">{bankInfo?.label}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
             <Label htmlFor="upload" className="mt-4 font-medium">
                 {isSubmitted ? 'Minh chứng đã tải lên:' : 'Tải ảnh chuyển khoản:'}
             </Label>
@@ -189,28 +216,32 @@ const VisitRefundProof = () => {
             {uploadError && <p className="text-red-500 mt-2">{uploadError}</p>}
             {uploadSuccess && <p className="text-green-500 mt-2">{uploadSuccess}</p>}
 
-            {!isSubmitted && (
-                <Button
-                    className={`mt-4 bg-teal-600 text-white font-semibold py-2 px-4 rounded hover:bg-teal-700 transition duration-200 ${uploading || !file ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
-                    onClick={handleUpload}
-                    disabled={uploading || !file}
-                >
-                    {uploading ? 'Đang tải...' : 'Gửi minh chứng'}
-                </Button>
-            )}
+            {
+                !isSubmitted && (
+                    <Button
+                        className={`mt-4 bg-teal-600 text-white font-semibold py-2 px-4 rounded hover:bg-teal-700 transition duration-200 ${uploading || !file ? 'opacity-50 cursor-not-allowed' : ''
+                            }`}
+                        onClick={handleUpload}
+                        disabled={uploading || !file}
+                    >
+                        {uploading ? 'Đang tải...' : 'Gửi minh chứng'}
+                    </Button>
+                )
+            }
 
-            {showBackButton && (
-                <Button
-                    variant="outline"
-                    onClick={() => navigate(-1)}
-                    className="mt-4 text-teal-600 border-teal-600 hover:bg-normal hover:text-teal-600"
-                >
-                    <Undo2 className="mr-2 h-4 w-4" />
-                    Trở lại
-                </Button>
-            )}
-        </div>
+            {
+                showBackButton && (
+                    <Button
+                        variant="outline"
+                        onClick={() => navigate(-1)}
+                        className="mt-4 text-teal-600 border-teal-600 hover:bg-normal hover:text-teal-600"
+                    >
+                        <Undo2 className="mr-2 h-4 w-4" />
+                        Trở lại
+                    </Button>
+                )
+            }
+        </div >
     );
 };
 

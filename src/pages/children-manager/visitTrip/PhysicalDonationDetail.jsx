@@ -63,7 +63,8 @@ const PhysicalDonationDetail = () => {
     const [file, setFile] = useState(null);
     const [fileUrl, setFileUrl] = useState(null);
     const [uploading, setUploading] = useState(false);
-    const [showUploadSection, setShowUploadSection] = useState(false);
+    const [confirmLoading, setConfirmLoading] = useState(false);
+    const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
 
     useEffect(() => {
         if (donation?.proofOfDonation) {
@@ -85,6 +86,7 @@ const PhysicalDonationDetail = () => {
 
     const handleStatusUpdate = async (newStatus) => {
         try {
+            setConfirmLoading(true);
             let updateData = { giftStatus: newStatus };
 
             if (newStatus === 2 && !file && !donation?.proofOfDonation) {
@@ -110,12 +112,13 @@ const PhysicalDonationDetail = () => {
             await updatePhysicalDonation({ id, ...updateData }).unwrap();
             toast.success('Cập nhật trạng thái thành công!');
             await refetch();
-            setShowUploadSection(false);
+            setIsUploadDialogOpen(false);
         } catch (error) {
             console.error('Update failed:', error);
             toast.error('Cập nhật thất bại, vui lòng thử lại.');
         } finally {
             setUploading(false);
+            setConfirmLoading(false);
         }
     };
 
@@ -128,21 +131,100 @@ const PhysicalDonationDetail = () => {
 
     const renderActionButtons = () => (
         <div className="flex justify-end space-x-4">
-            {donation.giftStatus !== 2 && (
-                <Button
-                    className="bg-teal-600 hover:bg-teal-700 text-white"
-                    onClick={() => setShowUploadSection(true)}
-                >
-                    <Upload className="w-4 h-4 mr-2" />
-                    Tải lên minh chứng
-                </Button>
-            )}
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button
+                        className="bg-teal-600 hover:bg-teal-700 text-white"
+                        disabled={confirmLoading}
+                    >
+                        {confirmLoading ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Đang xử lý...
+                            </>
+                        ) : (
+                            'Xác nhận nhận quà'
+                        )}
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Tải lên ảnh xác nhận đã nhận quà</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Vui lòng tải lên hình ảnh minh chứng để xác nhận đã nhận quà
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className="p-4">
+                        <div
+                            className="relative w-full h-40 border-dashed border-2 border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
+                            onClick={() => document.getElementById('proofUpload').click()}
+                        >
+                            {fileUrl ? (
+                                <img
+                                    src={fileUrl}
+                                    alt="Proof"
+                                    className="h-full w-full object-contain rounded-lg"
+                                />
+                            ) : (
+                                <div className="flex flex-col items-center">
+                                    <Upload className="h-8 w-8 text-gray-400" />
+                                    <span className="mt-2 text-sm text-gray-500">
+                                        Click để chọn ảnh hoặc kéo thả vào đây
+                                    </span>
+                                </div>
+                            )}
+                            <Input
+                                type="file"
+                                id="proofUpload"
+                                className="hidden"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                            />
+                        </div>
+                    </div>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => {
+                            setFileUrl(null);
+                            setFile(null);
+                        }}>Hủy</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => handleStatusUpdate(2)}
+                            disabled={uploading || (!fileUrl && !donation.proofOfDonation) || confirmLoading}
+                            className="bg-teal-600 hover:bg-teal-700"
+                        >
+                            {uploading ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Đang tải...
+                                </>
+                            ) : confirmLoading ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Đang xử lý...
+                                </>
+                            ) : 'Xác nhận'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
 
             <AlertDialog>
                 <AlertDialogTrigger asChild>
-                    <Button variant="destructive">
-                        <AlertCircle className="w-4 h-4 mr-2" />
-                        Hủy
+                    <Button
+                        variant="destructive"
+                        disabled={confirmLoading}
+                    >
+                        {confirmLoading ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Đang xử lý...
+                            </>
+                        ) : (
+                            <>
+                                <AlertCircle className="w-4 h-4 mr-2" />
+                                Hủy
+                            </>
+                        )}
                     </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -156,65 +238,22 @@ const PhysicalDonationDetail = () => {
                         <AlertDialogCancel>Không</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={() => handleStatusUpdate(3)}
+                            disabled={confirmLoading}
                             className="bg-red-500 hover:bg-red-700"
                         >
-                            Xác nhận hủy
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-
-            <AlertDialog>
-                <AlertDialogTrigger asChild>
-                    <Button
-                        variant="outline"
-                        className="bg-yellow-400 hover:bg-yellow-600"
-                    >
-                        Hoàn trả quà
-                    </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Xác nhận hoàn trả</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Bạn có chắc chắn muốn hoàn trả quyên góp này? Hành động này không thể hoàn tác.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Không</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={() => handleStatusUpdate(4)}
-                            className="bg-yellow-400 hover:bg-yellow-600"
-                        >
-                            Xác nhận hoàn trả
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-
-            <AlertDialog>
-                <AlertDialogTrigger asChild>
-                    <Button variant="secondary">
-                        Không giao được
-                    </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Xác nhận không giao được</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Bạn có chắc chắn  quyên góp này là không giao được? Hành động này không thể hoàn tác.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Không</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleStatusUpdate(5)}>
-                            Xác nhận
+                            {confirmLoading ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Đang xử lý...
+                                </>
+                            ) : 'Xác nhận hủy'}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
         </div>
     );
+
     return (
         <div className="container mx-auto p-6 space-y-6">
             <Card className="shadow-lg border-0">
@@ -281,12 +320,12 @@ const PhysicalDonationDetail = () => {
                         </div>
                     </div>
 
-                    {(fileUrl || donation.proofOfDonation) && (
+                    {(donation.proofOfDonation) && (
                         <div className="md:col-span-2 space-y-2">
-                            <Label className="text-lg font-medium text-gray-700">Hình ảnh minh chứng:</Label>
+                            <Label className="text-lg font-medium text-gray-700">Ảnh xác nhận đã nhận quà:</Label>
                             <div className="mt-2">
                                 <img
-                                    src={fileUrl || donation.proofOfDonation}
+                                    src={donation.proofOfDonation}
                                     alt="Proof of donation"
                                     className="max-w-xs rounded-lg"
                                 />
@@ -296,69 +335,13 @@ const PhysicalDonationDetail = () => {
                 </CardContent>
             </Card>
 
-            {showUploadSection ? (
-                <Card className="shadow-lg border-0">
-                    <CardHeader className="bg-teal-600 text-white">
-                        <CardTitle className="text-2xl font-semibold">Tải lên minh chứng nhận quà</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-6">
-                        <div
-                            className="relative w-full h-40 border-dashed border-2 border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
-                            onClick={() => document.getElementById('proofUpload').click()}
-                        >
-                            {fileUrl ? (
-                                <img
-                                    src={fileUrl}
-                                    alt="Proof"
-                                    className="h-full w-full object-contain rounded-lg"
-                                />
-                            ) : (
-                                <div className="flex flex-col items-center">
-                                    <Upload className="h-8 w-8 text-gray-400" />
-                                    <span className="mt-2 text-sm text-gray-500">
-                                        Click để chọn ảnh hoặc kéo thả vào đây
-                                    </span>
-                                </div>
-                            )}
-                            <Input
-                                type="file"
-                                id="proofUpload"
-                                className="hidden"
-                                accept="image/*"
-                                onChange={handleFileChange}
-                            />
-                        </div>
-                        <div className="mt-4 flex justify-end space-x-4">
-                            <Button
-                                variant="outline"
-                                onClick={() => setShowUploadSection(false)}
-                            >
-                                Hủy
-                            </Button>
-                            <Button
-                                className="bg-teal-400 hover:bg-teal-600"
-                                onClick={() => handleStatusUpdate(2)}
-                                disabled={uploading || (!fileUrl && !donation.proofOfDonation)}
-                            >
-                                {uploading ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Đang tải...
-                                    </>
-                                ) : 'Xác nhận nhận quà'}
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            ) : (
-                <div className="flex flex-col space-y-4">
-                    {donation.giftStatus !== 2 &&
-                        donation.giftStatus !== 3 &&
-                        donation.giftStatus !== 4 &&
-                        donation.giftStatus !== 5 &&
-                        renderActionButtons()}
-                </div>
-            )}
+            <div className="flex flex-col space-y-4">
+                {donation.giftStatus !== 2 &&
+                    donation.giftStatus !== 3 &&
+                    donation.giftStatus !== 4 &&
+                    donation.giftStatus !== 5 &&
+                    renderActionButtons()}
+            </div>
         </div>
     );
 };

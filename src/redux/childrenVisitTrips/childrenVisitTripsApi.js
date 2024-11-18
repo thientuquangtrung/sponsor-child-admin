@@ -22,6 +22,13 @@ export const childrenVisitTripsApi = baseApi.injectEndpoints({
                 body: data,
             }),
         }),
+        updateChildrenVisitTripStatus: builder.mutation({
+            query: ({ id, ...data }) => ({
+                url: `/ChildrenVisitTrips/${id}/status`,
+                method: 'PUT',
+                body: data,
+            }),
+        }),
         getChildrenVisitTripsByProvince: builder.query({
             query: (province) => ({
                 url: `/ChildrenVisitTrips/province`,
@@ -37,4 +44,5 @@ export const {
     useGetChildrenVisitTripsByIdQuery,
     useUpdateChildrenVisitTripsMutation,
     useGetChildrenVisitTripsByProvinceQuery,
+    useUpdateChildrenVisitTripStatusMutation,
 } = childrenVisitTripsApi;
