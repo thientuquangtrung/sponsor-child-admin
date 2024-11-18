@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Pencil, ChevronDown, Loader2 } from "lucide-react";
+import { Pencil, ChevronDown, Loader2, AlertCircle, User, X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {
     AlertDialog,
@@ -57,9 +57,18 @@ const VisitDetail = () => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [cancellationReason, setCancellationReason] = useState('');
+    const [isParticipantAlertOpen, setIsParticipantAlertOpen] = useState(false);
     const { data: visitData, isLoading: visitLoading, isError, refetch } = useGetChildrenVisitTripsByIdQuery(id);
     const [updateVisitStatus] = useUpdateChildrenVisitTripStatusMutation();
 
+    useEffect(() => {
+        if (visitData && [1, 2].includes(visitData.status)) {
+            const participationThreshold = visitData.maxParticipants * (2 / 3);
+            if (visitData.participantsCount < participationThreshold) {
+                setIsParticipantAlertOpen(true);
+            }
+        }
+    }, [visitData]);
     if (visitLoading) {
         return <LoadingScreen />;
     }
@@ -113,7 +122,7 @@ const VisitDetail = () => {
     };
 
     const showStartButton = visitData.status === 2;
-    const showCancelButton = [0, 2].includes(visitData.status);
+    const showCancelButton = [0, 1, 2].includes(visitData.status);
 
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('vi-VN');
@@ -138,6 +147,37 @@ const VisitDetail = () => {
         <>
             <Breadcrumb breadcrumbs={breadcrumbs} />
             <div className="min-h-screen bg-gray-50">
+                <AlertDialog open={isParticipantAlertOpen} onOpenChange={setIsParticipantAlertOpen}>
+                    <AlertDialogContent className="max-w-md overflow-hidden">
+                        <AlertDialogCancel
+                            className="absolute top-0 right-0 hover:bg-red-500 hover:text-white rounded-full p-2">
+                            <X size={24} />
+                        </AlertDialogCancel>
+                        <AlertDialogHeader className="p-6 relative">
+                            <div className="flex items-center justify-center mb-3">
+                                <AlertDialogTitle className="text-xl text-teal-600 font-bold">
+                                    Số lượng người tham gia chưa đủ
+                                </AlertDialogTitle>
+                            </div>
+                            <AlertDialogDescription className="sr-only">
+                                Hiện tại có {visitData.participantsCount} người tham gia, yêu cầu tối thiểu {visitData.maxParticipants} người.
+                            </AlertDialogDescription>
+                            <div className="text-teal-600">
+                                <div className="flex items-center justify-center gap-4">
+                                    <div className="text-center">
+                                        <div className="text-3xl font-bold">{visitData.participantsCount}</div>
+                                        <div className="text-sm text-teal-600">Hiện tại</div>
+                                    </div>
+                                    <div className="text-2xl">/</div>
+                                    <div className="text-center">
+                                        <div className="text-3xl font-bold">{visitData.maxParticipants}</div>
+                                        <div className="text-sm text-teal-600">Yêu cầu</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </AlertDialogHeader>
+                    </AlertDialogContent>
+                </AlertDialog>
                 <div className="p-6">
                     <div className="flex justify-end items-center space-x-4 mb-6">
 
@@ -296,19 +336,13 @@ const VisitDetail = () => {
                         <CollapsibleSection title="Danh sách quyên góp" defaultOpen={false}>
                             <PhysicalDonationsList donations={visitData.physicalDonations} />
                         </CollapsibleSection>
+
+                        {visitData.cancellationReason && (
+                            <CollapsibleSection title="Lý do từ chối" defaultOpen={false}>
+                                {visitData.cancellationReason}
+                            </CollapsibleSection>
+                        )}
                     </div>
-                    {visitData.cancellationReason && (
-                        <Card className="shadow-lg border-0">
-                            <CardHeader className="bg-teal-600 text-white">
-                                <CardTitle className="text-2xl font-semibold">Lý do từ chối</CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-6">
-                                <div className="bg-red-50 text-red-800 p-4 rounded-lg whitespace-pre-line">
-                                    {visitData.cancellationReason}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
 
                 </div>
                 <div className="flex justify-end items-center space-x-4 mb-6">
