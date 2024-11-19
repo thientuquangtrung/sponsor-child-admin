@@ -393,6 +393,7 @@ const VisitDetail = () => {
                                     <AlertDialogAction
                                         onClick={handleCancelVisit}
                                         disabled={isLoading || !cancellationReason.trim()}
+                                        className="bg-red-600 hover:bg-red-700 text-white"
                                     >
                                         {isLoading ? (
                                             <>

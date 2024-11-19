@@ -24,6 +24,7 @@ import Breadcrumb from '@/pages/admin/Breadcrumb';
 import { transactionType, transactionStatus } from '@/config/combobox';
 import { useGetTransactionQuery } from '@/redux/transaction/transactionApi';
 import ToolbarForTransaction from '@/components/datatable/ToolbarForTransaction';
+import * as XLSX from 'xlsx';
 
 const getTransactionTypeLabel = (value) => {
     const type = transactionType.find((t) => t.value === value);
@@ -143,7 +144,7 @@ const ActionMenu = ({ row }) => {
 export function FinanceTransaction() {
     const navigate = useNavigate();
     const { data: transactionData = [], isLoading } = useGetTransactionQuery();
-    const [sorting, setSorting] = React.useState([{ id: 'transactionDate', desc: true }]); 
+    const [sorting, setSorting] = React.useState([{ id: 'transactionDate', desc: true }]);
     const [columnFilters, setColumnFilters] = React.useState([]);
     const [columnVisibility, setColumnVisibility] = React.useState({});
     const [rowSelection, setRowSelection] = React.useState({});
@@ -173,6 +174,26 @@ export function FinanceTransaction() {
     });
 
     if (isLoading) return <div>Loading...</div>;
+    const handleExportExcel = () => {
+        const dataToExport = transactionData.map(item => ({
+            'Tên giao dịch': item.transactionName,
+            'Ngày giao dịch': new Date(item.transactionDate).toLocaleDateString('vi-VN'),
+            'Số tiền': item.amount.toLocaleString('vi-VN'),
+            'Loại giao dịch': getTransactionTypeLabel(item.type),
+            'Trạng thái': getTransactionStatusLabel(item.status)
+        }));
+        const ws = XLSX.utils.json_to_sheet(dataToExport);
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Transactions");
+
+        const colWidths = Object.keys(dataToExport[0]).map(key => ({
+            wch: Math.max(key.length, ...dataToExport.map(item => String(item[key]).length))
+        }));
+        ws['!cols'] = colWidths;
+
+        XLSX.writeFile(wb, `Transactions_${new Date().toLocaleDateString()}.xlsx`);
+    };
 
     return (
         <>
@@ -181,9 +202,9 @@ export function FinanceTransaction() {
                 <div className="flex justify-end">
                     <Button
                         className="mr-2 mt-3 border-2 border-[#25a5a7] bg-transparent text-[#25a5a7] hover:bg-[#25a5a7] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600"
-                        onClick={() => navigate('/admin/finance/export-transaction')}
+                        onClick={handleExportExcel}
                     >
-                        Export Transaction
+                        Tải xuống Excel
                     </Button>
                 </div>
                 <ToolbarForTransaction table={table} />
