@@ -138,8 +138,6 @@ const ActionMenu = ({ row }) => {
                     <Eye className="mr-2 h-4 w-4" />
                     Xem chi tiết
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-
             </DropdownMenuContent>
         </DropdownMenu>
     );

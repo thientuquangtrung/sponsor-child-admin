@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Upload, Undo2, AlertCircle, MapPin, FileText, Landmark, Banknote } from 'lucide-react';
+import { Upload, Undo2, Landmark, } from 'lucide-react';
 import { UPLOAD_FOLDER, UPLOAD_NAME, uploadFile } from '@/lib/cloudinary';
 import {
     useUpdateVisitTripRegistrationMutation,
@@ -59,10 +59,11 @@ const VisitRefundProof = () => {
         setUploadSuccess(null);
 
         try {
+            const eventID = registration?.visit?.id;
             const uploadResult = await uploadFile({
                 file,
-                folder: UPLOAD_FOLDER.getVisitTransferProofFolder(id),
-                customFilename: `${UPLOAD_NAME.TRANSFER_PROOF_IMAGE}_${id}`,
+                folder: UPLOAD_FOLDER.getVisitTransferProofFolder(eventID),
+                customFilename: `${UPLOAD_NAME.REFUND_PROOF_IMAGE}_${id}`,
             });
 
             if (!uploadResult) {

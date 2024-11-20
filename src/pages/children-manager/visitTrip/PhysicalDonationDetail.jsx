@@ -96,9 +96,11 @@ const PhysicalDonationDetail = () => {
 
             if (newStatus === 2 && file) {
                 setUploading(true);
+                const eventID = donation?.visit?.id;
+
                 const uploadResult = await uploadFile({
                     file,
-                    folder: UPLOAD_FOLDER.getVisitDonationProofFolder(id),
+                    folder: UPLOAD_FOLDER.getVisitDonationProofFolder(eventID),
                     customFilename: `${UPLOAD_NAME.DONATION_PROOF_IMAGE}_${id}`,
                 });
 
