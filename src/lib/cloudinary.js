@@ -43,8 +43,8 @@ const UPLOAD_NAME = {
     //disbursement
     DISBURSEMENT_RECEIPT: 'receipt_phase',
     //visitTrip
-    TRANSFER_PROOF_IMAGE: 'transfer_proof_image',
-    DONATION_PROOF_IMAGE: 'donation_proof_image',
+    DONATION_PROOF_IMAGE: 'donation_confirmed',
+    REFUND_PROOF_IMAGE: 'refund',
 };
 
 // Create a Cloudinary instance and set your cloud name.
