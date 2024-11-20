@@ -57,18 +57,11 @@ const VisitDetail = () => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [cancellationReason, setCancellationReason] = useState('');
-    const [isParticipantAlertOpen, setIsParticipantAlertOpen] = useState(false);
     const { data: visitData, isLoading: visitLoading, isError, refetch } = useGetChildrenVisitTripsByIdQuery(id);
     const [updateVisitStatus] = useUpdateChildrenVisitTripStatusMutation();
+    const [isConfirmStartVisitOpen, setIsConfirmStartVisitOpen] = useState(false);
 
-    useEffect(() => {
-        if (visitData && [1, 2].includes(visitData.status)) {
-            const participationThreshold = visitData.maxParticipants * (2 / 3);
-            if (visitData.participantsCount < participationThreshold) {
-                setIsParticipantAlertOpen(true);
-            }
-        }
-    }, [visitData]);
+
     if (visitLoading) {
         return <LoadingScreen />;
     }
@@ -87,6 +80,15 @@ const VisitDetail = () => {
     ];
 
     const handleStartVisit = async () => {
+        const participationThreshold = visitData.maxParticipants * (2 / 3);
+        if (visitData.participantsCount < participationThreshold) {
+            setIsConfirmStartVisitOpen(true);
+            return;
+        }
+
+        await performStartVisit();
+    };
+    const performStartVisit = async () => {
         try {
             setIsLoading(true);
             await updateVisitStatus({
@@ -100,9 +102,9 @@ const VisitDetail = () => {
             toast.error('Có lỗi xảy ra khi bắt đầu chuyến thăm');
         } finally {
             setIsLoading(false);
+            setIsConfirmStartVisitOpen(false);
         }
     };
-
     const handleCancelVisit = async () => {
         try {
             setIsLoading(true);
@@ -147,35 +149,40 @@ const VisitDetail = () => {
         <>
             <Breadcrumb breadcrumbs={breadcrumbs} />
             <div className="min-h-screen bg-gray-50">
-                <AlertDialog open={isParticipantAlertOpen} onOpenChange={setIsParticipantAlertOpen}>
-                    <AlertDialogContent className="max-w-md overflow-hidden">
-                        <AlertDialogCancel
-                            className="absolute top-0 right-0 hover:bg-red-500 hover:text-white rounded-full p-2">
-                            <X size={24} />
-                        </AlertDialogCancel>
-                        <AlertDialogHeader className="p-6 relative">
-                            <div className="flex items-center justify-center mb-3">
-                                <AlertDialogTitle className="text-xl text-teal-600 font-bold">
-                                    Số lượng người tham gia chưa đủ
-                                </AlertDialogTitle>
-                            </div>
-                            <AlertDialogDescription className="sr-only">
-                                Hiện tại có {visitData.participantsCount} người tham gia, yêu cầu tối thiểu {visitData.maxParticipants} người.
+                {visitData.status === 2 && visitData.participantsCount < visitData.maxParticipants * (2 / 3) && (
+                    <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
+                        <div className="flex items-center">
+                            <AlertCircle className="w-6 h-6 mr-2" />
+                            <p className="font-bold">Số lượng người tham gia chưa đạt. Hiện tại chuyến thăm này chỉ có {visitData.participantsCount}/{visitData.maxParticipants} người tham gia.
+                            </p>
+                        </div>
+                    </div>
+                )}
+                <AlertDialog
+                    open={isConfirmStartVisitOpen}
+                    onOpenChange={setIsConfirmStartVisitOpen}
+                >
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle className="text-green-600">
+                                Số lượng người tham gia chưa đủ
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Hiện tại chỉ có {visitData.participantsCount}/{visitData.maxParticipants} người tham gia
+                                Bạn có chắc chắn muốn bắt đầu chuyến thăm này không?
                             </AlertDialogDescription>
-                            <div className="text-teal-600">
-                                <div className="flex items-center justify-center gap-4">
-                                    <div className="text-center">
-                                        <div className="text-3xl font-bold">{visitData.participantsCount}</div>
-                                        <div className="text-sm text-teal-600">Hiện tại</div>
-                                    </div>
-                                    <div className="text-2xl">/</div>
-                                    <div className="text-center">
-                                        <div className="text-3xl font-bold">{visitData.maxParticipants}</div>
-                                        <div className="text-sm text-teal-600">Yêu cầu</div>
-                                    </div>
-                                </div>
-                            </div>
                         </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel
+                                className="bg-gray-800 hover:bg-gray-900 text-white hover:text-white">
+                                Hủy</AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={performStartVisit}
+                                className="bg-green-600 hover:bg-green-700 text-white"
+                            >
+                                Xác nhận bắt đầu
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
                 <div className="p-6">
@@ -192,7 +199,9 @@ const VisitDetail = () => {
                         )}
 
                     </div>
+
                     <div className="space-y-6 max-w-7xl mx-auto">
+
                         <CollapsibleSection title="Hình ảnh chuyến thăm">
                             <ImageGallery
                                 thumbnailUrl={visitData.thumbnailUrl}
@@ -389,7 +398,8 @@ const VisitDetail = () => {
                                     />
                                 </div>
                                 <AlertDialogFooter>
-                                    <AlertDialogCancel>Hủy</AlertDialogCancel>
+                                    <AlertDialogCancel className="bg-gray-800 hover:bg-gray-900 text-white hover:text-white">
+                                        Hủy</AlertDialogCancel>
                                     <AlertDialogAction
                                         onClick={handleCancelVisit}
                                         disabled={isLoading || !cancellationReason.trim()}
