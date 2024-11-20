@@ -142,7 +142,7 @@ export const visitRegistrationStatus = [
     { label: 'Đang chờ hoàn tiền', value: 2 },
     { label: 'Hủy đăng ký', value: 3 },
     { label: 'Góp vào quỹ chung', value: 4 },
-    { label: 'Đang chờ hoàn tiền do chuyến thăm hủy', value: 5 },
+    { label: 'Đang chờ hoàn tiền', value: 5 },
 ];
 export const giftDeliveryMethod = [
     { label: 'Giao tận nơi', value: 0 },

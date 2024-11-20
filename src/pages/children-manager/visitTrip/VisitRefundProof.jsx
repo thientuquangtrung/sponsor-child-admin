@@ -70,9 +70,10 @@ const VisitRefundProof = () => {
                 throw new Error('Không nhận được link tải lên.');
             }
 
+            const updateStatus = registration?.visit?.status === 5 ? 5 : 3;
             await updateVisitTripRegistration({
                 id: id,
-                status: 3,
+                status: updateStatus,
                 transferProofImageUrl: uploadResult.secure_url,
             }).unwrap();
 
