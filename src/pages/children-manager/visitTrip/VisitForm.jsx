@@ -240,10 +240,12 @@ const VisitForm = () => {
                                                         <FormControl>
                                                             <Input
                                                                 type="number"
-                                                                min="1"
                                                                 {...field}
                                                                 placeholder="Nhập số lượng"
-
+                                                                onChange={(e) => {
+                                                                    const value = Math.max(1, parseInt(e.target.value) || 1);
+                                                                    field.onChange(value.toString());
+                                                                }}
                                                             />
                                                         </FormControl>
                                                         <FormMessage />

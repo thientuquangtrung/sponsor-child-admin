@@ -273,32 +273,13 @@ const UpdateVisitForm = () => {
                                                 render={({ field }) => (
                                                     <FormItem className="col-span-1">
                                                         <FormLabel>Tỉnh/Thành phố</FormLabel>
-                                                        <Select
-                                                            onValueChange={(value) => {
-                                                                const province = provinces.find(p => p.name === value);
-                                                                if (province) {
-                                                                    setSelectedProvince(province);
-                                                                    field.onChange(province.name);
-                                                                }
-                                                            }}
-                                                            value={field.value}
-                                                        >
-                                                            <FormControl>
-                                                                <SelectTrigger>
-                                                                    <SelectValue placeholder="Chọn tỉnh/thành" />
-                                                                </SelectTrigger>
-                                                            </FormControl>
-                                                            <SelectContent>
-                                                                {provinces.map((province) => (
-                                                                    <SelectItem
-                                                                        key={province.id}
-                                                                        value={province.name}
-                                                                    >
-                                                                        {province.name}
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
+                                                        <FormControl>
+                                                            <Input
+                                                                {...field}
+                                                                readOnly
+                                                                className="cursor-not-allowed"
+                                                            />
+                                                        </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
                                                 )}
@@ -313,9 +294,12 @@ const UpdateVisitForm = () => {
                                                         <FormControl>
                                                             <Input
                                                                 type="number"
-                                                                min="1"
                                                                 {...field}
                                                                 placeholder="Nhập số lượng"
+                                                                onChange={(e) => {
+                                                                    const value = Math.max(1, parseInt(e.target.value) || 1);
+                                                                    field.onChange(value.toString());
+                                                                }}
                                                             />
                                                         </FormControl>
                                                         <FormMessage />

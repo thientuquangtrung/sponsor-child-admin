@@ -48,7 +48,14 @@ export const GiftRequests = ({ form }) => {
                             <FormItem>
                                 <FormLabel>Số lượng</FormLabel>
                                 <FormControl>
-                                    <Input type="number" min="1" {...field} />
+                                    <Input
+                                        type="number"
+                                        {...field}
+                                        onChange={(e) => {
+                                            const value = Math.max(1, parseInt(e.target.value) || 1);
+                                            field.onChange(value.toString());
+                                        }}
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
