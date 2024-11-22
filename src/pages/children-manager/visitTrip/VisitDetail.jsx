@@ -339,8 +339,12 @@ const VisitDetail = () => {
                         </CollapsibleSection>
 
                         <CollapsibleSection title="Danh sách người tham gia" defaultOpen={false}>
-                            <ParticipantsList registrations={visitData.visitRegistrations} />
+                            <ParticipantsList
+                                registrations={visitData.visitRegistrations}
+                                cost={visitData.visitCost}
+                            />
                         </CollapsibleSection>
+
 
                         <CollapsibleSection title="Danh sách quyên góp" defaultOpen={false}>
                             <PhysicalDonationsList donations={visitData.physicalDonations} />

@@ -207,8 +207,9 @@ const ActionMenu = ({ row }) => {
                 <DropdownMenuItem onClick={() => navigate(`/campaign/${row.original.campaignID}`)}>
                     <Eye className="mr-2 h-4 w-4" />
                     Xem chi tiết
-                </DropdownMenuItem>                <DropdownMenuSeparator />
-                <AlertDialog>
+                </DropdownMenuItem>
+                {/* <DropdownMenuSeparator /> */}
+                {/* <AlertDialog>
                     <AlertDialogTrigger asChild>
                         <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600">
                             Xóa chiến dịch
@@ -226,7 +227,7 @@ const ActionMenu = ({ row }) => {
                             <AlertDialogAction onClick={handleDelete}>Tiếp tục xóa</AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
-                </AlertDialog>
+                </AlertDialog> */}
             </DropdownMenuContent>
         </DropdownMenu>
     );
