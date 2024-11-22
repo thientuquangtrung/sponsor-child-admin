@@ -208,5 +208,19 @@ export const transactionType = [
 export const fundSourceType = [
     { label: 'Cá nhân', value: 0 },
     { label: 'Chiến dịch', value: 1 },
-    { label: 'Khác', value: 2 },
+    { label: 'Sự kiện', value: 2 },
+];
+
+export const configCategory = [
+    { label: 'Xác minh người dùng', value: 0 },
+    { label: 'Chiến dịch', value: 1 },
+    { label: 'Hợp đồng', value: 2 },
+    { label: 'Giải ngân', value: 3 },
+    { label: 'Giao dịch', value: 4 },
+    { label: 'Chuyến thăm', value: 5 },
+    { label: 'Thông báo', value: 6 },
+    { label: 'Quyên góp', value: 7 },
+    { label: 'Hệ thống', value: 8 },
+    { label: 'Quản trị viên', value: 9 },
+    { label: 'Email', value: 10 },
 ];
