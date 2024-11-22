@@ -16,7 +16,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { Eye, MoreHorizontal } from 'lucide-react';
+import { Download, Eye, MoreHorizontal } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DataTablePagination } from '@/components/datatable/DataTablePagination';
 import { DataTableColumnHeader } from '@/components/datatable/DataTableColumnHeader';
@@ -43,6 +43,11 @@ const columns = [
         cell: ({ row }) => <div>{row.getValue('transactionName')}</div>,
     },
     {
+        accessorKey: 'description',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Nội dung giao dịch" />,
+        cell: ({ row }) => <div>{row.getValue('description')}</div>,
+    },
+    {
         accessorKey: 'transactionDate',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Ngày giao dịch" />,
         cell: ({ row }) => <div>{new Date(row.getValue('transactionDate')).toLocaleDateString('vi-VN')}</div>,
@@ -50,7 +55,7 @@ const columns = [
     {
         accessorKey: 'amount',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Số tiền" />,
-        cell: ({ row }) => <div className="font-medium">{row.getValue('amount').toLocaleString('vi-VN')}</div>,
+        cell: ({ row }) => <div className="font-medium">{row.getValue('amount').toLocaleString('vi-VN')} ₫</div>,
     },
     {
         accessorKey: 'type',
@@ -115,31 +120,31 @@ const columns = [
             return value.includes(status);
         },
     },
-    {
-        id: 'actions',
-        cell: ({ row }) => <ActionMenu row={row} />,
-    },
+    // {
+    //     id: 'actions',
+    //     cell: ({ row }) => <ActionMenu row={row} />,
+    // },
 ];
 
-const ActionMenu = ({ row }) => {
-    const navigate = useNavigate();
-    return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-normal">
-                    <span className="sr-only">Mở menu</span>
-                    <MoreHorizontal className="h-4 w-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => navigate(`/disbursement-requests/${row.original.id}`)}>
-                    <Eye className="mr-2 h-4 w-4" />
-                    Xem chi tiết
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-    );
-};
+// const ActionMenu = ({ row }) => {
+//     const navigate = useNavigate();
+//     return (
+//         <DropdownMenu>
+//             <DropdownMenuTrigger asChild>
+//                 <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-normal">
+//                     <span className="sr-only">Mở menu</span>
+//                     <MoreHorizontal className="h-4 w-4" />
+//                 </Button>
+//             </DropdownMenuTrigger>
+//             <DropdownMenuContent align="end">
+//                 <DropdownMenuItem onClick={() => navigate(`/disbursement-requests/${row.original.id}`)}>
+//                     <Eye className="mr-2 h-4 w-4" />
+//                     Xem chi tiết
+//                 </DropdownMenuItem>
+//             </DropdownMenuContent>
+//         </DropdownMenu>
+//     );
+// };
 
 export function FinanceTransaction() {
     const navigate = useNavigate();
@@ -175,20 +180,20 @@ export function FinanceTransaction() {
 
     if (isLoading) return <div>Loading...</div>;
     const handleExportExcel = () => {
-        const dataToExport = transactionData.map(item => ({
+        const dataToExport = transactionData.map((item) => ({
             'Tên giao dịch': item.transactionName,
             'Ngày giao dịch': new Date(item.transactionDate).toLocaleDateString('vi-VN'),
             'Số tiền': item.amount.toLocaleString('vi-VN'),
             'Loại giao dịch': getTransactionTypeLabel(item.type),
-            'Trạng thái': getTransactionStatusLabel(item.status)
+            'Trạng thái': getTransactionStatusLabel(item.status),
         }));
         const ws = XLSX.utils.json_to_sheet(dataToExport);
 
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Transactions");
+        XLSX.utils.book_append_sheet(wb, ws, 'Transactions');
 
-        const colWidths = Object.keys(dataToExport[0]).map(key => ({
-            wch: Math.max(key.length, ...dataToExport.map(item => String(item[key]).length))
+        const colWidths = Object.keys(dataToExport[0]).map((key) => ({
+            wch: Math.max(key.length, ...dataToExport.map((item) => String(item[key]).length)),
         }));
         ws['!cols'] = colWidths;
 
@@ -204,6 +209,7 @@ export function FinanceTransaction() {
                         className="mr-2 mt-3 border-2 border-[#25a5a7] bg-transparent text-[#25a5a7] hover:bg-[#25a5a7] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600"
                         onClick={handleExportExcel}
                     >
+                        <Download className="mr-2 h-4 w-4" />
                         Tải xuống Excel
                     </Button>
                 </div>
