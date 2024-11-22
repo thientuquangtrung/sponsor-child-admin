@@ -29,6 +29,7 @@ import ChildSearch from '@/pages/admin/campaign/ChildSearch';
 import DetailDisbursementPlan from '@/pages/admin/campaign/DetailDisbursementPlan';
 import CampaignSuspended from '@/pages/admin/campaign/CampaignSuspended';
 import CancelCampaign from '@/pages/admin/campaign/CancelCampaign';
+import DonateFromFund from './DonateFromFund';
 
 const DetailCampaign = () => {
     const { id } = useParams();
@@ -385,13 +386,21 @@ const DetailCampaign = () => {
                                             }}
                                         />
                                     )}
-
+                                    {campaignData.status === 7 && (
+                                        <DonateFromFund
+                                            campaignId={id}
+                                            userId={user.userID}
+                                            targetAmount={campaignData.targetAmount}
+                                            raisedAmount={campaignData.raisedAmount}
+                                            onSuccess={refetch}
+                                        />
+                                    )}
                                     {showPauseButton && (
                                         <Button
                                             className="bg-yellow-600 hover:bg-yellow-700 text-white"
                                             onClick={() => setShowSuspendForm(true)}
                                         >
-                                            Tạo ngưng chiến dịch
+                                            Tạm ngưng chiến dịch
                                         </Button>
                                     )}
                                 </>

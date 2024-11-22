@@ -115,10 +115,10 @@ const columns = [
             return value.includes(status);
         },
     },
-    {
-        id: 'actions',
-        cell: ({ row }) => <ActionMenu row={row} />,
-    },
+    // {
+    //     id: 'actions',
+    //     cell: ({ row }) => <ActionMenu row={row} />,
+    // },
 ];
 
 const ActionMenu = ({ row }) => {

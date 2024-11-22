@@ -76,9 +76,23 @@ const columns = [
         cell: ({ row }) => <div className="font-medium">{row.getValue('userName')}</div>,
     },
     {
+        accessorKey: 'phoneNumber',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Số điện thoại" />,
+        cell: ({ row }) => <div className="font-medium">{row.getValue('phoneNumber')}</div>,
+    },
+    {
         accessorKey: 'visitTitle',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Tên chuyến thăm" />,
-        cell: ({ row }) => <div>{row.getValue('visitTitle')}</div>,
+        cell: ({ row }) => <div className='max-w-[200px] truncate'>{row.getValue('visitTitle')}</div>,
+    },
+    {
+        id: 'cost',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Chi phí" />,
+        cell: ({ table }) => (
+            <div className="font-medium">
+                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(table.options.meta?.cost || 0)}
+            </div>
+        ),
     },
     {
         accessorKey: 'createdAt',
@@ -98,18 +112,13 @@ const columns = [
             return value.includes(row.getValue(id).toString());
         },
     },
-    // {
-    //     accessorKey: 'cancellationReason',
-    //     header: ({ column }) => <DataTableColumnHeader column={column} title="Lý do hủy" />,
-    //     cell: ({ row }) => <div>{row.getValue('cancellationReason') || '-'}</div>,
-    // },
     {
         id: 'actions',
         cell: ({ row }) => <ActionMenu row={row} />,
     },
 ];
 
-export const ParticipantsList = ({ registrations }) => {
+export const ParticipantsList = ({ registrations, cost }) => {
     const [sorting, setSorting] = React.useState([]);
     const [columnFilters, setColumnFilters] = React.useState([]);
     const [columnVisibility, setColumnVisibility] = React.useState({});
@@ -126,6 +135,9 @@ export const ParticipantsList = ({ registrations }) => {
         getFilteredRowModel: getFilteredRowModel(),
         onColumnVisibilityChange: setColumnVisibility,
         onRowSelectionChange: setRowSelection,
+        meta: {
+            cost,
+        },
         state: {
             sorting,
             columnFilters,

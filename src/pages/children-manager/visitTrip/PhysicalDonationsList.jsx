@@ -82,7 +82,7 @@ const columns = [
     {
         accessorKey: 'visitTitle',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Chuyến thăm" />,
-        cell: ({ row }) => <div>{row.getValue('visitTitle')}</div>,
+        cell: ({ row }) => <div className='max-w-[200px] truncate'>{row.getValue('visitTitle')}</div>,
     },
     {
         accessorKey: 'giftType',
