@@ -60,7 +60,10 @@ export const Activities = ({ form }) => {
                                             <FormControl>
                                                 <DatePicker
                                                     date={field.value}
-                                                    onDateSelect={(date) => field.onChange(date)}
+                                                    onDateSelect={(date) => {
+                                                        const adjusted = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+                                                        field.onChange(adjusted);
+                                                    }}
                                                     variant="outline"
                                                     disablePastDates={true}
                                                     className="border-gray-200 focus:border-blue-300 focus:ring-blue-300"
