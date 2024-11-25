@@ -49,6 +49,7 @@ export default function Router() {
         { element: <UpdateVisitForm />, path: 'visit/edit/:id' },
 
 
+
     ];
     return useRoutes([
         {
@@ -97,7 +98,6 @@ export default function Router() {
                         { element: <UpdateVisitForm />, path: 'visit/edit/:id' },
                         { element: <VisitRefundProof />, path: 'visit-refund/:id' },
                         { element: <PhysicalDonationDetail />, path: 'physical-donation/:id' },
-
                         { path: '404', element: <Page404 /> },
                     ]),
             ],
@@ -118,7 +118,6 @@ const NewPasswordPage = Loadable(lazy(() => import('../pages/auth/NewPassword'))
 const AdminDashboard = Loadable(lazy(() => import('@/pages/admin/AdminDashboard')));
 const UserManagement = Loadable(lazy(() => import('@/pages/admin/UserManagement')));
 const AdminCampaign = Loadable(lazy(() => import('@/pages/admin/campaign/AdminCampaign')));
-const AddFundrasing = Loadable(lazy(() => import('@/pages/admin/AddFundrasing')));
 const FinanceTransaction = Loadable(lazy(() => import('@/pages/admin/finance/FinanceTransaction')));
 const FinanceReport = Loadable(lazy(() => import('@/pages/admin/finance/FinanceReport')));
 const FundDisbursement = Loadable(lazy(() => import('@/pages/admin/finance/FundDisbursement')));
