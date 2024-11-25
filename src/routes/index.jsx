@@ -46,7 +46,6 @@ export default function Router() {
         { element: <VisitDetail />, path: 'visit/:id' },
         { element: <VisitForm />, path: 'visit/create-visit-trip' },
         { element: <VisitRefundProof />, path: 'visit-refund/:id' },
-
     ];
     return useRoutes([
         {
@@ -74,7 +73,6 @@ export default function Router() {
                           { element: <AdminCampaign />, path: 'campaigns' },
                           { element: <DetailCampaign />, path: 'campaign/:id' },
                           { element: <UpdateCampaign />, path: 'campaign/edit/:id' },
-                          { element: <AddFundrasing />, path: 'fundrasings/add' },
                           { element: <FinanceTransaction />, path: 'finance/transactions' },
                           { element: <FinanceReport />, path: 'finance/reports' },
                           { element: <FundDisbursement />, path: 'finance/disbursement' },
@@ -116,7 +114,6 @@ const NewPasswordPage = Loadable(lazy(() => import('../pages/auth/NewPassword'))
 const AdminDashboard = Loadable(lazy(() => import('@/pages/admin/AdminDashboard')));
 const UserManagement = Loadable(lazy(() => import('@/pages/admin/UserManagement')));
 const AdminCampaign = Loadable(lazy(() => import('@/pages/admin/campaign/AdminCampaign')));
-const AddFundrasing = Loadable(lazy(() => import('@/pages/admin/AddFundrasing')));
 const FinanceTransaction = Loadable(lazy(() => import('@/pages/admin/finance/FinanceTransaction')));
 const FinanceReport = Loadable(lazy(() => import('@/pages/admin/finance/FinanceReport')));
 const FundDisbursement = Loadable(lazy(() => import('@/pages/admin/finance/FundDisbursement')));
