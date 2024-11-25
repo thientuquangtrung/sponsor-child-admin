@@ -10,6 +10,8 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileText, FileSignature, UserCheck } from 'lucide-react';
 import Breadcrumb from '@/pages/admin/Breadcrumb';
+import { useGetAdminSummaryQuery } from '@/redux/admin/adminApi';
+import LoadingScreen from '@/components/common/LoadingScreen';
 
 const StatusCard = ({ title, count, icon, color, to }) => (
     <Link to={to}>
@@ -42,16 +44,35 @@ const RecentNotification = ({ icon, title, description, date }) => (
 );
 
 const AdminCenter = () => {
+    const { data: summaryData, isLoading, error } = useGetAdminSummaryQuery();
+
     const recentNotifications = [
         { id: 1, type: 'report', title: 'Báo cáo mới từ Quản lý trẻ em', description: 'Báo cáo hàng tháng về tình trạng trẻ em', date: '1 giờ trước' },
         { id: 2, type: 'guarantee-requests', title: 'Yêu cầu trở thành Người bảo lãnh', description: 'Nguyễn Văn A đã gửi yêu cầu', date: '3 giờ trước' },
         { id: 3, type: 'contract', title: 'Hợp đồng mới cần duyệt', description: 'Hợp đồng giải ngân cho dự án A', date: '1 ngày trước' },
         { id: 4, type: 'report', title: 'Báo cáo Giải ngân của Người bảo lãnh', description: 'Báo cáo chi tiết về việc giải ngân tháng 9', date: '2 ngày trước' },
     ];
+
     const breadcrumbs = [
         { name: 'Bảng điều khiển', path: '/' },
         { name: 'Trung tâm Quản trị', path: null },
     ];
+
+    if (isLoading) {
+        return (
+            <div>
+                <LoadingScreen />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="w-full h-screen flex items-center justify-center">
+                <div className="text-lg text-red-500">Đã có lỗi xảy ra khi tải dữ liệu</div>
+            </div>
+        );
+    }
 
     return (
         <>
@@ -60,22 +81,22 @@ const AdminCenter = () => {
             <div className="w-full space-y-4 mx-3">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                     <StatusCard
-                        title="Báo cáo"
-                        count={3}
+                        title="Yêu cầu giải ngân"
+                        count={summaryData?.requestedDisbursementCount ?? 0}
                         icon={<FileText />}
                         color="bg-[#54C392] hover:bg-green-600"
-                        to="reports"
+                        to="/disbursement-requests"
                     />
                     <StatusCard
-                        title="Yêu cầu trở thành Bảo lãnh"
-                        count={5}
+                        title="Yêu cầu trở thành Bảo lãnh"
+                        count={summaryData?.pendingUsersCount ?? 0}
                         icon={<UserCheck />}
                         color="bg-[#4aba75] hover:bg-green-600"
                         to="guarantee-requests"
                     />
                     <StatusCard
                         title="Hợp đồng"
-                        count={4}
+                        count={summaryData?.waitingContractsCount ?? 0}
                         icon={<FileSignature />}
                         color="bg-[#1b8048] hover:bg-green-600"
                         to="contracts"

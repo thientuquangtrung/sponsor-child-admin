@@ -34,7 +34,6 @@ const menuItems = [
             { icon: PiggyBank, label: "Quỹ chung", path: "/funds" },
             { icon: ReceiptText, label: "Giao dịch", path: "/finance/transactions" },
             { icon: CircleDollarSign, label: "Giải ngân", path: "/disbursement-requests" },
-            { icon: MessageSquareDot, label: "Báo cáo", path: "/disbursement-reports" },
         ]
     },
     { icon: SquareUser, label: "Người dùng", path: "/users" },
@@ -160,8 +159,7 @@ const SidebarLink = ({ path, icon, label }) => (
     <NavLink
         to={path}
         className={({ isActive }) =>
-            `flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition duration-200 ${
-                isActive ? "text-teal-600 dark:text-teal-400 font-bold" : ""
+            `flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition duration-200 ${isActive ? "text-teal-600 dark:text-teal-400 font-bold" : ""
             }`
         }
     >

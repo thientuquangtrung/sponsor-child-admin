@@ -93,11 +93,11 @@ const columns = [
         header: ({ column }) => <DataTableColumnHeader column={column} title="Số tiền" className="justify-end" />,
         cell: ({ row }) => <div className="text-right">{row.getValue('amountAdded').toLocaleString('vi-VN')} ₫</div>,
     },
-    {
-        accessorKey: 'commonFundTotal',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Tổng tiền quỹ chung" className="justify-end" />,
-        cell: ({ row }) => <div className="text-right">{row.getValue('commonFundTotal').toLocaleString('vi-VN')} ₫</div>,
-    },
+    // {
+    //     accessorKey: 'commonFundTotal',
+    //     header: ({ column }) => <DataTableColumnHeader column={column} title="Tổng tiền quỹ chung" className="justify-end" />,
+    //     cell: ({ row }) => <div className="text-right">{row.getValue('commonFundTotal').toLocaleString('vi-VN')} ₫</div>,
+    // },
     {
         accessorKey: 'dateAdded',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Ngày thêm" />,

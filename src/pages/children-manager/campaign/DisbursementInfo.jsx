@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Plus, Trash2 } from 'lucide-react';
+import { formatDateForServer, setLocalDateWithoutTime } from '@/lib/utils';
 
 const DisbursementInfo = ({ campaignType }) => {
     const { control, watch, formState: { errors } } = useFormContext();
@@ -55,8 +56,11 @@ const DisbursementInfo = ({ campaignType }) => {
                             <FormLabel>Ngày Bắt Đầu Dự Kiến Giải Ngân</FormLabel>
                             <FormControl>
                                 <DatePicker
-                                    date={field.value}
-                                    onDateSelect={(date) => field.onChange(date)}
+                                    date={setLocalDateWithoutTime(field.value)}
+                                    onDateSelect={(date) => {
+                                        const formattedDate = formatDateForServer(date);
+                                        field.onChange(new Date(formattedDate));
+                                    }}
                                     variant="outline"
                                     disablePastDates={true}
                                     className={`ml-2 ${errors.plannedStartDate ? 'border-red-500' : ''}`}
@@ -75,8 +79,11 @@ const DisbursementInfo = ({ campaignType }) => {
                             <FormLabel>Ngày Kết Thúc Dự Kiến Giải Ngân</FormLabel>
                             <FormControl>
                                 <DatePicker
-                                    date={field.value}
-                                    onDateSelect={(date) => field.onChange(date)}
+                                    date={setLocalDateWithoutTime(field.value)}
+                                    onDateSelect={(date) => {
+                                        const formattedDate = formatDateForServer(date);
+                                        field.onChange(new Date(formattedDate));
+                                    }}
                                     variant="outline"
                                     disablePastDates={true}
                                     className={`ml-2 ${errors.plannedEndDate ? 'border-red-500' : ''}`}
@@ -166,8 +173,11 @@ const DisbursementInfo = ({ campaignType }) => {
                                                 <FormItem className="space-y-0">
                                                     <FormControl>
                                                         <DatePicker
-                                                            date={dateField.value}
-                                                            onDateSelect={(date) => dateField.onChange(date)}
+                                                            date={setLocalDateWithoutTime(dateField.value)}
+                                                            onDateSelect={(date) => {
+                                                                const formattedDate = formatDateForServer(date);
+                                                                dateField.onChange(new Date(formattedDate));
+                                                            }}
                                                             variant="outline"
                                                             disablePastDates={true}
                                                             className={`w-full ${errors.disbursementStages?.[index]?.scheduledDate

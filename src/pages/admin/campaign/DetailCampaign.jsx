@@ -336,7 +336,7 @@ const DetailCampaign = () => {
                                     {showRejectButton && (
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
-                                                <Button className="bg-gray-800 hover:bg-gray-900 text-white">
+                                                <Button className="bg-red-600 hover:bg-red-500 text-white">
                                                     Từ chối yêu cầu
                                                 </Button>
                                             </AlertDialogTrigger>
