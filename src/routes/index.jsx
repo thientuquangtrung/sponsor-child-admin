@@ -77,7 +77,6 @@ export default function Router() {
                         { element: <AdminCampaign />, path: 'campaigns' },
                         { element: <DetailCampaign />, path: 'campaign/:id' },
                         { element: <UpdateCampaign />, path: 'campaign/edit/:id' },
-                        { element: <AddFundrasing />, path: 'fundrasings/add' },
                         { element: <FinanceTransaction />, path: 'finance/transactions' },
                         { element: <FinanceReport />, path: 'finance/reports' },
                         { element: <FundDisbursement />, path: 'finance/disbursement' },
