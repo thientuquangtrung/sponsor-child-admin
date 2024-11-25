@@ -138,19 +138,21 @@ const GuaranteeRequestsDetail = () => {
                                                 className="h-12 text-lg bg-gray-50"
                                             />
                                         </div>
-                                        <div className="space-y-2">
+                                        <div className="space-y-2 md:col-span-2">
                                             <Label
                                                 htmlFor="socialMediaLinks"
                                                 className="text-lg font-medium text-gray-700"
                                             >
                                                 Link liên kết mạng xã hội:
                                             </Label>
-                                            <Input
-                                                id="socialMediaLinks"
-                                                value={requestData.socialMediaLinks}
-                                                readOnly
-                                                className="h-12 text-lg bg-gray-50"
-                                            />
+                                            <a
+                                                href={requestData.socialMediaLinks}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="block p-3 text-lg text-blue-600 hover:text-blue-800 bg-gray-50 rounded border border-gray-300"
+                                            >
+                                                {requestData.socialMediaLinks}
+                                            </a>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -244,7 +246,9 @@ const GuaranteeRequestsDetail = () => {
                                                 <Label className="text-lg font-medium text-gray-700">
                                                     Kinh nghiệm tình nguyện:
                                                 </Label>
-                                                {requestData.volunteerExperienceFiles?.split(',').map((link) => (
+                                                <ImageAlbum files={requestData.volunteerExperienceFiles} />
+
+                                                {/* {requestData.volunteerExperienceFiles?.split(',').map((link) => (
                                                     <>
                                                         <br />
                                                         <a
@@ -257,7 +261,7 @@ const GuaranteeRequestsDetail = () => {
                                                             {link}
                                                         </a>
                                                     </>
-                                                ))}
+                                                ))} */}
                                             </div>
                                         </div>
                                     </CardContent>
@@ -377,19 +381,21 @@ const GuaranteeRequestsDetail = () => {
                                                 className="h-12 text-lg bg-gray-50"
                                             />
                                         </div>
-                                        <div className="space-y-2">
+                                        <div className="space-y-2 md:col-span-2">
                                             <Label
                                                 htmlFor="socialMediaLinks"
                                                 className="text-lg font-medium text-gray-700"
                                             >
-                                                Link MXH:
+                                                Link liên kết mạng xã hội:
                                             </Label>
-                                            <Input
-                                                id="socialMediaLinks"
-                                                value={requestData.socialMediaLinks}
-                                                readOnly
-                                                className="h-12 text-lg bg-gray-50"
-                                            />
+                                            <a
+                                                href={requestData.socialMediaLinks}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="block p-3 text-lg text-blue-600 hover:text-blue-800 bg-gray-50 rounded border border-gray-300"
+                                            >
+                                                {requestData.socialMediaLinks}
+                                            </a>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -432,15 +438,16 @@ const GuaranteeRequestsDetail = () => {
                                 </Card>
                             </>
                         )}
-
-                        <div className="mt-6 flex justify-end space-x-4">
-                            <Button onClick={handleAccept} className="bg-teal-600 hover:bg-green-700 text-white">
-                                Chấp nhận đơn
-                            </Button>
-                            <Button onClick={handleReject} className="bg-gray-800 hover:bg-gray-900 text-white">
-                                Từ chối yêu cầu
-                            </Button>
-                        </div>
+                        {requestData.status === 0 && (
+                            <div className="mt-6 flex justify-end space-x-4">
+                                <Button onClick={handleAccept} className="bg-teal-600 hover:bg-green-700 text-white">
+                                    Chấp nhận đơn
+                                </Button>
+                                <Button onClick={handleReject} className="bg-red-600 hover:bg-red-500 text-white">
+                                    Từ chối yêu cầu
+                                </Button>
+                            </div>
+                        )}
 
                         <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
                             <DialogContent>
@@ -459,7 +466,7 @@ const GuaranteeRequestsDetail = () => {
                                     </Button>
                                     <Button
                                         onClick={handleRejectConfirm}
-                                        className="bg-gray-800 hover:bg-gray-900 text-white"
+                                        className="bg-red-600 hover:bg-red-500 text-white"
                                     >
                                         Xác nhận từ chối
                                     </Button>

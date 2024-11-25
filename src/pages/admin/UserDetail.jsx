@@ -30,7 +30,6 @@ const profileSchema = z.object({
 function deepEqual(obj1, obj2) {
     return JSON.stringify(obj1) === JSON.stringify(obj2);
 }
-
 export default function UserDetail() {
     const { id } = useParams();
     const { data: user } = useGetUserByIdQuery(id);
@@ -42,7 +41,8 @@ export default function UserDetail() {
     const [dragging, setDragging] = useState(false);
     const [isImgUploading, setIsImgUploading] = useState(false);
     const [gender, setGender] = useState(user?.gender === 'Female' ? 'Female' : 'Male');
-    const [updateUser, { isLoading, isError, error }] = useUpdateUserMutation();
+    const [updateUser, { isLoading }] = useUpdateUserMutation();
+
     const roleColors = {
         Guarantee: 'bg-rose-100 text-rose-400',
         Donor: 'bg-sky-200 text-sky-600',
@@ -93,13 +93,17 @@ export default function UserDetail() {
     }, [form, initialValues]);
 
     const handleGenderChange = (selectedGender) => {
-        setGender(selectedGender);
-        form.setValue('gender', selectedGender);
+        if (user?.isActive) {
+            setGender(selectedGender);
+            form.setValue('gender', selectedGender);
+        }
     };
 
     const handleBack = () => navigate(-1);
 
     async function onSubmit(values) {
+        if (!user?.isActive) return;
+
         try {
             const updateUserProfile = {
                 id: user?.userID,
@@ -126,10 +130,9 @@ export default function UserDetail() {
             await updateUser(updateUserProfile)
                 .unwrap()
                 .then(() => {
-                    console.log('User profile updated successfully', updateUserProfile);
                     toast.success('Cập nhật thông tin thành công');
-                    setInitialValues(values); // Update initial values to the new submitted values
-                    setIsModified(false); // Reset modification state after successful submission
+                    setInitialValues(values);
+                    setIsModified(false);
                 })
                 .catch((err) => {
                     toast.error('Cập nhật thông tin thất bại');
@@ -143,6 +146,8 @@ export default function UserDetail() {
     }
 
     const handleAvatarChange = (event) => {
+        if (!user?.isActive) return;
+
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
@@ -181,6 +186,7 @@ export default function UserDetail() {
                             accept="image/*"
                             onChange={handleAvatarChange}
                             className="absolute inset-0 opacity-0 cursor-pointer"
+                            disabled={!user?.isActive}
                         />
                     </div>
                 </div>
@@ -193,6 +199,7 @@ export default function UserDetail() {
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 mt-12">
                     <div className="grid md:grid-cols-2 gap-8">
+                        {/* Form fields */}
                         <FormField
                             control={form.control}
                             name="fullname"
@@ -200,7 +207,11 @@ export default function UserDetail() {
                                 <FormItem>
                                     <FormLabel className="text-xl">Tên tài khoản</FormLabel>
                                     <FormControl>
-                                        <Input className="text-lg h-14 border-2 border-primary" {...field} />
+                                        <Input
+                                            className="text-lg h-14 border-2 border-primary"
+                                            {...field}
+                                            disabled={!user?.isActive}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -230,6 +241,7 @@ export default function UserDetail() {
                                             type="date"
                                             className="text-lg h-14 border-2 border-primary"
                                             {...field}
+                                            disabled={!user?.isActive}
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -245,6 +257,7 @@ export default function UserDetail() {
                                             checked={gender === 'Male'}
                                             onCheckedChange={() => handleGenderChange('Male')}
                                             className="h-6 w-6"
+                                            disabled={!user?.isActive}
                                         />
                                         <span className="text-lg">Nam</span>
                                     </Label>
@@ -253,6 +266,7 @@ export default function UserDetail() {
                                             checked={gender === 'Female'}
                                             onCheckedChange={() => handleGenderChange('Female')}
                                             className="h-6 w-6"
+                                            disabled={!user?.isActive}
                                         />
                                         <span className="text-lg">Nữ</span>
                                     </Label>
@@ -267,7 +281,11 @@ export default function UserDetail() {
                                 <FormItem>
                                     <FormLabel className="text-xl">Số điện thoại</FormLabel>
                                     <FormControl>
-                                        <Input className="text-lg h-14 border-2 border-primary" {...field} />
+                                        <Input
+                                            className="text-lg h-14 border-2 border-primary"
+                                            {...field}
+                                            disabled={!user?.isActive}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -280,7 +298,11 @@ export default function UserDetail() {
                                 <FormItem>
                                     <FormLabel className="text-xl">Địa chỉ</FormLabel>
                                     <FormControl>
-                                        <Input className="text-lg h-14 border-2 border-primary" {...field} />
+                                        <Input
+                                            className="text-lg h-14 border-2 border-primary"
+                                            {...field}
+                                            disabled={!user?.isActive}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -293,7 +315,11 @@ export default function UserDetail() {
                                 <FormItem className="col-span-2">
                                     <FormLabel className="text-xl">Giới thiệu bản thân</FormLabel>
                                     <FormControl>
-                                        <Input className="text-lg h-20 border-2 border-primary" {...field} />
+                                        <Input
+                                            className="text-lg h-20 border-2 border-primary"
+                                            {...field}
+                                            disabled={!user?.isActive}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -309,14 +335,23 @@ export default function UserDetail() {
                         >
                             <Undo2 className="mr-2 w-4 h-4" /> Trở lại
                         </Button>
-                        <ButtonLoading
-                            className="w-full md:w-[40%] h-14 text-white text-2xl bg-gradient-to-r from-primary to-secondary"
-                            type="submit"
-                            disabled={!isModified || isLoading || isImgUploading}
-                            isLoading={isLoading || isImgUploading}
-                        >
-                            Cập nhật
-                        </ButtonLoading>
+                        {user?.isActive ? (
+                            <ButtonLoading
+                                className="w-full md:w-[40%] h-14 text-white text-2xl bg-gradient-to-r from-primary to-secondary"
+                                type="submit"
+                                disabled={!isModified || isLoading || isImgUploading}
+                                isLoading={isLoading || isImgUploading}
+                            >
+                                Cập nhật
+                            </ButtonLoading>
+                        ) : (
+                            <div className="p-4 bg-red-50 text-red-600 text-lg">
+                                <p>
+                                    Tài khoản này đã bị vô hiệu hóa. Lý do:{' '}
+                                    <strong>{user?.rejectionReason || 'Không có lý do'}</strong>
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </form>
             </Form>

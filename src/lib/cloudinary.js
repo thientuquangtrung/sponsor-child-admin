@@ -23,6 +23,8 @@ const UPLOAD_FOLDER = {
     //visitTrip
     getVisitTripFolder: (eventID) => `events/${eventID}`,
     getVisitTripMediaFolder: (eventID) => `events/${eventID}/media`,
+    getVisitTransferProofFolder: (eventID) => `events/${eventID}/refund_proofs`,
+    getVisitDonationProofFolder: (eventID) => `events/${eventID}/donation_proofs`,
 };
 
 const UPLOAD_NAME = {
@@ -40,6 +42,9 @@ const UPLOAD_NAME = {
     EVIDENCE_IMAGE: 'evidence_image',
     //disbursement
     DISBURSEMENT_RECEIPT: 'receipt_phase',
+    //visitTrip
+    DONATION_PROOF_IMAGE: 'donation_confirmed',
+    REFUND_PROOF_IMAGE: 'refund',
 };
 
 // Create a Cloudinary instance and set your cloud name.

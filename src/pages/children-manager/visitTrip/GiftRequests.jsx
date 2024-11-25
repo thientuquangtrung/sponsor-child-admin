@@ -17,7 +17,7 @@ export const GiftRequests = ({ form }) => {
                 <h3 className="text-lg font-semibold">Quà tặng phù hợp chuyến thăm</h3>
                 <Button
                     type="button"
-                    className="hover:bg-teal-500 transition-colors bg-[#2fabab] text-white"
+                    className="transition-colors bg-gradient-to-t from-rose-100 to-teal-100 hover:bg-normal"
                     size="sm"
                     onClick={() => append({ giftType: "", amount: "", unit: "" })}
                 >
@@ -48,7 +48,14 @@ export const GiftRequests = ({ form }) => {
                             <FormItem>
                                 <FormLabel>Số lượng</FormLabel>
                                 <FormControl>
-                                    <Input type="number" min="1" {...field} />
+                                    <Input
+                                        type="number"
+                                        {...field}
+                                        onChange={(e) => {
+                                            const value = Math.max(1, parseInt(e.target.value) || 1);
+                                            field.onChange(value.toString());
+                                        }}
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -70,10 +77,10 @@ export const GiftRequests = ({ form }) => {
                     <Button
                         type="button"
                         size="icon"
-                        className="w-8 h-8 hover:bg-red-300 transition-colors text-white bg-red-500"
+                        className="w-10 h-10 hover:bg-red-300 transition-colors text-red-500 bg-red-100 rounded-full"
                         onClick={() => remove(index)}
                     >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-5 h-5" />
                     </Button>
                 </div>
             ))}

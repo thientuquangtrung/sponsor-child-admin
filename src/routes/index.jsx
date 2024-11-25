@@ -8,11 +8,14 @@ import { AdminLayout } from '@/components/layouts/AdminLayout';
 // config
 // import { DEFAULT_PATH } from '../config/app';
 import LoadingScreen from '@/components/common/LoadingScreen';
-
-import UserDetail from '@/pages/admin/finance/UserDetail';
+import UserDetail from '@/pages/admin/UserDetail';
 import FundSourceDetail from '@/pages/admin/fund/FundSourceDetail';
 import FundUsageDetail from '@/pages/admin/fund/FundUsageDetail';
-
+import UpdateVisitForm from '@/pages/children-manager/visitTrip/UpdateVisitForm';
+import VisitRefundProof from '@/pages/children-manager/visitTrip/VisitRefundProof';
+import SettingsPage from '@/pages/admin/Setting';
+import PhysicalDonationDetail from '@/pages/children-manager/visitTrip/PhysicalDonationDetail';
+import { useSelector } from 'react-redux';
 
 const Loadable = (Component) => {
     const LoadableComponent = (props) => {
@@ -31,6 +34,20 @@ const Loadable = (Component) => {
 // "/app"
 
 export default function Router() {
+    const { user } = useSelector((state) => state.auth);
+    const allowedChildManagerRoutes = [
+        { element: <Navigate to="/home" replace />, index: true },
+        { element: <AdminDashboard />, path: '/home' },
+        { element: <AdminCampaign />, path: 'campaigns' },
+        { element: <CampaignInfo />, path: 'create-campaign' },
+        { element: <DetailCampaign />, path: 'campaign/:id' },
+        { element: <UpdateCampaign />, path: 'campaign/edit/:id' },
+        { element: <Visit />, path: 'visits' },
+        { element: <VisitDetail />, path: 'visit/:id' },
+        { element: <VisitForm />, path: 'visit/create-visit-trip' },
+        { element: <VisitRefundProof />, path: 'visit-refund/:id' },
+
+    ];
     return useRoutes([
         {
             path: '/auth',
@@ -46,34 +63,41 @@ export default function Router() {
             path: '/',
             element: <AdminLayout />,
             children: [
-                { element: <Navigate to="/home" replace />, index: true },
-                { element: <AdminDashboard />, path: '/home' },
-                { element: <UserManagement />, path: 'users' },
-                { element: <UserDetail />, path: 'users/:id' },
-                { element: <AdminCampaign />, path: 'campaigns' },
-                { element: <DetailCampaign />, path: 'campaign/:id' },
-                { element: <UpdateCampaign />, path: 'campaign/edit/:id' },
-                { element: <AddFundrasing />, path: 'fundrasings/add' },
-                { element: <FinanceTransaction />, path: 'finance/transactions' },
-                { element: <FinanceReport />, path: 'finance/reports' },
-                { element: <FundDisbursement />, path: 'finance/disbursement' },
-                { element: <Visit />, path: 'visits' },
-                { element: <VisitDetail />, path: 'visit/:id' },
-                { element: <VisitForm />, path: 'visit/create-visit-trip' },
-                { element: <AdminCenter />, path: 'center' },
-                { element: <GuaranteeRequests />, path: 'center/guarantee-requests' },
-                { element: <GuaranteeRequestsDetail />, path: 'center/guarantee-requests/:id' },
-                { element: <ContractManagement />, path: 'center/contracts' },
-                { element: <ContractDetail />, path: 'center/contracts/:id' },
-                { element: <CampaignInfo />, path: 'create-campaign' },
-                { element: <DisbursementRequests />, path: 'disbursement-requests' },
-                { element: <DisbursementRequestDetail />, path: 'disbursement-requests/:id' },
-                { element: <AdminFund />, path: 'funds' },
-                { element: <FundSourceDetail />, path: 'fund/source/:id' },
-                { element: <FundUsageDetail />, path: 'fund/usage/:id' },
+                ...(user?.role.toLowerCase() === 'childmanager'
+                    ? allowedChildManagerRoutes
+                    : [
+                          { element: <Navigate to="/home" replace />, index: true },
+                          { element: <AdminDashboard />, path: '/home' },
+                          { element: <UserManagement />, path: 'users' },
+                          { element: <UserDetail />, path: 'users/:id' },
+                          { element: <SettingsPage />, path: 'settings' },
+                          { element: <AdminCampaign />, path: 'campaigns' },
+                          { element: <DetailCampaign />, path: 'campaign/:id' },
+                          { element: <UpdateCampaign />, path: 'campaign/edit/:id' },
+                          { element: <AddFundrasing />, path: 'fundrasings/add' },
+                          { element: <FinanceTransaction />, path: 'finance/transactions' },
+                          { element: <FinanceReport />, path: 'finance/reports' },
+                          { element: <FundDisbursement />, path: 'finance/disbursement' },
+                          { element: <Visit />, path: 'visits' },
+                          { element: <VisitDetail />, path: 'visit/:id' },
+                          { element: <VisitForm />, path: 'visit/create-visit-trip' },
+                          { element: <AdminCenter />, path: 'center' },
+                          { element: <GuaranteeRequests />, path: 'center/guarantee-requests' },
+                          { element: <GuaranteeRequestsDetail />, path: 'center/guarantee-requests/:id' },
+                          { element: <ContractManagement />, path: 'center/contracts' },
+                          { element: <ContractDetail />, path: 'center/contracts/:id' },
+                          { element: <CampaignInfo />, path: 'create-campaign' },
+                          { element: <DisbursementRequests />, path: 'disbursement-requests' },
+                          { element: <DisbursementRequestDetail />, path: 'disbursement-requests/:id' },
+                          { element: <AdminFund />, path: 'funds' },
+                          { element: <FundSourceDetail />, path: 'fund/source/:id' },
+                          { element: <FundUsageDetail />, path: 'fund/usage/:id' },
+                          { element: <UpdateVisitForm />, path: 'visit/edit/:id' },
+                          { element: <VisitRefundProof />, path: 'visit-refund/:id' },
+                          { element: <PhysicalDonationDetail />, path: 'physical-donation/:id' },
 
-
-                { path: '404', element: <Page404 /> },
+                          { path: '404', element: <Page404 /> },
+                      ]),
             ],
         },
         { path: '404', element: <Page404 /> },

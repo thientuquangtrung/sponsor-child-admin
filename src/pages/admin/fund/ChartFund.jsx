@@ -101,7 +101,7 @@ export function ChartFund() {
         <Card className="w-full" style={customStyles}>
             <CardHeader className="flex items-center gap-4 space-y-0 border-b py-5 sm:flex-row">
                 <div className="grid flex-1 gap-1">
-                    <CardTitle>Tổng quan quỹ</CardTitle>
+                    <CardTitle>Tổng quan</CardTitle>
                     <CardDescription>
                         Phân tích thu nhập và chi tiêu
                     </CardDescription>

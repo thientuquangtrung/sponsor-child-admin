@@ -236,7 +236,7 @@ const FundUsageTable = ({ data, onFilterChange }) => {
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id} className="bg-slate-50 hover:bg-slate-50">
                                 {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id} className="h-10 px-2 text-slate-600">
+                                    <TableHead key={header.id} className="h-10  text-slate-600">
                                         {header.isPlaceholder
                                             ? null
                                             : flexRender(header.column.columnDef.header, header.getContext())}
@@ -254,7 +254,7 @@ const FundUsageTable = ({ data, onFilterChange }) => {
                                     className="hover:bg-slate-50"
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className="px-2 py-2">
+                                        <TableCell key={cell.id} >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}

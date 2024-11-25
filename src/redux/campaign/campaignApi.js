@@ -79,7 +79,16 @@ export const campaignApi = baseApi.injectEndpoints({
                 },
             }),
         }),
-
+        donateFromCommonFund: builder.mutation({
+            query: ({ campaignId, ...data }) => ({
+                url: `/campaign/${campaignId}/donate-from-common-fund`,
+                method: 'POST',
+                body: data,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }),
+        }),
     }),
 });
 
@@ -95,4 +104,5 @@ export const {
     useGetCampaignEstimatedDisbursementPlanQuery,
     useCreateCampaignDisbursementPlanMutation,
     useCancelCampaignMutation,
+    useDonateFromCommonFundMutation,
 } = campaignApi;

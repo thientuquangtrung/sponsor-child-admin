@@ -21,31 +21,42 @@ import {
     PiggyBank
 } from "lucide-react";
 
+import { useSelector } from "react-redux";
+
 const menuItems = [
     { icon: LayoutDashboard, label: "Bảng điều khiển", path: "/" },
-    { icon: Leaf, label: 'Chiến dịch gây quỹ', path: '/campaigns' },
+    { icon: Leaf, label: "Chiến dịch gây quỹ", path: "/campaigns" },
     {
         icon: BarChart2,
-        label: 'Tài chính',
-        path: '/finance',
+        label: "Tài chính",
+        path: "/finance",
         subItems: [
-            { icon: PiggyBank, label: 'Quỹ chung', path: '/funds' },
-            { icon: ReceiptText, label: 'Giao dịch', path: '/finance/transactions' },
-            { icon: CircleDollarSign, label: 'Giải ngân', path: '/disbursement-requests' },
-            { icon: MessageSquareDot, label: 'Báo cáo', path: '/disbursement-reports' },
+            { icon: PiggyBank, label: "Quỹ chung", path: "/funds" },
+            { icon: ReceiptText, label: "Giao dịch", path: "/finance/transactions" },
+            { icon: CircleDollarSign, label: "Giải ngân", path: "/disbursement-requests" },
         ]
     },
     { icon: SquareUser, label: "Người dùng", path: "/users" },
     { icon: Heater, label: "Trung tâm Quản trị", path: "/center" },
     { icon: Settings, label: "Cài đặt", path: "/settings" },
     { icon: Telescope, label: "Chuyến thăm", path: "/visits" },
-    { icon: LogOut, label: 'Đăng xuất', path: '/logout' },
+    { icon: LogOut, label: "Đăng xuất", path: "/logout" },
 ];
 
 const SidebarAdmin = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [openDropdown, setOpenDropdown] = useState(null);
     const sideBarRef = useRef(null);
+
+    const { user } = useSelector((state) => state.auth);
+
+    // Filter menu items based on the user's role
+    const filteredMenuItems =
+        user?.role.toLowerCase() === "childmanager"
+            ? menuItems.filter((item) =>
+                ["Bảng điều khiển", "Chiến dịch gây quỹ", "Chuyến thăm"].includes(item.label)
+            )
+            : menuItems;
 
     useEffect(() => {
         const handleResize = () => {
@@ -54,8 +65,8 @@ const SidebarAdmin = () => {
             }
         };
 
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
     }, []);
 
     const toggleSidebar = () => {
@@ -81,7 +92,7 @@ const SidebarAdmin = () => {
                 ref={sideBarRef}
                 className={`fixed top-0 left-0 h-screen w-64 bg-white dark:bg-gray-950 border-r border-gray-300 dark:border-gray-700 p-6 
                     shadow-xl transition-all duration-300 ease-in-out z-40
-                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                    ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
                     md:translate-x-0 md:top-16 md:h-[calc(100vh-4rem)]
                 `}
             >
@@ -94,7 +105,7 @@ const SidebarAdmin = () => {
 
                     <div className="space-y-6">
                         <p className="uppercase text-xs text-gray-600 mb-4 mt-4 tracking-wider">Quản lý</p>
-                        {menuItems.map((item, index) => (
+                        {filteredMenuItems.map((item, index) => (
                             <div key={index}>
                                 {item.subItems ? (
                                     <div>

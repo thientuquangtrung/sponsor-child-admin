@@ -211,13 +211,12 @@ const ContractDetail = () => {
                                     <TableHead className="font-semibold">Trạng thái</TableHead>
                                     <TableCell>
                                         <span
-                                            className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                                contract.status === 2
+                                            className={`px-2 py-1 rounded-full text-xs font-semibold ${contract.status === 2
                                                     ? 'bg-green-200 text-green-800'
                                                     : contract.status === 0 || contract.status === 1
-                                                    ? 'bg-yellow-200 text-yellow-800'
-                                                    : 'bg-purple-200 text-purple-800'
-                                            }`}
+                                                        ? 'bg-yellow-200 text-yellow-800'
+                                                        : 'bg-purple-200 text-purple-800'
+                                                }`}
                                         >
                                             {getContractStatusString(contract.status)}
                                         </span>
@@ -231,6 +230,13 @@ const ContractDetail = () => {
                                 </TableRow>
                             </TableBody>
                         </Table>
+
+                        {contract.status === 4 && contract.rejectionReason && (
+                            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
+                                <h3 className="text-red-700 font-semibold mb-2">Lý do từ chối:</h3>
+                                <p className="text-red-600">{contract.rejectionReason}</p>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 

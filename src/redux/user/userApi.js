@@ -33,6 +33,13 @@ export const userApi = baseApi.injectEndpoints({
                 params: { rejectionReason },
             }),
         }),
+
+        reactivateUser: builder.mutation({
+            query: (id) => ({
+                url: `/users/reactivate/${id}`,
+                method: 'POST',
+            }),
+        }),
     }),
 });
 
@@ -42,4 +49,5 @@ export const {
     useCreateUserMutation,
     useUpdateUserMutation,
     useDeleteUserMutation,
+    useReactivateUserMutation,
 } = userApi;

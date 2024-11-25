@@ -54,7 +54,7 @@ const columns = [
         cell: ({ row }) => {
             const isAnonymous = row.original.isAnonymous;
             return (
-                <div className={`font-medium ${isAnonymous ? 'italic text-gray-500' : ''}`}>
+                <div className={`font-medium max-w-[200px] truncate ${isAnonymous ? 'italic text-gray-500' : ''}`}>
                     {row.getValue('sourceName')}
                 </div>
             );
@@ -93,6 +93,11 @@ const columns = [
         header: ({ column }) => <DataTableColumnHeader column={column} title="Số tiền" className="justify-end" />,
         cell: ({ row }) => <div className="text-right">{row.getValue('amountAdded').toLocaleString('vi-VN')} ₫</div>,
     },
+    // {
+    //     accessorKey: 'commonFundTotal',
+    //     header: ({ column }) => <DataTableColumnHeader column={column} title="Tổng tiền quỹ chung" className="justify-end" />,
+    //     cell: ({ row }) => <div className="text-right">{row.getValue('commonFundTotal').toLocaleString('vi-VN')} ₫</div>,
+    // },
     {
         accessorKey: 'dateAdded',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Ngày thêm" />,
@@ -295,7 +300,7 @@ const FundSourceTable = ({ data, onFilterChange }) => {
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id} className="bg-slate-50 hover:bg-slate-50">
                                 {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id} className="h-10 px-2 text-slate-600">
+                                    <TableHead key={header.id} className="h-10  text-slate-600">
                                         {header.isPlaceholder
                                             ? null
                                             : flexRender(header.column.columnDef.header, header.getContext())}

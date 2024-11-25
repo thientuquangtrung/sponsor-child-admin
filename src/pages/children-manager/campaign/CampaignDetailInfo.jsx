@@ -7,6 +7,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { campaignTypes } from '@/config/combobox';
 import { useCustomFileDropzone } from '@/pages/children-manager/campaign/CustomDropzone';
 import QuillEditor from '@/pages/admin/campaign/QuillEditor';
+import { formatDateForServer, setLocalDateWithoutTime } from '@/lib/utils';
 
 
 const CustomDropzone = ({ onDrop, multiple, children }) => {
@@ -223,8 +224,11 @@ const CampaignDetailInfo = ({
                             <FormLabel>Ngày Bắt Đầu</FormLabel>
                             <FormControl>
                                 <DatePicker
-                                    date={field.value}
-                                    onDateSelect={(date) => field.onChange(date)}
+                                    date={setLocalDateWithoutTime(field.value)}
+                                    onDateSelect={(date) => {
+                                        const formattedDate = formatDateForServer(date);
+                                        field.onChange(new Date(formattedDate));
+                                    }}
                                     variant="outline"
                                     disablePastDates={true}
                                     className="ml-2"
@@ -243,8 +247,11 @@ const CampaignDetailInfo = ({
                             <FormLabel>Ngày Kết Thúc</FormLabel>
                             <FormControl>
                                 <DatePicker
-                                    date={field.value}
-                                    onDateSelect={(date) => field.onChange(date)}
+                                    date={setLocalDateWithoutTime(field.value)}
+                                    onDateSelect={(date) => {
+                                        const formattedDate = formatDateForServer(date);
+                                        field.onChange(new Date(formattedDate));
+                                    }}
                                     variant="outline"
                                     disablePastDates={true}
                                     className="ml-2"

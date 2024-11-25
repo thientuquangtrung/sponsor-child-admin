@@ -7,7 +7,8 @@ import { useSelector } from 'react-redux';
 export function AdminLayout() {
     const { user } = useSelector((state) => state.auth);
 
-    if (user?.role.toLowerCase() !== 'admin') {
+    const allowedRoles = ['admin', 'childmanager'];
+    if (!allowedRoles.includes(user?.role.toLowerCase())) {
         return <Navigate to="/auth/login" />;
     }
 
@@ -25,6 +26,6 @@ export function AdminLayout() {
             </div>
         </div>
     );
-};
+}
 
 export default AdminLayout;

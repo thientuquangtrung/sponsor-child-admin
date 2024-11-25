@@ -207,26 +207,7 @@ const ActionMenu = ({ row }) => {
                 <DropdownMenuItem onClick={() => navigate(`/campaign/${row.original.campaignID}`)}>
                     <Eye className="mr-2 h-4 w-4" />
                     Xem chi tiết
-                </DropdownMenuItem>                <DropdownMenuSeparator />
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600">
-                            Xóa chiến dịch
-                        </DropdownMenuItem>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Bạn có chắc chắn muốn xóa?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Hành động này không thể hoàn tác. Chiến dịch sẽ bị xóa vĩnh viễn.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Hủy</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleDelete}>Tiếp tục xóa</AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     );
