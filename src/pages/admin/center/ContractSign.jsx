@@ -3,11 +3,18 @@ import SignatureCanvas from 'react-signature-canvas';
 import { useSelector } from 'react-redux';
 import { Toaster, toast } from 'sonner';
 import { ClipboardCheck, ClipboardPenLine, Eraser, XCircle } from 'lucide-react';
-
 import 'react-datepicker/dist/react-datepicker.css';
-
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { useGetContractByIdQuery, useUpdateContractMutation } from '@/redux/contract/contractApi';
 import { useGetCampaignByIdQuery } from '@/redux/campaign/campaignApi';
 import ContractCampaignContent from '@/pages/admin/center/ContractCampaignContent';
@@ -19,6 +26,8 @@ const ContractSign = ({ contractID }) => {
     const { user } = useSelector((state) => state.auth);
     const [signatureA, setSignatureA] = useState(null);
     const [isSigned, setIsSigned] = useState(false);
+    const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
+    const [rejectionReason, setRejectionReason] = useState('');
     const sigCanvas = useRef({});
     const contractRef = useRef(null);
     const [uploadLoading, setUploadLoading] = useState(false);
@@ -95,11 +104,20 @@ const ContractSign = ({ contractID }) => {
                         partyBSignatureUrl: contractDetails.partyBSignatureUrl,
                     };
 
+                    if (status === 4) {
+                        updateData.rejectionReason = rejectionReason;
+                    }
+
                     if (contractDetails.contractType === 1) {
                         updateData.campaignID = contractDetails.campaignID;
                     }
 
                     await updateContract(updateData).unwrap();
+
+                    if (status === 4) {
+                        setIsRejectDialogOpen(false);
+                        setRejectionReason('');
+                    }
 
                     return `Đã ${actionText} hợp đồng`;
                 } catch (error) {
@@ -124,7 +142,18 @@ const ContractSign = ({ contractID }) => {
         }
         handleUpdateContract(6);
     };
-    const handleReject = () => handleUpdateContract(4);
+
+    const handleOpenRejectDialog = () => {
+        setIsRejectDialogOpen(true);
+    };
+
+    const handleReject = () => {
+        if (!rejectionReason.trim()) {
+            toast.error('Vui lòng nhập lý do từ chối hợp đồng');
+            return;
+        }
+        handleUpdateContract(4);
+    };
 
     const renderContractContent = () => {
         if (!contractDetails) return null;
@@ -169,7 +198,7 @@ const ContractSign = ({ contractID }) => {
                         className="flex-1 border-2 bg-sky-400 hover:bg-sky-500 text-sky-800 rounded-lg"
                         onClick={handleSave}
                     >
-                        <ClipboardPenLine className="h-4 w-4 mr-2" /> Ký
+                        <ClipboardPenLine className="h-4 w-4 mr-2" /> Ký
                     </Button>
                     <Button
                         className="flex-1 border-2 bg-yellow-400 hover:bg-yellow-400 text-rose-800 rounded-lg"
@@ -190,7 +219,7 @@ const ContractSign = ({ contractID }) => {
                     </Button>
                     <Button
                         className="flex-1 border-2 bg-red-500 hover:bg-red-500 text-white"
-                        onClick={handleReject}
+                        onClick={handleOpenRejectDialog}
                         disabled={uploadLoading || isUpdatingContract}
                     >
                         <XCircle className="h-4 w-4 mr-2" />
@@ -198,6 +227,43 @@ const ContractSign = ({ contractID }) => {
                     </Button>
                 </div>
             </div>
+
+            <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Từ chối hợp đồng</DialogTitle>
+                        <DialogDescription>
+                            Vui lòng nhập lý do từ chối hợp đồng
+                        </DialogDescription>
+                    </DialogHeader>
+                    <Textarea
+                        placeholder="Nhập lý do từ chối..."
+                        value={rejectionReason}
+                        onChange={(e) => setRejectionReason(e.target.value)}
+                        className="min-h-[100px]"
+                    />
+                    <DialogFooter className="gap-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                                setIsRejectDialogOpen(false);
+                                setRejectionReason('');
+                            }}
+                        >
+                            Hủy
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            onClick={handleReject}
+                            disabled={!rejectionReason.trim() || uploadLoading || isUpdatingContract}
+                        >
+                            {uploadLoading || isUpdatingContract ? 'Đang xử lý...' : 'Xác nhận từ chối'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

@@ -112,3 +112,29 @@ export const generatePDF = async (element) => {
 
     return pdf;
 };
+
+/**
+ * Set a date to local time without time part.
+ * @param {string|Date} date - The input date.
+ * @returns {Date|null} - Local date at midnight.
+ */
+export const setLocalDateWithoutTime = (date) => {
+    if (!date) return null;
+    const localDate = new Date(date);
+    localDate.setHours(0, 0, 0, 0);
+    return localDate;
+};
+
+/**
+ * Format date for server with 'YYYY-MM-DDT00:00:00.000Z' format.
+ * @param {string|Date} date - The input date.
+ * @returns {string|null} - Formatted date string.
+ */
+export const formatDateForServer = (date) => {
+    if (!date) return null;
+    const localDate = new Date(date);
+    const year = localDate.getFullYear();
+    const month = String(localDate.getMonth() + 1).padStart(2, '0');
+    const day = String(localDate.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}T00:00:00.000Z`;
+};
