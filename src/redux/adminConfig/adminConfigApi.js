@@ -22,6 +22,13 @@ export const adminConfigApi = baseApi.injectEndpoints({
             }),
         }),
         
+        setDefaultCategoryConfig: builder.mutation({
+            query: ({ categoryId }) => ({
+                url: `/adminConfig/setDefault/${categoryId}`, 
+                method: 'POST',
+            }),
+        }),
+
         updateAdminConfig: builder.mutation({
             query: ({ id, ...data }) => ({
                 url: `/adminConfig/${id}`,
@@ -37,5 +44,6 @@ export const {
     useGetAdminConfigQuery,
     useUpdateAdminConfigMutation,
     useSetDefaultAdminConfigMutation,
+    useSetDefaultCategoryConfigMutation,
     useCreateAdminConfigMutation
 } = adminConfigApi;
