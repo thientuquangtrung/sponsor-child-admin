@@ -3,17 +3,26 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { RefreshCcw, SlidersHorizontal } from 'lucide-react';
+import { RefreshCcw, SlidersHorizontal, LoaderCircle } from 'lucide-react'; // Import the loader
 import { configCategory } from '@/config/combobox';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { useGetAdminConfigQuery } from '@/redux/adminConfig/adminConfigApi';
+import { useGetAdminConfigQuery, useSetDefaultAdminConfigMutation } from '@/redux/adminConfig/adminConfigApi';
+import { useUpdateAdminConfigMutation } from '@/redux/adminConfig/adminConfigApi'; // Import the mutation
+import { toast } from 'sonner';
+import { useSelector } from 'react-redux';
 
 export default function SettingsPage() {
+    const { user } = useSelector((state) => state.auth);
     const { data: configData, isLoading } = useGetAdminConfigQuery();
+    const [setDefaultAdminConfig] = useSetDefaultAdminConfigMutation();
     const [groupedConfigs, setGroupedConfigs] = useState({});
+    const [updateAdminConfig] = useUpdateAdminConfigMutation(); 
+    const [modifiedConfigValues, setModifiedConfigValues] = useState({}); 
+    const [openResetDialog, setOpenResetDialog] = useState(null); 
+    const [openUpdateDialog, setOpenUpdateDialog] = useState(null); 
+    const [isLoadingUpdate, setIsLoadingUpdate] = useState(false); 
 
-    // Group the configurations by category when data is fetched
     useEffect(() => {
         if (configData) {
             const grouped = configData.reduce((acc, config) => {
@@ -30,15 +39,62 @@ export default function SettingsPage() {
     }, [configData]);
 
     const handleInputChange = (category, key, value) => {
-        console.log(`Changed ${category} - ${key} to: ${value}`);
+        setModifiedConfigValues((prevState) => ({
+            ...prevState,
+            [key]: value,
+        }));
     };
 
-    const handleSetDefault = (category) => {
+    const isUpdateButtonEnabled = (category) => {
+        return groupedConfigs[category].some((config) => {
+            return (
+                modifiedConfigValues[config.configKey] !== undefined &&
+                modifiedConfigValues[config.configKey] !== config.configValue
+            );
+        });
+    };
+
+    const handleSetDefault = async (category) => {
         console.log(`Resetting values for category: ${category}`);
+
+        try {
+            await setDefaultAdminConfig().unwrap(); 
+
+            toast.success('Đặt lại về mặc định thành công!');
+        } catch (error) {
+            console.error('Error resetting config:', error);
+            toast.error('Có lỗi xảy ra khi đặt lại về mặc định');
+        }
+
+        setOpenResetDialog(null); 
     };
 
-    const handleUpdate = (category) => {
+    const handleUpdate = async (category) => {
         console.log(`Updating values for category: ${category}`);
+        setIsLoadingUpdate(true);
+
+        const configsToUpdate = groupedConfigs[category];
+
+        for (const config of configsToUpdate) {
+            const updatedConfig = {
+                id: config.id,
+                configuredByUserID: user.userID,
+                configValue: modifiedConfigValues[config.configKey] || config.configValue,
+                description: config.description, 
+            };
+
+            try {
+                await updateAdminConfig(updatedConfig).unwrap();
+                console.log(`Config updated successfully`, updatedConfig);
+                toast.success('Cập nhật thành công!');
+            } catch (error) {
+                console.error(`Failed to update config:`, error);
+                toast.error('Có lỗi xảy ra khi cập nhật');
+            }
+        }
+
+        setIsLoadingUpdate(false);
+        setOpenUpdateDialog(null);
     };
 
     if (isLoading) {
@@ -53,14 +109,16 @@ export default function SettingsPage() {
             </div>
             <div className="space-y-6">
                 {Object.keys(groupedConfigs).map((categoryId) => {
-                    const categoryLabel = configCategory.find((item) => item.value === parseInt(categoryId))?.label || `Unknown Category (${categoryId})`;
+                    const categoryLabel =
+                        configCategory.find((item) => item.value === parseInt(categoryId))?.label ||
+                        `Unknown Category (${categoryId})`;
 
                     return (
-                        <Card key={categoryId} className="p-6 space-y-4">
+                        <Card key={categoryId} className="p-4 space-y-4">
                             <CardHeader>
                                 <CardTitle>{`Cài đặt ${categoryLabel}`}</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-6">
+                            <CardContent className="space-y-4">
                                 {groupedConfigs[categoryId].map((config) => (
                                     <div key={config.id} className="grid grid-cols-2 gap-4 items-center">
                                         <Label htmlFor={config.configKey} className="text-md">
@@ -79,9 +137,9 @@ export default function SettingsPage() {
                                                 <Input
                                                     id={config.configKey}
                                                     type={typeof config.configValue === 'number' ? 'number' : 'text'}
-                                                    defaultValue={config.configValue}
+                                                    value={modifiedConfigValues[config.configKey] || config.configValue}
                                                     className="border-gray-300 w-[50%]"
-                                                    onBlur={(e) =>
+                                                    onChange={(e) =>
                                                         handleInputChange(categoryId, config.configKey, e.target.value)
                                                     }
                                                 />
@@ -97,15 +155,19 @@ export default function SettingsPage() {
                                 ))}
                             </CardContent>
                             <CardFooter className="flex justify-end space-x-4">
-                                <Dialog>
+                                <Dialog
+                                    open={openResetDialog === categoryId}
+                                    onOpenChange={(isOpen) => {
+                                        if (!isOpen) setOpenResetDialog(null);
+                                    }}
+                                >
                                     <DialogTrigger asChild>
                                         <Button
-                                            variant="secondary"
-                                            onClick={() => handleSetDefault(categoryId)}
-                                            className="flex items-center gap-2"
+                                            onClick={() => setOpenResetDialog(categoryId)}
+                                            className="flex items-center gap-2 bg-rose-100"
                                         >
                                             <RefreshCcw className="w-4 h-4" />
-                                            Set Default
+                                            Đặt mặc định
                                         </Button>
                                     </DialogTrigger>
                                     <DialogContent>
@@ -113,27 +175,40 @@ export default function SettingsPage() {
                                             <DialogTitle>Xác nhận đặt lại</DialogTitle>
                                         </DialogHeader>
                                         <p className="text-sm text-gray-600">
-                                            Bạn có chắc chắn muốn đặt lại tất cả giá trị trong danh mục <b>{categoryLabel}</b> về
-                                            mặc định không?
+                                            Bạn có chắc chắn muốn đặt lại tất cả giá trị trong danh mục{' '}
+                                            <b>{categoryLabel}</b> về mặc định không?
                                         </p>
                                         <DialogFooter>
-                                            <Button
-                                                variant="secondary"
-                                                onClick={() => setPendingAction({ category: null, type: null })}
-                                            >
+                                            <Button variant="primary" onClick={() => setOpenResetDialog(null)}>
                                                 Hủy
                                             </Button>
-                                            <Button variant="destructive" onClick={() => handleSetDefault(categoryId)}>
+                                            <Button
+                                                className="bg-rose-100 hover:bg-rose-300"
+                                                onClick={() => handleSetDefault(categoryId)}
+                                            >
                                                 Đồng ý
                                             </Button>
                                         </DialogFooter>
                                     </DialogContent>
                                 </Dialog>
 
-                                <Dialog>
+                                <Dialog
+                                    open={openUpdateDialog === categoryId}
+                                    onOpenChange={(isOpen) => {
+                                        if (!isOpen) setOpenUpdateDialog(null);
+                                    }}
+                                >
                                     <DialogTrigger asChild>
-                                        <Button variant="primary" onClick={() => handleUpdate(categoryId)}>
-                                            Cập nhật
+                                        <Button
+                                            className="bg-teal-100"
+                                            onClick={() => setOpenUpdateDialog(categoryId)}
+                                            disabled={!isUpdateButtonEnabled(categoryId)}
+                                        >
+                                            {isLoadingUpdate ? (
+                                                <LoaderCircle className="animate-spin" size={18} />
+                                            ) : (
+                                                'Cập nhật'
+                                            )}
                                         </Button>
                                     </DialogTrigger>
                                     <DialogContent>
@@ -146,13 +221,21 @@ export default function SettingsPage() {
                                         </p>
                                         <DialogFooter>
                                             <Button
-                                                variant="secondary"
-                                                onClick={() => setPendingAction({ category: null, type: null })}
+                                                variant="primary"
+                                                onClick={() => setOpenUpdateDialog(null)}
                                             >
                                                 Hủy
                                             </Button>
-                                            <Button variant="primary" onClick={() => handleUpdate(categoryId)}>
-                                                Đồng ý
+                                            <Button
+                                                className="bg-teal-100"
+                                                onClick={() => handleUpdate(categoryId)}
+                                                disabled={!isUpdateButtonEnabled(categoryId) || isLoadingUpdate}
+                                            >
+                                                {isLoadingUpdate ? (
+                                                    <LoaderCircle className="animate-spin" size={18} />
+                                                ) : (
+                                                    'Đồng ý'
+                                                )}
                                             </Button>
                                         </DialogFooter>
                                     </DialogContent>
