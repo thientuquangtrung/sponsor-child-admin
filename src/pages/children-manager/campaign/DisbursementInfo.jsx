@@ -10,7 +10,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { formatDateForServer, setLocalDateWithoutTime } from '@/lib/utils';
 
 const DisbursementInfo = ({ campaignType }) => {
-    const { control, watch, formState: { errors } } = useFormContext();
+    const { control, watch, setValue, formState: { errors } } = useFormContext();
     const targetAmount = parseFloat(watch('targetAmount')?.replace(/,/g, '') || '0');
 
     const { fields, append, remove } = useFieldArray({
@@ -39,6 +39,13 @@ const DisbursementInfo = ({ campaignType }) => {
         }
     }, [append, fields.length]);
 
+    useEffect(() => {
+        if (campaignType === 1 && targetAmount) {
+            if (fields.length > 0) {
+                setValue(`disbursementStages.0.disbursementAmount`, targetAmount);
+            }
+        }
+    }, [campaignType, targetAmount, setValue, fields.length]);
     const formatCurrency = (value) => {
         if (!value) return '';
         return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
