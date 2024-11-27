@@ -2,25 +2,22 @@ import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 const ImageGallery = ({ thumbnailUrl, imagesFolderUrl }) => {
-    const [selectedImage, setSelectedImage] = useState(thumbnailUrl);
+    const [selectedMedia, setSelectedMedia] = useState(thumbnailUrl);
     const [isModalOpen, setIsModalOpen] = useState(false);
-
-    const supportingImages = imagesFolderUrl ? imagesFolderUrl.split(',') : [];
-    const allImages = [thumbnailUrl, ...supportingImages];
-
+    const supportingMedia = imagesFolderUrl ? imagesFolderUrl.split(',') : [];
+    const allMedia = [thumbnailUrl, ...supportingMedia];
     const [currentIndex, setCurrentIndex] = useState(0);
-
-    const handleThumbnailClick = (image, index) => {
-        setSelectedImage(image);
+    const isVideo = (url) => url.toLowerCase().endsWith('.mp4');
+    const handleThumbnailClick = (media, index) => {
+        setSelectedMedia(media);
         setCurrentIndex(index);
     };
-
     const handlePrevious = (e) => {
         if (e) {
             e.stopPropagation();
         }
-        const newIndex = (currentIndex - 1 + allImages.length) % allImages.length;
-        setSelectedImage(allImages[newIndex]);
+        const newIndex = (currentIndex - 1 + allMedia.length) % allMedia.length;
+        setSelectedMedia(allMedia[newIndex]);
         setCurrentIndex(newIndex);
     };
 
@@ -28,8 +25,8 @@ const ImageGallery = ({ thumbnailUrl, imagesFolderUrl }) => {
         if (e) {
             e.stopPropagation();
         }
-        const newIndex = (currentIndex + 1) % allImages.length;
-        setSelectedImage(allImages[newIndex]);
+        const newIndex = (currentIndex + 1) % allMedia.length;
+        setSelectedMedia(allMedia[newIndex]);
         setCurrentIndex(newIndex);
     };
 
@@ -69,18 +66,42 @@ const ImageGallery = ({ thumbnailUrl, imagesFolderUrl }) => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isModalOpen, currentIndex]);
 
+    const renderMedia = (src, className = '', onClick = null, autoplay = false) => {
+        if (isVideo(src)) {
+            return (
+                <video
+                    src={src}
+                    className={className}
+                    onClick={onClick}
+                    controls
+                    autoPlay={autoplay}
+                    playsInline
+                >
+                    Your browser does not support the video tag.
+                </video>
+            );
+        }
+        return (
+            <img
+                src={src}
+                alt="Media content"
+                className={className}
+                onClick={onClick}
+            />
+        );
+    };
+
     return (
         <>
             <div className="w-full space-y-4">
                 <div className="relative w-full h-[600px] bg-gray-100 rounded-lg overflow-hidden">
-                    <img
-                        src={selectedImage}
-                        alt="Main campaign"
-                        className="w-full h-full object-cover cursor-pointer"
-                        onClick={openModal}
-                    />
+                    {renderMedia(
+                        selectedMedia,
+                        "w-full h-full object-cover cursor-pointer",
+                        openModal
+                    )}
 
-                    {allImages.length > 1 && (
+                    {allMedia.length > 1 && (
                         <>
                             <button
                                 onClick={(e) => {
@@ -104,12 +125,12 @@ const ImageGallery = ({ thumbnailUrl, imagesFolderUrl }) => {
                     )}
                 </div>
 
-                {supportingImages.length > 0 && (
+                {supportingMedia.length > 0 && (
                     <div className="flex gap-4 overflow-x-auto pb-2">
                         <div
                             onClick={() => handleThumbnailClick(thumbnailUrl, 0)}
                             className={`flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden cursor-pointer transition-all
-                ${selectedImage === thumbnailUrl ? 'ring-2 ring-teal-500' : 'hover:opacity-80'}`}
+                ${selectedMedia === thumbnailUrl ? 'ring-2 ring-teal-500' : 'hover:opacity-80'}`}
                         >
                             <img
                                 src={thumbnailUrl}
@@ -117,19 +138,25 @@ const ImageGallery = ({ thumbnailUrl, imagesFolderUrl }) => {
                                 className="w-full h-full object-cover"
                             />
                         </div>
-
-                        {supportingImages.map((image, index) => (
+                        {supportingMedia.map((media, index) => (
                             <div
-                                key={image}
-                                onClick={() => handleThumbnailClick(image, index + 1)}
+                                key={media}
+                                onClick={() => handleThumbnailClick(media, index + 1)}
                                 className={`flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden cursor-pointer transition-all
-                  ${selectedImage === image ? 'ring-2 ring-teal-500' : 'hover:opacity-80'}`}
+                  ${selectedMedia === media ? 'ring-2 ring-teal-500' : 'hover:opacity-80'}`}
                             >
-                                <img
-                                    src={image}
-                                    alt={`Supporting image ${index + 1}`}
-                                    className="w-full h-full object-cover"
-                                />
+                                {isVideo(media) ? (
+                                    <video
+                                        src={media}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <img
+                                        src={media}
+                                        alt={`Supporting media ${index + 1}`}
+                                        className="w-full h-full object-cover"
+                                    />
+                                )}
                             </div>
                         ))}
                     </div>
@@ -149,14 +176,13 @@ const ImageGallery = ({ thumbnailUrl, imagesFolderUrl }) => {
                     </button>
 
                     <div className="relative w-full h-full flex items-center justify-center p-4" onClick={e => e.stopPropagation()}>
-                        <img
-                            src={selectedImage}
-                            alt="Fullscreen view"
-                            className="max-h-[90vh] max-w-[90vw] object-contain"
-                            onClick={e => e.stopPropagation()}
-                        />
-
-                        {allImages.length > 1 && (
+                        {renderMedia(
+                            selectedMedia,
+                            "max-h-[90vh] max-w-[90vw] object-contain",
+                            e => e.stopPropagation(),
+                            true
+                        )}
+                        {allMedia.length > 1 && (
                             <>
                                 <button
                                     onClick={(e) => {

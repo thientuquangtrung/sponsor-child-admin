@@ -5,9 +5,13 @@ export const adminApi = baseApi.injectEndpoints({
         getAdminSummary: builder.query({
             query: () => '/Admin/summary',
         }),
+        getAdminDashboard: builder.query({
+            query: () => '/Admin/dashboard',
+        }),
     }),
 });
 
 export const {
-    useGetAdminSummaryQuery
+    useGetAdminSummaryQuery,
+    useGetAdminDashboardQuery,
 } = adminApi;
