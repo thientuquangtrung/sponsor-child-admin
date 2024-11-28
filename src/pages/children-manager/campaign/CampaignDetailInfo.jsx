@@ -114,7 +114,8 @@ const CampaignDetailInfo = ({
                     <FormItem>
                         <FormLabel>Ảnh Chiến Dịch</FormLabel>
                         <FormControl>
-                            <CustomDropzone onDrop={onDropThumbnail} multiple={false}>
+                            <CustomDropzone onDrop={onDropThumbnail} dropzoneType="imageOnly"
+                            >
                                 {thumbnail ? (
                                     <div className="flex justify-center items-center w-full py-4">
                                         <div className="relative">
@@ -256,6 +257,7 @@ const CampaignDetailInfo = ({
                             <FormLabel>Ngày Kết Thúc</FormLabel>
                             <FormControl>
                                 <DatePicker
+                                    disabled={true}
                                     date={setLocalDateWithoutTime(field.value)}
                                     onDateSelect={(date) => {
                                         const formattedDate = formatDateForServer(date);

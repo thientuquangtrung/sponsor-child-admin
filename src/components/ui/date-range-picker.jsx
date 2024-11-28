@@ -138,7 +138,7 @@ function Calendar({ mode = 'single', selected, onSelect, className, numberOfMont
 
 function DateRangePicker({ className, onRangeChange }) {
     const [date, setDate] = useState({
-        from: new Date(2023, 0, 1),
+        from: new Date(2024, 0, 1),
         to: new Date(),
     });
 

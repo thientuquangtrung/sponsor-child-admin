@@ -6,7 +6,7 @@ const addCampaignSchema = z.object({
         required_error: "Vui lòng nhập năm sinh",
         invalid_type_error: "Năm sinh không hợp lệ"
     })
-        .min(new Date().getFullYear() - 17, "Trẻ phải dưới 17 tuổi")
+        .min(new Date().getFullYear() - 16, "Trẻ phải dưới 17 tuổi")
         .max(new Date().getFullYear(), "Năm sinh không hợp lệ"),
     childGender: z.number().min(0).max(1),
     childLocation: z.string().min(1, "Vui lòng nhập địa chỉ trẻ."),
@@ -31,15 +31,13 @@ const addCampaignSchema = z.object({
     startDate: z.date({
         required_error: "Vui lòng chọn ngày bắt đầu",
     }),
-    endDate: z.date({
-        required_error: "Vui lòng chọn ngày kết thúc",
-    }),
+    endDate: z.date().optional().nullable(),
     thumbnailUrl: z.any().refine((val) => val !== null, "Bạn vui lòng tải lên hình ảnh cho chiến dịch")
         .refine((val) => val && val.size <= 10 * 1024 * 1024, "Kích thước tệp không được vượt quá 10MB"),
 
     imagesFolderUrl: z.array(z.any()).optional(),
     campaignType: z.number({
-        required_error: "Vui lòng chọn loại chiến dịch",
+        required_error: "Vui lòng chọn loại chiến dịnh",
     }),
     plannedStartDate: z.date({
         required_error: "Vui lòng chọn ngày bắt đầu dự kiến",
@@ -59,134 +57,37 @@ const addCampaignSchema = z.object({
         }),
         description: z.string().min(1, "Vui lòng nhập hoạt động giải ngân"),
     }))
-        .min(1, "Phải có ít nhất một giai đoạn giải ngân")
-        .refine((stages) => {
-            for (let i = 1; i < stages.length; i++) {
-                if (stages[i].scheduledDate <= stages[i - 1].scheduledDate) {
-                    return false;
-                }
-            }
-            return true;
-        }, {
-            message: "Ngày giải ngân của giai đoạn sau phải lớn hơn giai đoạn trước",
-            path: ["disbursementStages"]
-        })
 }).superRefine((data, ctx) => {
-    // Validate target amount is filled out before other checks
+    // Validate target amount
     const targetAmount = parseFloat(data.targetAmount.replace(/,/g, ''));
-    if (isNaN(targetAmount) || targetAmount <= 0) {
+    const isValidTargetAmount = !isNaN(targetAmount) && targetAmount > 0;
+
+    if (!isValidTargetAmount) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: "Vui lòng nhập số tiền mục tiêu trước khi nhập các giai đoạn giải ngân",
             path: ["targetAmount"]
         });
-        return; // Stop further validation if target amount is not valid
     }
 
-    if (data.endDate && data.endDate <= data.startDate) {
+    // Validation ngày bắt đầu
+    if (data.plannedStartDate <= data.startDate) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: "Ngày kết thúc phải sau ngày bắt đầu",
-            path: ["endDate"]
-        });
-    }
-
-    // Validate plannedStartDate is after endDate
-    if (data.plannedStartDate <= data.endDate) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Ngày bắt đầu dự kiến phải sau ngày kết thúc chiến dịch",
+            message: "Ngày bắt đầu giải ngân dự kiến phải sau ngày bắt đầu chiến dịch",
             path: ["plannedStartDate"]
         });
     }
 
-    // Validate plannedEndDate is after plannedStartDate
-    if (data.plannedEndDate <= data.plannedStartDate) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Ngày kết thúc dự kiến phải sau ngày bắt đầu dự kiến",
-            path: ["plannedEndDate"]
-        });
-    }
-
-    // Calculate total disbursement amount
-    const totalDisbursement = data.disbursementStages.reduce(
-        (sum, stage) => sum + stage.disbursementAmount,
-        0
-    );
-
-    // Campaign type specific validations
-    if (data.campaignType === 1) { // Emergency campaign
-        if (data.disbursementStages.length !== 1) {
+    const stages = data.disbursementStages;
+    for (let i = 1; i < stages.length; i++) {
+        if (stages[i].scheduledDate <= stages[i - 1].scheduledDate) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
-                message: "Chiến dịch khẩn cấp chỉ được có một giai đoạn giải ngân",
-                path: ["disbursementStages"]
-            });
-        }
-        if (totalDisbursement !== targetAmount) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: `Số tiền giải ngân phải bằng số tiền mục tiêu (${targetAmount.toLocaleString()} VNĐ)`,
-                path: ["disbursementStages"]
-            });
-        }
-    } else { // Regular campaign
-        if (data.disbursementStages.length < 2) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "Chiến dịch nuôi em phải có ít nhất hai giai đoạn giải ngân",
-                path: ["disbursementStages"]
-            });
-        }
-
-        // Check each stage's amount doesn't exceed 50% of target
-        data.disbursementStages.forEach((stage, index) => {
-            if (stage.disbursementAmount > targetAmount * 0.5) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "Mỗi giai đoạn không được vượt quá 50% tổng số tiền mục tiêu",
-                    path: [`disbursementStages.${index}.disbursementAmount`]
-                });
-            }
-        });
-
-        // Validate total disbursement matches target amount
-        if (totalDisbursement !== targetAmount) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: `Tổng số tiền giải ngân (${totalDisbursement.toLocaleString()} VNĐ) phải bằng số tiền mục tiêu (${targetAmount.toLocaleString()} VNĐ)`,
-                path: ["disbursementStages"]
-            });
-        }
-    }
-
-    // Validate disbursement dates are within planned period
-    data.disbursementStages.forEach((stage, index) => {
-        if (stage.scheduledDate < data.plannedStartDate || stage.scheduledDate > data.plannedEndDate) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "Ngày giải ngân phải nằm trong khoảng từ ngày bắt đầu đến ngày kết thúc dự kiến",
-                path: [`disbursementStages.${index}.scheduledDate`]
-            });
-        }
-    });
-
-    // Validate minimum 1 month between disbursement stages
-    for (let i = 1; i < data.disbursementStages.length; i++) {
-        const prevDate = new Date(data.disbursementStages[i - 1].scheduledDate);
-        const currentDate = new Date(data.disbursementStages[i].scheduledDate);
-        const monthDiff = (currentDate.getFullYear() - prevDate.getFullYear()) * 12 +
-            (currentDate.getMonth() - prevDate.getMonth());
-
-        if (monthDiff < 1) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "Các giai đoạn giải ngân phải cách nhau ít nhất 1 tháng",
-                path: [`disbursementStages.${i}.scheduledDate`]
+                message: "Ngày giải ngân của giai đoạn sau phải lớn hơn giai đoạn trước",
+                path: ["disbursementStages", i, "scheduledDate"],
             });
         }
     }
 });
-
 export default addCampaignSchema;
