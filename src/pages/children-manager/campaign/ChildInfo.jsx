@@ -3,8 +3,8 @@ import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessa
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, Upload } from 'lucide-react';
-import { YearPicker } from '@/components/ui/year-picker';
 import CustomDropzone from '@/pages/children-manager/campaign/CustomDropzone';
+import { YearPicker } from '@/components/ui/year-picker';
 
 const ChildInfo = ({ form, provinces, districts, wards, handleProvinceChange, handleDistrictChange, handleWardChange, childFile, onDropChildFile, removeChildFile }) => {
     return (
@@ -143,7 +143,8 @@ const ChildInfo = ({ form, provinces, districts, wards, handleProvinceChange, ha
                     <FormItem>
                         <FormLabel>Thông tin định danh trẻ em</FormLabel>
                         <FormControl>
-                            <CustomDropzone onDrop={onDropChildFile}>
+                            <CustomDropzone onDrop={onDropChildFile} dropzoneType="documentAndImage"
+                            >
                                 {childFile ? (
                                     <div className="flex justify-center items-center w-full py-4">
                                         <div className="relative flex items-center justify-center bg-gray-100 rounded-lg p-4">

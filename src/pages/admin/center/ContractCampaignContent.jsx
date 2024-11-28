@@ -55,7 +55,6 @@ const ContractCampaignContent = ({ signatureA, campaignDetails, contractDetails 
                 address: "......................."
             };
         }
-
         if (guaranteeProfile.guaranteeType === 0) {
             return (
                 <div className="space-y-2">
