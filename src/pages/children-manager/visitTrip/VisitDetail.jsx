@@ -323,7 +323,10 @@ const VisitDetail = () => {
                                                 <span className="w-8 h-8 flex items-center justify-center bg-teal-100 text-teal-600 rounded-full font-semibold">
                                                     {index + 1}
                                                 </span>
-                                                <span className="font-medium text-gray-700">{gift.giftType}</span>
+                                                <div>
+                                                    <span className="font-medium text-gray-700">{gift.giftType}</span>
+                                                    <p className="text-sm text-gray-500">Giá mỗi {gift.unit}: {gift.unitPrice.toLocaleString()} VND</p>
+                                                </div>
                                             </div>
                                             <div className="text-right">
                                                 <span className="inline-block px-4 py-2 bg-teal-50 text-teal-700 rounded-full">
@@ -337,6 +340,7 @@ const VisitDetail = () => {
                                 <p className="text-gray-500 text-center py-4">Không có quà tặng</p>
                             )}
                         </CollapsibleSection>
+
 
                         <CollapsibleSection title="Danh sách người tham gia" defaultOpen={false}>
                             <ParticipantsList

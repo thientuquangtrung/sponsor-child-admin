@@ -70,7 +70,6 @@ const addCampaignSchema = z.object({
         });
     }
 
-    // Validation ngày bắt đầu
     if (data.plannedStartDate <= data.startDate) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,

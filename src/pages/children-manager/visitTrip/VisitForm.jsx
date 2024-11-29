@@ -136,7 +136,8 @@ const VisitForm = () => {
                 maxParticipants: parseInt(data.maxParticipants),
                 giftRequestDetails: data.giftRequestDetails.map(gift => ({
                     ...gift,
-                    amount: parseInt(gift.amount)
+                    amount: parseInt(gift.amount),
+                    unitPrice: parseFloat(gift.unitPrice.replace(/,/g, ''))
                 })),
                 thumbnailUrl: thumbnailResponse.secure_url,
                 imagesFolderUrl: imageResponses.map(img => img.secure_url).join(','),
