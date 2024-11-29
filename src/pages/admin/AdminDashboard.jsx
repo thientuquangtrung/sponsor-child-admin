@@ -65,7 +65,7 @@ const AdminDashboard = () => {
             </div>
             <div className="mt-4 grid grid-cols-12 gap-4">
                 <div className="col-span-12 xl:col-span-8">
-                    <FundLineChart campaignsPerYearList={dashboardData.campaignsPerYearList} />
+                    <DisbursementChart disbursementData={dashboardData.disbursementSummaryList} />
                 </div>
                 <div className="col-span-12 xl:col-span-4">
                     <ActivityChart
@@ -77,7 +77,7 @@ const AdminDashboard = () => {
             </div>
 
             <div className="mt-4">
-                <DisbursementChart disbursementData={dashboardData.disbursementSummaryList} />
+                <FundLineChart campaignsPerYearList={dashboardData.campaignsPerYearList} />
             </div>
         </>
     );

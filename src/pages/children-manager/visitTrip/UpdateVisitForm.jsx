@@ -78,7 +78,8 @@ const UpdateVisitForm = () => {
                 })),
                 giftRequestDetails: visitData.giftRequestDetails.map(gift => ({
                     ...gift,
-                    amount: gift.amount.toString()
+                    amount: gift.amount.toString(),
+                    unitPrice: formatNumber(gift.unitPrice.toString())
                 })),
                 imagesFolderUrl: visitData.imagesFolderUrl ? visitData.imagesFolderUrl.split(',').map(url => ({
                     preview: url
@@ -207,7 +208,8 @@ const UpdateVisitForm = () => {
                 maxParticipants: parseInt(data.maxParticipants),
                 giftRequestDetails: data.giftRequestDetails.map(gift => ({
                     ...gift,
-                    amount: parseInt(gift.amount)
+                    amount: parseInt(gift.amount),
+                    unitPrice: parseFloat(gift.unitPrice.replace(/,/g, ''))
                 })),
                 thumbnailUrl: thumbnailUrl,
                 imagesFolderUrl: imagesUrls.length > 0 ? imagesUrls.join(',') : data.imagesFolderUrl

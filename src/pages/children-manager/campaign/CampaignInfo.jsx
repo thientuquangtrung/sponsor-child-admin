@@ -221,7 +221,6 @@ const CampaignInfo = () => {
                 URL.revokeObjectURL(childFile.preview);
             }
 
-            // Tạo preview nếu có thể
             const fileWithPreview = Object.assign(file, {
                 preview: URL.createObjectURL(file)
             });

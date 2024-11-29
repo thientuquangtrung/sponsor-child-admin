@@ -47,7 +47,12 @@ export const visitFormSchema = z.object({
     giftRequestDetails: z.array(z.object({
         giftType: z.string().min(1, "Vui lòng nhập loại quà"),
         amount: z.string().min(1, "Số lượng phải lớn hơn 0"),
-        unit: z.string().min(1, "Vui lòng nhập đơn vị")
+        unit: z.string().min(1, "Vui lòng nhập đơn vị"),
+        unitPrice: z.string()
+            .refine((val) => {
+                const numericValue = parseFloat(val.replace(/,/g, ''));
+                return !isNaN(numericValue) && numericValue >= 0;
+            }, { message: "Đơn giá phải lớn hơn 0" })
     })),
     thumbnailUrl: z.union([
         z.string().url(),
