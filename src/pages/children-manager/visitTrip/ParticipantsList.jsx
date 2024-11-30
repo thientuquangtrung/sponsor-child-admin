@@ -44,7 +44,7 @@ const ActionMenu = ({ row }) => {
     const navigate = useNavigate();
 
     const handleRefund = async () => {
-        navigate(`/visit-refund/${row.original.id}`);
+        navigate(`/visit-refund/${row.original.userID}/${row.original.visitID}`);
     };
 
     if (row.original.status !== 2) {
