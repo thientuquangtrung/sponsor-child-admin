@@ -45,6 +45,10 @@ export const visitTripRegistrationApi = baseApi.injectEndpoints({
                 body: data,
             }),
         }),
+        calculateRefundVisit: builder.query({
+            query: ({ userId, visitId }) => `/VisitTripRegistrations/calculate-refund/${userId}/${visitId}`,
+            method: 'GET',
+        }),
     }),
 });
 export const {
@@ -56,4 +60,5 @@ export const {
     useCancelVisitRegistrationTransactionMutation,
     useCanRegisterForVisitQuery,
     useUpdateVisitTripRegistrationMutation,
+    useCalculateRefundVisitQuery,
 } = visitTripRegistrationApi;

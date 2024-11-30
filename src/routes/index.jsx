@@ -95,7 +95,7 @@ export default function Router() {
                         { element: <FundSourceDetail />, path: 'fund/source/:id' },
                         { element: <FundUsageDetail />, path: 'fund/usage/:id' },
                         { element: <UpdateVisitForm />, path: 'visit/edit/:id' },
-                        { element: <VisitRefundProof />, path: 'visit-refund/:id' },
+                        { element: <VisitRefundProof />, path: 'visit-refund/:userID/:visitID' },
                         { element: <PhysicalDonationDetail />, path: 'physical-donation/:id' },
                         { path: '404', element: <Page404 /> },
                     ]),

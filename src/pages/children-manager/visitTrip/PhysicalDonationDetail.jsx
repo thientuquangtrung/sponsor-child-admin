@@ -306,8 +306,8 @@ const PhysicalDonationDetail = () => {
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
                     <InfoRow label="Loại quà tặng" value={donation.giftType} />
-                    <InfoRow label="Số lượng" value={`${donation.amount} ${donation.unit}`} />
-                    <InfoRow label="Kích thước" value={`${donation.length}cm x ${donation.width}cm x ${donation.height}cm`} />
+                    <InfoRow label="Số lượng" value={`${donation?.amount} ${donation.unit}`} />
+                    <InfoRow label="Kích thước" value={`${donation?.length || 0}cm x ${donation?.width || 0}cm x ${donation?.height || 0}cm`} />
                     <InfoRow label="Cân nặng" value={`${donation.giftWeight} kg`} />
                     <div className="space-y-2">
                         <Label className="text-lg font-medium text-gray-700">Phương thức giao:</Label>
