@@ -1,7 +1,7 @@
 import * as z from 'zod';
 
 export const visitFormSchema = z.object({
-    title: z.string().min(1, "Bạn vui lòng nhập Tiêu đề chyến thăm"),
+    title: z.string().min(1, "Bạn vui lòng nhập Tiêu đề chuyến thăm"),
     description: z.string().min(1, "Bạn vui lòng nhập thông tin chi tiết về chuyến thăm"),
     visitCost: z.string()
         .refine((val) => {
@@ -19,15 +19,19 @@ export const visitFormSchema = z.object({
     province: z.string().min(1, "Vui lòng chọn tỉnh/thành phố"),
     startDate: z.date({
         required_error: "Vui lòng chọn ngày bắt đầu",
+        invalid_type_error: "Vui lòng chọn ngày bắt đầu",
     }),
     endDate: z.date({
         required_error: "Vui lòng chọn ngày kết thúc",
+        invalid_type_error: "Vui lòng chọn ngày kết thúc",
     }),
     registrationStartDate: z.date({
         required_error: "Vui lòng chọn ngày bắt đầu nhận đăng ký",
+        invalid_type_error: "Vui lòng chọn ngày bắt đầu nhận đăng ký",
     }),
     registrationEndDate: z.date({
         required_error: "Vui lòng chọn ngày kết thúc nhận đăng ký",
+        invalid_type_error: "Vui lòng chọn ngày kết thúc nhận đăng ký",
     }),
     maxParticipants: z.string()
         .min(1, "Vui lòng nhập số lượng người tham gia")
@@ -37,6 +41,7 @@ export const visitFormSchema = z.object({
     travelItineraryDetails: z.array(z.object({
         date: z.date({
             required_error: "Vui lòng chọn ngày",
+            invalid_type_error: "Vui lòng chọn ngày",
         }),
         activities: z.array(z.object({
             startTime: z.string(),
@@ -52,48 +57,51 @@ export const visitFormSchema = z.object({
             .refine((val) => {
                 const numericValue = parseFloat(val.replace(/,/g, ''));
                 return !isNaN(numericValue) && numericValue >= 0;
-            }, { message: "Đơn giá phải lớn hơn 0" })
+            }, { message: "Đơn giá phải lớn hơn 0" })
     })),
-    thumbnailUrl: z.union([
-        z.string().url(),
-        z.instanceof(File).refine(
-            (file) => file.size <= 10 * 1024 * 1024,
-            "Kích thước tệp không được vượt quá 10MB"
-        )
-    ]).refine((val) => val !== null, "Bạn vui lòng tải lên hình ảnh cho chuyến thăm"),
+    thumbnailUrl: z.any().refine((val) => val !== null, "Bạn vui lòng tải lên hình ảnh cho chuyến thăm")
+        .refine((val) => val && val.size <= 10 * 1024 * 1024, "Kích thước tệp không được vượt quá 10MB"),
     imagesFolderUrl: z.array(z.any()).optional(),
 })
-    .refine(
-        (data) => {
-            const registrationEndDate = new Date(data.registrationEndDate);
-            const visitStartDate = new Date(data.startDate);
-            const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
-            return visitStartDate.getTime() - registrationEndDate.getTime() >= sevenDaysInMs;
-        },
-        {
-            message: "Ngày đóng đăng ký phải ít nhất 7 ngày trước ngày bắt đầu chuyến thăm",
-            path: ["registrationEndDate"],
+    .superRefine((data, ctx) => {
+        if (data.registrationEndDate <= data.registrationStartDate) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Ngày kết thúc đăng ký phải sau ngày bắt đầu đăng ký",
+                path: ["registrationEndDate"]
+            });
         }
-    )
-    .refine(
-        (data) => {
-            const registrationStartDate = new Date(data.registrationStartDate);
-            const registrationEndDate = new Date(data.registrationEndDate);
-            return registrationStartDate < registrationEndDate;
-        },
-        {
-            message: "Ngày bắt đầu đăng ký phải trước ngày kết thúc đăng ký",
-            path: ["registrationStartDate"],
+
+        const registrationEndDate = new Date(data.registrationEndDate);
+        const visitStartDate = new Date(data.startDate);
+        const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+        if (visitStartDate.getTime() - registrationEndDate.getTime() < sevenDaysInMs) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Ngày bắt đầu chuyến thăm phải sau ngày đóng đăng ký ít nhất 7 ngày",
+                path: ["startDate"]
+            });
         }
-    )
-    .refine(
-        (data) => {
+
+        if (data.endDate <= data.startDate) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Ngày kết thúc phải sau ngày bắt đầu",
+                path: ["endDate"]
+            });
+        }
+
+        data.travelItineraryDetails.forEach((itinerary, index) => {
+            const itineraryDate = new Date(itinerary.date);
             const startDate = new Date(data.startDate);
             const endDate = new Date(data.endDate);
-            return endDate > startDate;
-        },
-        {
-            message: "Thời gian kết thúc phải sau thời gian bắt đầu",
-            path: ["endDate"],
-        }
-    );
+
+            if (itineraryDate < startDate || itineraryDate > endDate) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "Ngày trong lịch trình phải nằm trong khoảng từ ngày bắt đầu đến ngày kết thúc",
+                    path: ["travelItineraryDetails", index, "date"]
+                });
+            }
+        });
+    });

@@ -243,6 +243,12 @@ const VisitForm = () => {
                                                                 type="number"
                                                                 {...field}
                                                                 placeholder="Nhập số lượng"
+                                                                min="1"
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === '-') {
+                                                                        e.preventDefault();
+                                                                    }
+                                                                }}
                                                                 onChange={(e) => {
                                                                     const value = Math.max(1, parseInt(e.target.value) || 1);
                                                                     field.onChange(value.toString());

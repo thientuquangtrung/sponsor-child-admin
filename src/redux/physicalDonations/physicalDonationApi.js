@@ -63,6 +63,16 @@ export const physicalDonationApi = baseApi.injectEndpoints({
                 body: data,
             }),
         }),
+        donatePhysicalDonationFromCommonFund: builder.mutation({
+            query: ({ visitId, ...data }) => ({
+                url: `/PhysicalDonations/${visitId}/donate-from-common-fund`,
+                method: 'POST',
+                body: data,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }),
+        }),
     }),
 });
 
@@ -73,4 +83,5 @@ export const {
     useGetPhysicalDonationByIdQuery,
     useCreatePhysicalDonationMutation,
     useUpdatePhysicalDonationMutation,
+    useDonatePhysicalDonationFromCommonFundMutation,
 } = physicalDonationApi;
