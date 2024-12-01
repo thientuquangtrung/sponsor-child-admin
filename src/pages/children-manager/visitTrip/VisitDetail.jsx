@@ -30,6 +30,8 @@ import { visitStatus } from '@/config/combobox';
 import ParticipantsList from '@/pages/children-manager/visitTrip/ParticipantsList';
 import PhysicalDonationsList from '@/pages/children-manager/visitTrip/PhysicalDonationsList';
 import { toast } from 'sonner';
+import { useSelector } from 'react-redux';
+import DonatePhysicalGiftsFromFund from '@/pages/children-manager/visitTrip/DonatePhysicalGiftsFromFund';
 
 const CollapsibleSection = ({ title, children }) => {
     const [isOpen, setIsOpen] = useState(true);
@@ -60,6 +62,7 @@ const VisitDetail = () => {
     const { data: visitData, isLoading: visitLoading, isError, refetch } = useGetChildrenVisitTripsByIdQuery(id);
     const [updateVisitStatus] = useUpdateChildrenVisitTripStatusMutation();
     const [isConfirmStartVisitOpen, setIsConfirmStartVisitOpen] = useState(false);
+    const { user } = useSelector((state) => state.auth);
 
 
     if (visitLoading) {
@@ -313,30 +316,47 @@ const VisitDetail = () => {
 
                         <CollapsibleSection title="Danh sách quà tặng" defaultOpen={false}>
                             {visitData.giftRequestDetails.length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {visitData.giftRequestDetails.map((gift, index) => (
-                                        <div
-                                            key={index}
-                                            className={`flex items-center justify-between bg-gray-50 p-6 rounded-lg hover:bg-gray-100 transition-colors ${index % 2 === 0 ? 'md:mr-3' : 'md:ml-3'}`}
-                                        >
-                                            <div className="flex items-center space-x-4">
-                                                <span className="w-8 h-8 flex items-center justify-center bg-teal-100 text-teal-600 rounded-full font-semibold">
-                                                    {index + 1}
-                                                </span>
-                                                <span className="font-medium text-gray-700">{gift.giftType}</span>
+                                <>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {visitData.giftRequestDetails.map((gift, index) => (
+                                            <div
+                                                key={index}
+                                                className={`flex items-center justify-between bg-gray-50 p-6 rounded-lg hover:bg-gray-100 transition-colors ${index % 2 === 0 ? 'md:mr-3' : 'md:ml-3'}`}
+                                            >
+                                                <div className="flex items-center space-x-4">
+                                                    <span className="w-8 h-8 flex items-center justify-center bg-teal-100 text-teal-600 rounded-full font-semibold">
+                                                        {index + 1}
+                                                    </span>
+                                                    <div>
+                                                        <span className="font-medium text-gray-700">{gift.giftType}</span>
+                                                        <p className="text-sm text-gray-500">Giá mỗi {gift.unit}: {gift.unitPrice.toLocaleString()} VND</p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <span className="inline-block px-4 py-2 bg-teal-50 text-teal-700 rounded-full">
+                                                        {gift.currentAmount}/{gift.amount} {gift.unit}
+                                                    </span>
+                                                </div>
                                             </div>
-                                            <div className="text-right">
-                                                <span className="inline-block px-4 py-2 bg-teal-50 text-teal-700 rounded-full">
-                                                    {gift.currentAmount}/{gift.amount} {gift.unit}
-                                                </span>
-                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {visitData.status === 2 && (
+                                        <div className="mt-4 flex justify-end">
+                                            <DonatePhysicalGiftsFromFund
+                                                visitId={id}
+                                                giftRequestDetails={visitData.giftRequestDetails}
+                                                userId={user.userID}
+                                                onSuccess={() => refetch()}
+                                            />
                                         </div>
-                                    ))}
-                                </div>
+                                    )}
+                                </>
                             ) : (
                                 <p className="text-gray-500 text-center py-4">Không có quà tặng</p>
                             )}
                         </CollapsibleSection>
+
 
                         <CollapsibleSection title="Danh sách người tham gia" defaultOpen={false}>
                             <ParticipantsList
@@ -376,7 +396,6 @@ const VisitDetail = () => {
                             )}
                         </Button>
                     )}
-
 
                     {showCancelButton && (
                         <AlertDialog>

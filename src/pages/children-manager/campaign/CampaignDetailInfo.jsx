@@ -114,7 +114,8 @@ const CampaignDetailInfo = ({
                     <FormItem>
                         <FormLabel>Ảnh Chiến Dịch</FormLabel>
                         <FormControl>
-                            <CustomDropzone onDrop={onDropThumbnail} multiple={false}>
+                            <CustomDropzone onDrop={onDropThumbnail} dropzoneType="imageOnly"
+                            >
                                 {thumbnail ? (
                                     <div className="flex justify-center items-center w-full py-4">
                                         <div className="relative">
@@ -156,7 +157,7 @@ const CampaignDetailInfo = ({
                 name="imagesFolderUrl"
                 render={() => (
                     <FormItem>
-                        <FormLabel>Ảnh Phụ (Không bắt buộc)</FormLabel>
+                        <FormLabel>Ảnh/Video Phụ (Không bắt buộc)</FormLabel>
                         <FormControl>
                             <div className="w-fit">
                                 <CustomDropzone onDrop={onDropImagesFolder} multiple={true}>
@@ -167,7 +168,7 @@ const CampaignDetailInfo = ({
                             </div>
                         </FormControl>
                         <FormDescription>
-                            Tải lên một hoặc nhiều ảnh phụ cho chiến dịch của bạn (JPEG, PNG, GIF, BMP, WebP)
+                            Tải lên một hoặc nhiều ảnh/video phụ cho chiến dịch của bạn (JPEG, PNG, GIF, BMP, WebP, MP4, AVI, MOV)
                         </FormDescription>
                     </FormItem>
                 )}
@@ -178,11 +179,20 @@ const CampaignDetailInfo = ({
                     <div className="grid grid-cols-7 gap-4">
                         {imagesFolderUrl.map((file, index) => (
                             <div key={index} className="relative aspect-square">
-                                <img
-                                    src={file.preview}
-                                    alt={`Upload ${index + 1}`}
-                                    className="w-full h-full object-cover rounded-lg"
-                                />
+                                {file.type.startsWith('video/') ? (
+                                    <video
+                                        src={file.preview}
+                                        alt={`Upload ${index + 1}`}
+                                        className="w-full h-full object-cover rounded-lg"
+                                        controls
+                                    />
+                                ) : (
+                                    <img
+                                        src={file.preview}
+                                        alt={`Upload ${index + 1}`}
+                                        className="w-full h-full object-cover rounded-lg"
+                                    />
+                                )}
                                 <button
                                     type="button"
                                     onClick={() => removeImageFolder(index)}
@@ -247,6 +257,7 @@ const CampaignDetailInfo = ({
                             <FormLabel>Ngày Kết Thúc</FormLabel>
                             <FormControl>
                                 <DatePicker
+                                    disabled={true}
                                     date={setLocalDateWithoutTime(field.value)}
                                     onDateSelect={(date) => {
                                         const formattedDate = formatDateForServer(date);

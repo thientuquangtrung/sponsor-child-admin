@@ -187,20 +187,49 @@ const CampaignInfo = () => {
         }
         remove(index);
     };
-
-
-
     const onDropChildFile = useCallback(
         (acceptedFiles) => {
+            if (!acceptedFiles || acceptedFiles.length === 0) {
+                toast.error('Vui lòng chỉ tải lên các file PDF, DOC, DOCX, JPEG hoặc PNG');
+                return;
+            }
             const file = acceptedFiles[0];
+            if (!file) {
+                toast.error('Không thể đọc file. Vui lòng thử lại.');
+                return;
+            }
+            const allowedTypes = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'image/jpeg',
+                'image/png'
+            ];
+
+            if (!allowedTypes.includes(file.type) || file.type.startsWith('video/')) {
+                toast.error('Vui lòng chỉ tải lên các file PDF, DOC, DOCX, JPEG hoặc PNG');
+                return;
+            }
+
+            const maxFileSize = 10 * 1024 * 1024;
+            if (file.size > maxFileSize) {
+                toast.error('Kích thước file không được vượt quá 10MB');
+                return;
+            }
+
             if (childFile) {
                 URL.revokeObjectURL(childFile.preview);
             }
-            setChildFile(file);
+
+            const fileWithPreview = Object.assign(file, {
+                preview: URL.createObjectURL(file)
+            });
+
+            setChildFile(fileWithPreview);
             form.setValue('childIdentificationInformationFile', file);
             form.clearErrors('childIdentificationInformationFile');
         },
-        [form, childFile],
+        [form, childFile]
     );
 
     const onDropImagesFolder = useCallback(
@@ -228,17 +257,21 @@ const CampaignInfo = () => {
     const onDropThumbnail = useCallback(
         (acceptedFiles) => {
             const file = acceptedFiles[0];
+            if (!file.type.startsWith('image/')) {
+                toast.error('Vui lòng chỉ tải lên tệp hình ảnh');
+                return;
+            }
+
             setThumbnail(
                 Object.assign(file, {
                     preview: URL.createObjectURL(file),
-                }),
+                })
             );
             form.setValue('thumbnailUrl', file);
             form.clearErrors('thumbnailUrl');
         },
-        [form],
+        [form]
     );
-
     const removeImageFolder = (index) => {
         const newImagesFolderUrl = [...imagesFolderUrl];
         URL.revokeObjectURL(newImagesFolderUrl[index].preview);
@@ -284,15 +317,26 @@ const CampaignInfo = () => {
 
             const imageResponses = await uploadMultipleFiles({
                 files: data.imagesFolderUrl,
-                folder: campaignMediaFolder
+                folder: campaignMediaFolder,
+                resourceType: data.imagesFolderUrl.some(file => file.type.startsWith('video/')) ? 'video' : 'auto'
             });
+
+
+            const identificationFileType = data.childIdentificationInformationFile.type;
+            const resourceType =
+                identificationFileType.startsWith('image/') ? 'image' :
+                    identificationFileType === 'application/pdf' ? 'raw' :
+                        identificationFileType.includes('document') ? 'raw' :
+                            'auto';
 
             // Upload child identification document
             const childDocResponse = await uploadFile({
                 file: data.childIdentificationInformationFile,
                 folder: campaignChildFolder,
-                customFilename: UPLOAD_NAME.IDENTIFICATION_FILE
+                customFilename: UPLOAD_NAME.IDENTIFICATION_FILE,
+                resourceType: resourceType
             });
+
 
             const finalData = {
                 id: campaignID,

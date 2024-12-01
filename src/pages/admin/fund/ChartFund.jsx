@@ -11,7 +11,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-
 import {
     ChartContainer,
     ChartLegend,
@@ -44,7 +43,7 @@ const customStyles = {
 
 export function ChartFund() {
     const [dateRange, setDateRange] = useState({
-        from: new Date(2023, 0, 1),
+        from: new Date(2024, 0, 1),
         to: new Date()
     });
 
