@@ -158,7 +158,7 @@ export const giftStatus = [
     { label: 'Đã hủy', value: 3 },
     { label: 'Chờ hoàn tiền', value: 4 },
     { label: 'Góp vào quỹ chung', value: 5 },
-    { label: 'Hoàn tiền do chuyến thăm hủy', value: 6 },
+    { label: 'Đã hoàn tiền', value: 6 },
 ];
 
 export const giftType = [
