@@ -180,6 +180,26 @@ const ChildInfo = ({ form, provinces, districts, wards, handleProvinceChange, ha
                     </FormItem>
                 )}
             />
+            <FormField
+                control={form.control}
+                name="childIdentificationCode"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Mã Định Danh Trẻ Em (Không bắt buộc)</FormLabel>
+                        <FormControl>
+                            <Input
+                                placeholder="Nhập mã định danh nếu có"
+                                {...field}
+                                value={field.value || ''}
+                            />
+                        </FormControl>
+                        <FormDescription>
+                            Nhập mã định danh của trẻ (ví dụ: mã khai sinh) nếu có.
+                        </FormDescription>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
         </>
     );
 };

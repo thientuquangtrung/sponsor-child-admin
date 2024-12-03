@@ -131,6 +131,10 @@ const DetailCampaign = () => {
                                 <FileViewer fileUrl={campaignData.childIdentificationInformationFile} />
                             </div>
                             <div className="space-y-2">
+                                <Label className="text-lg font-medium text-gray-700">Mã định danh trẻ:</Label>
+                                <Input value={campaignData?.childIdentificationCode} readOnly className="h-12 text-lg bg-gray-50" />
+                            </div>
+                            <div className="space-y-2">
                                 <Label className="text-lg font-medium text-gray-700">Họ và tên:</Label>
                                 <Input value={campaignData.childName} readOnly className="h-12 text-lg bg-gray-50" />
                             </div>
@@ -146,7 +150,7 @@ const DetailCampaign = () => {
                                     className="h-12 text-lg bg-gray-50"
                                 />
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-2 md:col-span-2">
                                 <Label className="text-lg font-medium text-gray-700">Địa chỉ:</Label>
                                 <Input
                                     value={`${campaignData.childLocation}, ${campaignData.childWard}, ${campaignData.childDistrict}, ${campaignData.childProvince}`}
@@ -386,7 +390,7 @@ const DetailCampaign = () => {
                                             }}
                                         />
                                     )}
-                                    {campaignData.status === 7 && (
+                                    {/* {campaignData.status === 7 && (
                                         <DonateFromFund
                                             campaignId={id}
                                             userId={user.userID}
@@ -394,7 +398,7 @@ const DetailCampaign = () => {
                                             raisedAmount={campaignData.raisedAmount}
                                             onSuccess={refetch}
                                         />
-                                    )}
+                                    )} */}
                                     {showPauseButton && (
                                         <Button
                                             className="bg-yellow-600 hover:bg-yellow-700 text-white"

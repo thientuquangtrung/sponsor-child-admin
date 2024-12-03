@@ -123,7 +123,7 @@ const ContractDetail = () => {
                 customFilename:
                     contract.contractType === 0
                         ? UPLOAD_NAME.REGISTRATION_CONTRACT_HARD
-                        : UPLOAD_NAME.CAMPAIGN_CONTRACT_HARD,
+                        : `${contract.contractID}_${UPLOAD_NAME.CAMPAIGN_CONTRACT_HARD}`,
                 resourceType: 'raw',
             });
 
@@ -212,10 +212,10 @@ const ContractDetail = () => {
                                     <TableCell>
                                         <span
                                             className={`px-2 py-1 rounded-full text-xs font-semibold ${contract.status === 2
-                                                    ? 'bg-green-200 text-green-800'
-                                                    : contract.status === 0 || contract.status === 1
-                                                        ? 'bg-yellow-200 text-yellow-800'
-                                                        : 'bg-purple-200 text-purple-800'
+                                                ? 'bg-green-200 text-green-800'
+                                                : contract.status === 0 || contract.status === 1
+                                                    ? 'bg-yellow-200 text-yellow-800'
+                                                    : 'bg-purple-200 text-purple-800'
                                                 }`}
                                         >
                                             {getContractStatusString(contract.status)}

@@ -83,7 +83,7 @@ const ContractSign = ({ contractID }) => {
                             customFilename:
                                 contractDetails.contractType === 0
                                     ? UPLOAD_NAME.REGISTRATION_CONTRACT_SOFT
-                                    : UPLOAD_NAME.CAMPAIGN_CONTRACT_SOFT,
+                                    : `${contractDetails.contractID}_${UPLOAD_NAME.CAMPAIGN_CONTRACT_SOFT}`,
                             resourceType: 'raw',
                         });
                         pdfUrl = pdfData.secure_url;
