@@ -15,6 +15,7 @@ const DisbursementInfo = ({ campaignType }) => {
     const plannedEndDate = watch('plannedEndDate');
     const disbursementStages = watch('disbursementStages');
     const targetAmount = parseFloat(watch('targetAmount')?.replace(/,/g, '') || '0');
+    const endDate = watch('endDate');
 
     const { fields, append, remove } = useFieldArray({
         control,
@@ -41,7 +42,6 @@ const DisbursementInfo = ({ campaignType }) => {
             });
         }
     }, [append, fields.length]);
-
     useEffect(() => {
         if (campaignType === 1 && targetAmount) {
             if (fields.length > 0) {
@@ -52,22 +52,29 @@ const DisbursementInfo = ({ campaignType }) => {
     useEffect(() => {
         if (plannedStartDate) {
             setValue('disbursementStages.0.scheduledDate', plannedStartDate);
-            if (campaignType === 1) {
-                setValue('endDate', plannedStartDate);
-                setValue('plannedEndDate', plannedStartDate);
+        }
+
+        if (endDate && campaignType === 0) {
+            setValue('plannedEndDate', endDate);
+
+            if (disbursementStages?.length > 0) {
+                const lastIndex = disbursementStages.length - 1;
+                setValue(`disbursementStages.${lastIndex}.scheduledDate`, endDate);
             }
         }
-        if (plannedEndDate && campaignType === 0 && disbursementStages?.length > 0) {
-            const lastIndex = disbursementStages.length - 1;
-            setValue('plannedEndDate', disbursementStages[lastIndex].scheduledDate);
-            setValue('endDate', disbursementStages[lastIndex].scheduledDate);
+        if (endDate && campaignType === 1) {
+            setValue('plannedStartDate', endDate);
+            setValue('plannedEndDate', endDate);
+            if (disbursementStages?.length > 0) {
+                const lastIndex = disbursementStages.length - 1;
+                setValue(`disbursementStages.${lastIndex}.scheduledDate`, endDate);
+            }
         }
-    }, [plannedStartDate, plannedEndDate, campaignType, disbursementStages, setValue]);
-
+    }, [plannedStartDate, endDate, campaignType, disbursementStages, setValue]);
 
     const isDateDisabled = (field) => {
         if (campaignType === 1 || campaignType === 0) {
-            return ['endDate', 'plannedEndDate'].includes(field);
+            return ['disbursementStages.${lastIndex}.scheduledDate', 'plannedEndDate'].includes(field);
         }
         return false;
     };
@@ -86,7 +93,7 @@ const DisbursementInfo = ({ campaignType }) => {
                     name="plannedStartDate"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Ngày Bắt Đầu Giải Ngân Dự Kiến </FormLabel>
+                            <FormLabel>Ngày Bắt Đầu  Giải Ngân Dự Kiến</FormLabel>
                             <FormControl>
                                 <DatePicker
                                     date={setLocalDateWithoutTime(field.value)}
@@ -95,6 +102,7 @@ const DisbursementInfo = ({ campaignType }) => {
                                         field.onChange(new Date(formattedDate));
                                     }}
                                     variant="outline"
+                                    disabled={(campaignType === 1)}
                                     disablePastDates={true}
                                     className={`ml-2 ${errors.plannedStartDate ? 'border-red-500' : ''}`}
                                 />
@@ -212,7 +220,10 @@ const DisbursementInfo = ({ campaignType }) => {
                                                                 const formattedDate = formatDateForServer(date);
                                                                 dateField.onChange(new Date(formattedDate));
                                                             }}
-                                                            disabled={index === 0 || (campaignType === 1)}
+                                                            disabled={
+                                                                index === 0 ||
+                                                                index === fields.length - 1
+                                                            }
                                                             variant="outline"
                                                             disablePastDates={true}
                                                             className={`w-full ${errors.disbursementStages?.[index]?.scheduledDate

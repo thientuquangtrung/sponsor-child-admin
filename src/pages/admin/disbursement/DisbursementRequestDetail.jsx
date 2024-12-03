@@ -5,6 +5,8 @@ import {
     useGetDisbursementRequestByIdQuery,
     useUpdateDisbursementRequestMutation,
 } from '@/redux/guarantee/disbursementRequestApi';
+import { useGetCommonFundsQuery } from '@/redux/fund/fundApi';
+import { Badge } from '@/components/ui/badge';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -25,6 +27,7 @@ import DisbursementApproval from '@/pages/admin/disbursement/DisbursementApprova
 import { disbursementStageStatus, disbursementRequestStatus, activityStatus } from '@/config/combobox';
 import DisbursementReport from '@/pages/admin/disbursement/DisbursementReport';
 import { useSelector } from 'react-redux';
+import { useGetDisbursementStageByIdQuery } from '@/redux/guarantee/disbursementStageApi';
 
 export default function DisbursementRequestDetail() {
     const { id } = useParams();
@@ -32,12 +35,23 @@ export default function DisbursementRequestDetail() {
     const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
     const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
     const [isEditRequestDialogOpen, setIsEditRequestDialogOpen] = useState(false);
+    const [isCommonFundDialogOpen, setIsCommonFundDialogOpen] = useState(false);
     const [isReasonEmpty, setIsReasonEmpty] = useState(false);
-    const { data: disbursementRequest, isLoading, error, refetch } = useGetDisbursementRequestByIdQuery(id);
+    const { data: disbursementRequest, isLoading: isRequestLoading, error, refetch } = useGetDisbursementRequestByIdQuery(id);
+    const { data: commonFund, isLoading: isFundLoading } = useGetCommonFundsQuery();
+    const {
+        data: disbursementStage,
+        isLoading: isStageLoading
+    } = useGetDisbursementStageByIdQuery(
+        disbursementRequest?.disbursementStage?.stageID || '',
+        {
+            skip: !disbursementRequest?.disbursementStage?.stageID
+        }
+    );
     const [updateDisbursementRequest] = useUpdateDisbursementRequestMutation();
     const { user } = useSelector((state) => state.auth);
 
-    if (isLoading) {
+    if (isRequestLoading || isStageLoading || isFundLoading) {
         return <LoadingScreen />;
     }
 
@@ -45,7 +59,7 @@ export default function DisbursementRequestDetail() {
         return <div className="text-center py-4 text-red-500">Đã có lỗi khi tải dữ liệu</div>;
     }
 
-    const handleAction = async (actionType) => {
+    const handleAction = async (actionType, isCommonFundApproved = false) => {
         if (actionType === 'reject' || actionType === 'edit') {
             if (!reason.trim()) {
                 setIsReasonEmpty(true);
@@ -65,23 +79,34 @@ export default function DisbursementRequestDetail() {
                 case 'edit':
                     requestStatus = 3;
                     break;
+                case 'approveWithoutCommonFund':
+                    requestStatus = 1;
+                    break;
                 default:
                     requestStatus = 0;
             }
-
-            await updateDisbursementRequest({
+            const updateBody = {
                 id,
                 body: {
                     requestStatus: requestStatus,
                     userID: user.userID,
-                    rejectionReason: actionType !== 'approve' ? reason : '',
-                },
-            }).unwrap();
+                    rejectionReason: actionType !== 'approve' && actionType !== 'approveWithoutCommonFund' ? reason : '',
+                }
+            };
+
+            if (isCommonFundApproved) {
+                updateBody.body.isCommonFundApproved = true;
+            }
+
+            await updateDisbursementRequest(updateBody).unwrap();
 
             let successMessage;
             switch (actionType) {
                 case 'approve':
-                    successMessage = 'Yêu cầu đã được phê duyệt!';
+                case 'approveWithoutCommonFund':
+                    successMessage = isCommonFundApproved
+                        ? 'Yêu cầu đã được phê duyệt!'
+                        : 'Yêu cầu đã được phê duyệt!';
                     break;
                 case 'reject':
                     successMessage = 'Yêu cầu đã bị từ chối!';
@@ -97,7 +122,6 @@ export default function DisbursementRequestDetail() {
             refetch();
             setReason('');
             setIsReasonEmpty(false);
-            refetch();
         } catch (error) {
             console.error('Lỗi khi cập nhật yêu cầu:', error);
             toast.error('Có lỗi xảy ra khi cập nhật yêu cầu.');
@@ -142,7 +166,8 @@ export default function DisbursementRequestDetail() {
                 return 'text-gray-600';
         }
     };
-
+    const commonFundAmount = commonFund?.totalAmount || 0;
+    const needsCommonFund = disbursementStage?.expectedDisbursementAmount > disbursementStage?.remainingAmount;
     return (
         <div className="space-y-4">
             <div>
@@ -196,6 +221,67 @@ export default function DisbursementRequestDetail() {
                         ))}
                 </div>
             </div>
+            {disbursementStage?.undisbursedStagesInfo && disbursementStage.undisbursedStagesInfo.length > 0 && (
+                <div className="space-y-4 flex flex-col border rounded-lg shadow-lg">
+                    <div className="flex space-x-2 justify-center items-center bg-gradient-to-r from-rose-100 to-gray-100 p-2 rounded-t-lg">
+                        <h4 className="text-xl font-semibold text-gray-700">Thông tin các đợt giải ngân</h4>
+                    </div>
+                    <div className="space-y-6 p-6 rounded-b-lg">
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full bg-white rounded-lg">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Đợt</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Số tiền giải ngân</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Ngày dự kiến</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Số tiền đã giải ngân</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Số tiền chưa giải ngân</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-200">
+                                    {disbursementStage.undisbursedStagesInfo.map((stage) => (
+                                        <tr key={stage.stageID} className="hover:bg-gray-50">
+                                            <td className="px-4 py-3">
+                                                <div className="flex items-center">
+                                                    <Badge className="w-6 h-6 p-2 text-white bg-teal-500 rounded-full shadow-inner">
+                                                        {stage.stageNumber}
+                                                    </Badge>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3 text-sm text-gray-700">
+                                                {stage.disbursementAmount?.toLocaleString('vi-VN')} VNĐ
+                                            </td>
+                                            <td className="px-4 py-3 text-sm text-gray-700">
+                                                <div className="flex items-center">
+                                                    <Calendar className="mr-2 h-4 w-4 text-teal-400" />
+                                                    {new Date(stage.scheduledDate).toLocaleDateString('vi-VN')}
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3 text-sm text-gray-700">
+                                                {stage.actualDisbursementAmount
+                                                    ? `${stage.actualDisbursementAmount.toLocaleString('vi-VN')} VNĐ`
+                                                    : 'Chưa giải ngân'}
+                                            </td>
+
+                                            <td className="px-4 py-3 text-sm font-medium text-teal-600">
+                                                {stage.totalUndisbursedAmount?.toLocaleString('vi-VN')} VNĐ
+                                            </td>
+
+                                            <td className="px-4 py-3">
+                                                <span className={`text-sm font-medium ${getStatusColorClass(stage.status, 'stage')}`}>
+                                                    {getStatusLabel(stage.status, disbursementStageStatus)}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            )}
+
 
             <div>
                 <div className="my-10 border rounded-lg shadow-sm bg-gray-50">
@@ -223,33 +309,9 @@ export default function DisbursementRequestDetail() {
                                 {new Date(disbursementRequest.disbursementStage.scheduledDate).toLocaleDateString('vi-VN')}
                             </h4>
                             <div className="space-y-4">
-                                <div className="flex items-center">
-                                    <p className="text-gray-700 font-medium flex items-center w-1/2">
-                                        <Landmark className="mr-2 h-5 w-5 text-teal-500" />
-                                        Ngân hàng:
-                                    </p>
-                                    <p className="text-teal-500 font-medium w-1/2">{disbursementRequest.bankName}</p>
-                                </div>
-                                <div className="flex flex-col gap-4">
-                                    <div className="flex items-center">
-                                        <div className="flex items-center w-1/2">
-                                            <CreditCard className="mr-2 h-5 w-5 text-teal-500" />
-                                            <p className="text-gray-700 font-medium">Số tài khoản ngân hàng:</p>
-                                        </div>
-                                        <p className="text-teal-500 font-medium w-1/2">
-                                            {disbursementRequest.bankAccountNumber}
-                                        </p>
-                                    </div>
 
-                                    <div className="flex items-center">
-                                        <div className="flex items-center w-1/2">
-                                            <User className="mr-2 h-5 w-5 text-teal-500" />
-                                            <p className="text-gray-700 font-medium">Tên tài khoản ngân hàng:</p>
-                                        </div>
-                                        <p className="text-teal-500 font-medium w-1/2">
-                                            {disbursementRequest.bankAccountName}
-                                        </p>
-                                    </div>
+                                <div className="flex flex-col gap-4">
+
 
                                     <div className="flex items-center">
                                         <div className="flex items-center w-1/2">
@@ -260,7 +322,18 @@ export default function DisbursementRequestDetail() {
                                             {new Date(disbursementRequest.requestDate).toLocaleDateString('vi-VN')}
                                         </p>
                                     </div>
-
+                                    <div className="flex items-center">
+                                        <div className="flex items-center w-1/2">
+                                            <CircleDollarSign className="mr-2 h-5 w-5 text-teal-500" />
+                                            <p className="text-gray-700 font-medium">
+                                                Số tiền chưa được giải ngân:
+                                            </p>
+                                        </div>
+                                        <p className="text-teal-500 font-medium w-1/2">
+                                            {disbursementStage.totalUndisbursedAmount
+                                                ? `${disbursementStage.totalUndisbursedAmount.toLocaleString('vi-VN')} VNĐ`
+                                                : 'Không có'}                                        </p>
+                                    </div>
                                     <div className="flex items-center">
                                         <div className="flex items-center w-1/2">
                                             <CircleDollarSign className="mr-2 h-5 w-5 text-teal-500" />
@@ -272,15 +345,36 @@ export default function DisbursementRequestDetail() {
                                             {disbursementRequest?.disbursementStage?.disbursementAmount?.toLocaleString('vi-VN')} VNĐ
                                         </p>
                                     </div>
-
                                     <div className="flex items-center">
                                         <div className="flex items-center w-1/2">
                                             <CircleDollarSign className="mr-2 h-5 w-5 text-teal-500" />
                                             <p className="text-gray-700 font-medium">
-                                                Số tiền yêu cầu giải ngân:
+                                                Số tiền giải ngân mong đợi:
                                             </p>
                                         </div>
                                         <p className="text-teal-500 font-medium w-1/2">
+                                            {disbursementStage?.expectedDisbursementAmount?.toLocaleString('vi-VN')} VNĐ
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <div className="flex items-center w-1/2">
+                                            <CircleDollarSign className="mr-2 h-5 w-5 text-teal-500" />
+                                            <p className="text-gray-700 font-medium">
+                                                Số tiền còn lại của chiến dịch:
+                                            </p>
+                                        </div>
+                                        <p className="text-teal-500 font-medium w-1/2">
+                                            {disbursementStage?.remainingAmount?.toLocaleString('vi-VN')} VNĐ
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <div className="flex items-center w-1/2">
+                                            <CircleDollarSign className="mr-2 h-5 w-5 text-orange-500" />
+                                            <p className="text-orange-700 font-medium">
+                                                Số tiền thực tế có thể giải ngân:
+                                            </p>
+                                        </div>
+                                        <p className="text-orange-500 font-medium w-1/2">
                                             {disbursementRequest?.disbursementStage?.actualDisbursementAmount?.toLocaleString('vi-VN')} VNĐ
                                         </p>
                                     </div>
@@ -294,6 +388,7 @@ export default function DisbursementRequestDetail() {
                                         {getStatusLabel(disbursementRequest.requestStatus, disbursementRequestStatus)}
                                     </p>
                                 </div>
+
                             </div>
                         </div>
 
@@ -334,6 +429,34 @@ export default function DisbursementRequestDetail() {
                                         Không có hoạt động nào được định nghĩa cho đợt này.
                                     </div>
                                 )}
+                                <div className="p-4 space-y-4 mt-4 bg-white rounded-lg shadow border border-gray-200">
+                                    <div className="flex items-center">
+                                        <div className="flex items-center w-1/2">
+                                            <CreditCard className="mr-2 h-5 w-5 text-teal-500" />
+                                            <p className="text-gray-700 font-medium">Số tài khoản ngân hàng:</p>
+                                        </div>
+                                        <p className="text-teal-500 font-medium w-1/2">
+                                            {disbursementRequest.bankAccountNumber}
+                                        </p>
+                                    </div>
+
+                                    <div className="flex items-center">
+                                        <div className="flex items-center w-1/2">
+                                            <User className="mr-2 h-5 w-5 text-teal-500" />
+                                            <p className="text-gray-700 font-medium">Tên tài khoản ngân hàng:</p>
+                                        </div>
+                                        <p className="text-teal-500 font-medium w-1/2">
+                                            {disbursementRequest.bankAccountName}
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <p className="text-gray-700 font-medium flex items-center w-1/2">
+                                            <Landmark className="mr-2 h-5 w-5 text-teal-500" />
+                                            Ngân hàng:
+                                        </p>
+                                        <p className="text-teal-500 font-medium w-1/2">{disbursementRequest.bankName}</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -388,11 +511,18 @@ export default function DisbursementRequestDetail() {
                         <div className="flex space-x-4 justify-end pt-5">
                             <Button
                                 variant="success"
-                                onClick={() => setIsApproveDialogOpen(true)}
+                                onClick={() => {
+                                    if (needsCommonFund) {
+                                        setIsCommonFundDialogOpen(true);
+                                    } else {
+                                        setIsApproveDialogOpen(true);
+                                    }
+                                }}
                                 className="bg-green-500 text-white hover:bg-green-600"
                             >
                                 Đồng ý giải ngân
                             </Button>
+
                             <Button
                                 variant="warning"
                                 onClick={() => setIsEditRequestDialogOpen(true)}
@@ -462,6 +592,75 @@ export default function DisbursementRequestDetail() {
                 </DialogContent>
             </Dialog>
 
+            <Dialog open={isCommonFundDialogOpen} onOpenChange={setIsCommonFundDialogOpen}>
+                <DialogContent className="sm:max-w-[600px] p-6">
+                    <DialogHeader className="mb-4">
+                        <DialogTitle className="text-2xl font-bold text-gray-800">Xác nhận sử dụng quỹ chung</DialogTitle>
+                        <DialogClose />
+                    </DialogHeader>
+
+                    <div className="space-y-6 bg-gray-50 p-4 rounded-lg">
+                        <p className="text-gray-700 text-base">
+                            Hiện tại số tiền còn lại trong chiến dịch này nhỏ hơn số tiền mong đợi giải ngân.
+                        </p>
+
+                        <div className="space-y-3 bg-white p-4 rounded-md shadow-sm border border-gray-100">
+                            <div className="flex justify-between items-center">
+                                <span className="text-gray-600">Số tiền còn lại trong chiến dịch:</span>
+                                <span className="font-semibold text-teal-600 text-lg">
+                                    {disbursementStage?.remainingAmount.toLocaleString('vi-VN')} VNĐ
+                                </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-gray-600">Số tiền giải ngân mong đợi:</span>
+                                <span className="font-semibold text-rose-600 text-lg">
+                                    {disbursementStage?.expectedDisbursementAmount.toLocaleString('vi-VN')} VNĐ
+                                </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-gray-600">Số tiền trong quỹ chung:</span>
+                                <span className="font-semibold text-blue-600 text-lg">
+                                    {commonFundAmount.toLocaleString('vi-VN')} VNĐ
+                                </span>
+                            </div>
+                        </div>
+
+                        <p className="text-gray-700 text-base">
+                            Bạn có muốn trích tiền từ quỹ chung để bù đắp cho số tiền còn thiếu không?
+                        </p>
+                    </div>
+
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsCommonFundDialogOpen(false)}
+                            className="hover:bg-gray-100 border-2 border-gray-300 rounded-lg"
+                        >
+                            Hủy
+                        </Button>
+                        <Button
+                            onClick={async () => {
+                                setIsCommonFundDialogOpen(false);
+                                await handleAction('approveWithoutCommonFund');
+                            }}
+                            className="bg-blue-500 text-white hover:bg-blue-600"
+                        >
+                            Giải ngân không dùng quỹ chung
+                        </Button>
+                        <Button
+                            variant="success"
+                            onClick={async () => {
+                                setIsCommonFundDialogOpen(false);
+                                await handleAction('approve', true);
+                            }}
+                            className="bg-teal-500 text-white hover:bg-teal-600"
+                            disabled={commonFundAmount < (needsCommonFund)}
+                        >
+                            Đồng ý sử dụng quỹ chung
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
             <Dialog open={isEditRequestDialogOpen} onOpenChange={setIsEditRequestDialogOpen}>
                 <DialogContent>
                     <DialogHeader>

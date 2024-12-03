@@ -51,7 +51,7 @@ const VisitForm = () => {
             registrationEndDate: "",
             startDate: new Date(),
             endDate: null,
-            maxParticipants: "",
+            maxParticipants: 1,
             travelItineraryDetails: [],
             giftRequestDetails: [],
             thumbnailUrl: null,
