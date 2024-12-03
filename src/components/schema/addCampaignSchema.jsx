@@ -18,6 +18,7 @@ const addCampaignSchema = z.object({
     districtId: z.string().min(1, "Vui lòng chọn quận/huyện"),
     wardId: z.string().min(1, "Vui lòng chọn phường/xã"),
     title: z.string().min(1, "Bạn vui lòng nhập Tiêu Đề chiến dịch"),
+    childIdentificationCode: z.string().optional(),
     story: z.string().min(1, "Bạn vui lòng nhập thông tin chi tiết về chiến dịch"),
     targetAmount: z.string()
         .refine((val) => {
@@ -41,6 +42,7 @@ const addCampaignSchema = z.object({
     }),
     plannedStartDate: z.date({
         required_error: "Vui lòng chọn ngày bắt đầu dự kiến",
+        invalid_type_error: "Vui lòng chọn bắt đầu dự kiến",
     }),
     plannedEndDate: z.date({
         required_error: "Vui lòng chọn ngày kết thúc dự kiến",
@@ -69,7 +71,6 @@ const addCampaignSchema = z.object({
             path: ["targetAmount"]
         });
     }
-
     if (data.plannedStartDate <= data.startDate) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
@@ -77,13 +78,13 @@ const addCampaignSchema = z.object({
             path: ["plannedStartDate"]
         });
     }
-
     const stages = data.disbursementStages;
     for (let i = 1; i < stages.length; i++) {
-        if (stages[i].scheduledDate <= stages[i - 1].scheduledDate) {
+        const daysDifference = (stages[i].scheduledDate.getTime() - stages[i - 1].scheduledDate.getTime()) / (1000 * 3600 * 24);
+        if (daysDifference < 30) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
-                message: "Ngày giải ngân của giai đoạn sau phải lớn hơn giai đoạn trước",
+                message: "Khoảng cách giữa các ngày giải ngân phải ít nhất 30 ngày",
                 path: ["disbursementStages", i, "scheduledDate"],
             });
         }

@@ -9,7 +9,11 @@ export const disbursementStageApi = baseApi.injectEndpoints({
                 body: body,
             }),
         }),
+
+        getDisbursementStageById: builder.query({
+            query: (stageId) => `/disbursementStage/${stageId}`,
+        }),
     }),
 });
 
-export const { useUpdateDisbursementStageMutation } = disbursementStageApi;
+export const { useUpdateDisbursementStageMutation, useGetDisbursementStageByIdQuery } = disbursementStageApi;

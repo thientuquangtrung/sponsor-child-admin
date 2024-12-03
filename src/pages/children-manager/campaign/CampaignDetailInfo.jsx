@@ -257,7 +257,6 @@ const CampaignDetailInfo = ({
                             <FormLabel>Ngày Kết Thúc</FormLabel>
                             <FormControl>
                                 <DatePicker
-                                    disabled={true}
                                     date={setLocalDateWithoutTime(field.value)}
                                     onDateSelect={(date) => {
                                         const formattedDate = formatDateForServer(date);
