@@ -23,58 +23,81 @@ import {
 } from "@/components/ui/alert-dialog";
 import * as z from 'zod';
 
+const adjustDate = (date) => {
+    if (!date) return null;
+    const newDate = new Date(date);
+    newDate.setMinutes(newDate.getMinutes() - newDate.getTimezoneOffset());
+    return newDate;
+};
 const ExtendCampaignDuration = ({ onCancel, onSuccess, id, userID }) => {
     const { data: estimatedPlan, isLoading: isLoadingPlan } = useGetCampaignEstimatedDisbursementPlanQuery(id);
     const [createPlan] = useCreateCampaignDisbursementPlanMutation();
-
+    const [isValidForm, setIsValidForm] = React.useState(false);
     const createExtensionSchema = React.useMemo(() => {
         return z.object({
-            plannedStartDate: z.date(),
-            plannedEndDate: z.date(),
+            plannedStartDate: z.date({
+                required_error: "Vui lòng chọn ngày bắt đầu",
+            }),
+            plannedEndDate: z.date({
+                required_error: "Vui lòng chọn ngày kết thúc",
+            }),
             totalPlannedAmount: z.number().optional(),
             stages: z.array(
                 z.object({
                     stageNumber: z.number(),
                     disbursementAmount: z.number(),
                     scheduledDate: z.date(),
-                    description: z.string().optional()
+                    description: z.string().min(1, "Vui lòng nhập hoạt động"),
                 })
             )
         }).refine(
-            (data) => {
-                const firstStageDate = data.stages[0]?.scheduledDate;
-                if (!firstStageDate || firstStageDate.toDateString() !== data.plannedStartDate.toDateString()) {
-                    return false;
-                }
-
-                const lastStageDate = data.stages[data.stages.length - 1]?.scheduledDate;
-                if (!lastStageDate || lastStageDate.toDateString() !== data.plannedEndDate.toDateString()) {
-                    return false;
-                }
-
-                for (let i = 1; i < data.stages.length; i++) {
-                    const prevStageDate = data.stages[i - 1].scheduledDate;
-                    const currentStageDate = data.stages[i].scheduledDate;
-
-                    const daysDifference = Math.floor(
-                        (currentStageDate.getTime() - prevStageDate.getTime()) / (1000 * 60 * 60 * 24)
-                    );
-                    if (daysDifference < 30) {
-                        return false;
-                    }
-
-                    if (currentStageDate <= prevStageDate) {
-                        return false;
-                    }
-                }
-
-                return data.plannedEndDate > data.plannedStartDate;
-            },
+            (data) => data.plannedEndDate > data.plannedStartDate,
             {
-                message: "Validation failed",
-                path: ["stages"]
+                message: "Ngày kết thúc phải lớn hơn ngày bắt đầu",
+                path: ["plannedEndDate"]
             }
-        )
+        ).superRefine((data, ctx) => {
+            const firstStage = data.stages[0];
+            if (firstStage && firstStage.scheduledDate.getTime() !== data.plannedStartDate.getTime()) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "Ngày giải ngân đầu tiên phải trùng với ngày bắt đầu",
+                    path: ["stages", 0, "scheduledDate"]
+                });
+            }
+            const lastStage = data.stages[data.stages.length - 1];
+            if (lastStage && lastStage.scheduledDate.getTime() !== data.plannedEndDate.getTime()) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "Ngày giải ngân cuối cùng phải trùng với ngày kết thúc",
+                    path: ["stages", data.stages.length - 1, "scheduledDate"]
+                });
+            }
+            for (let i = 1; i < data.stages.length; i++) {
+                const prevDate = data.stages[i - 1].scheduledDate;
+                const currentDate = data.stages[i].scheduledDate;
+
+                const daysDifference = Math.floor(
+                    (currentDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24)
+                );
+
+                if (daysDifference < 30) {
+                    ctx.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message: "Khoảng cách giữa các ngày giải ngân phải ít nhất 30 ngày",
+                        path: ["stages", i, "scheduledDate"]
+                    });
+                }
+
+                if (currentDate <= prevDate) {
+                    ctx.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message: "Ngày giải ngân sau phải lớn hơn ngày giải ngân trước",
+                        path: ["stages", i, "scheduledDate"]
+                    });
+                }
+            }
+        });
     }, []);
 
     const {
@@ -89,38 +112,72 @@ const ExtendCampaignDuration = ({ onCancel, onSuccess, id, userID }) => {
         mode: 'onChange',
         reValidateMode: 'onChange',
         defaultValues: {
-            plannedStartDate: new Date(),
-            plannedEndDate: new Date(),
+            plannedStartDate: adjustDate(new Date()),
+            plannedEndDate: adjustDate(new Date()),
             totalPlannedAmount: 0,
             stages: []
         }
     });
+    const checkFormValidity = React.useCallback(async () => {
+        const isValid = await trigger();
+        setIsValidForm(isValid);
+    }, [trigger]);
 
     React.useEffect(() => {
         if (estimatedPlan) {
             reset({
-                plannedStartDate: new Date(estimatedPlan.plannedStartDate),
-                plannedEndDate: new Date(estimatedPlan.plannedEndDate),
+                plannedStartDate: adjustDate(new Date(estimatedPlan.plannedStartDate)),
+                plannedEndDate: adjustDate(new Date(estimatedPlan.plannedEndDate)),
                 totalPlannedAmount: estimatedPlan.totalPlannedAmount,
                 stages: estimatedPlan.simplifiedStages.map(stage => ({
                     stageNumber: stage.stageNumber,
                     disbursementAmount: stage.disbursementAmount,
-                    scheduledDate: new Date(stage.scheduledDate),
+                    scheduledDate: adjustDate(new Date(stage.scheduledDate)),
                     description: stage.description || ''
                 }))
             });
         }
     }, [estimatedPlan, reset]);
 
+    React.useEffect(() => {
+        const subscription = watch((value, { name }) => {
+            checkFormValidity();
+            if (name === 'plannedStartDate') {
+                const stages = value.stages;
+                if (stages && stages.length > 0) {
+                    const updatedStages = [...stages];
+                    updatedStages[0] = {
+                        ...updatedStages[0],
+                        scheduledDate: adjustDate(value.plannedStartDate)
+                    };
+                    reset({ ...value, stages: updatedStages }, { keepDefaultValues: true });
+                }
+            }
+            if (name === 'plannedEndDate') {
+                const stages = value.stages;
+                if (stages && stages.length > 0) {
+                    const updatedStages = [...stages];
+                    updatedStages[stages.length - 1] = {
+                        ...updatedStages[stages.length - 1],
+                        scheduledDate: adjustDate(value.plannedEndDate)
+                    };
+                    reset({ ...value, stages: updatedStages }, { keepDefaultValues: true });
+                }
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [watch, reset, checkFormValidity]);
+
     const onSubmitForm = async (data) => {
         try {
             const formattedData = {
                 campaignId: id,
-                plannedStartDate: data.plannedStartDate.toISOString(),
-                plannedEndDate: data.plannedEndDate.toISOString(),
+                plannedStartDate: adjustDate(data.plannedStartDate).toISOString(),
+                plannedEndDate: adjustDate(data.plannedEndDate).toISOString(),
                 disbursementStages: data.stages.map(stage => ({
                     disbursementAmount: stage.disbursementAmount,
-                    scheduledDate: stage.scheduledDate.toISOString(),
+                    scheduledDate: adjustDate(stage.scheduledDate).toISOString(),
                     description: stage.description
                 })),
                 campaignStatus: 1,
@@ -155,7 +212,7 @@ const ExtendCampaignDuration = ({ onCancel, onSuccess, id, userID }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <Label className="text-lg font-medium text-gray-700">
-                                    Ngày bắt đầu giải ngân dự kiến mới<span className="text-red-500">*</span>
+                                    Ngày bắt đầu<span className="text-red-500">*</span>
                                 </Label>
                                 <Controller
                                     name="plannedStartDate"
@@ -177,7 +234,7 @@ const ExtendCampaignDuration = ({ onCancel, onSuccess, id, userID }) => {
 
                             <div className="space-y-2">
                                 <Label className="text-lg font-medium text-gray-700">
-                                    Ngày kết thúc giải ngân dự kiến mới<span className="text-red-500">*</span>
+                                    Ngày kết thúc<span className="text-red-500">*</span>
                                 </Label>
                                 <Controller
                                     name="plannedEndDate"
@@ -254,6 +311,7 @@ const ExtendCampaignDuration = ({ onCancel, onSuccess, id, userID }) => {
                                                                     }}
                                                                     variant="outline"
                                                                     disablePastDates={true}
+                                                                    disabled={index === 0 || index === watch('stages').length - 1}
                                                                     className={errors.stages?.[index]?.scheduledDate ? 'border-red-500' : ''}
                                                                 />
                                                             )}
@@ -295,49 +353,58 @@ const ExtendCampaignDuration = ({ onCancel, onSuccess, id, userID }) => {
                                 Hủy
                             </Button>
 
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button
-                                        type="button"
-                                        className="bg-blue-600 hover:bg-blue-700 text-white h-12"
-                                    >
-                                        Gia Hạn
-                                    </Button>
-                                </AlertDialogTrigger>
-
-                                <AlertDialogContent className="bg-white p-6 rounded-lg shadow-lg">
-                                    <AlertDialogHeader className="border-b pb-2 mb-4">
-                                        <AlertDialogTitle className="text-xl font-semibold text-gray-800">
-                                            Xác nhận Gia Hạn Chiến Dịch
-                                        </AlertDialogTitle>
-                                    </AlertDialogHeader>
-                                    <AlertDialogDescription className="space-y-4">
-                                        <p className="text-gray-700">
-                                            - Hành động này sẽ gia hạn thời gian chiến dịch.
-                                        </p>
-                                        <p className="text-gray-700">
-                                            - Các giai đoạn giải ngân sẽ được điều chỉnh theo thời gian mới.
-                                        </p>
-                                    </AlertDialogDescription>
-
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Hủy</AlertDialogCancel>
-                                        <AlertDialogAction
-                                            onClick={handleSubmit(onSubmitForm)}
-                                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                            {isValidForm ? (
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button
+                                            type="button"
+                                            className="bg-blue-600 hover:bg-blue-700 text-white h-12"
                                         >
-                                            {isSubmitting ? (
-                                                <>
-                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    Đang xử lý
-                                                </>
-                                            ) : (
-                                                'Xác nhận Gia Hạn'
-                                            )}
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
+                                            Gia Hạn
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent className="bg-white p-6 rounded-lg shadow-lg">
+                                        <AlertDialogHeader className="border-b pb-2 mb-4">
+                                            <AlertDialogTitle className="text-xl font-semibold text-gray-800">
+                                                Xác nhận Gia Hạn Chiến Dịch
+                                            </AlertDialogTitle>
+                                        </AlertDialogHeader>
+                                        <AlertDialogDescription className="space-y-4">
+                                            <p className="text-gray-700">
+                                                - Hành động này sẽ gia hạn thời gian chiến dịch.
+                                            </p>
+                                            <p className="text-gray-700">
+                                                - Các giai đoạn giải ngân sẽ được điều chỉnh theo thời gian mới.
+                                            </p>
+                                        </AlertDialogDescription>
+
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Hủy</AlertDialogCancel>
+                                            <AlertDialogAction
+                                                onClick={handleSubmit(onSubmitForm)}
+                                                className="bg-blue-600 hover:bg-blue-700 text-white"
+                                            >
+                                                {isSubmitting ? (
+                                                    <>
+                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        Đang xử lý
+                                                    </>
+                                                ) : (
+                                                    'Xác nhận Gia Hạn'
+                                                )}
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            ) : (
+                                <Button
+                                    type="button"
+                                    disabled
+                                    className="bg-gray-400 text-white h-12 cursor-not-allowed"
+                                >
+                                    Gia Hạn
+                                </Button>
+                            )}
                         </div>
                     </form>
                 </CardContent>
