@@ -42,11 +42,14 @@ const customStyles = {
 };
 
 export function ChartFund() {
-    const [dateRange, setDateRange] = useState({
-        from: new Date(2024, 0, 1),
-        to: new Date()
-    });
+    const today = new Date();
+    const oneYearAgo = new Date(today);
+    oneYearAgo.setFullYear(today.getFullYear() - 1);
 
+    const [dateRange, setDateRange] = useState({
+        from: oneYearAgo,
+        to: today
+    });
     const { data: chartData, isLoading, isError } = useGetIncomeExpenseByDateRangeQuery({
         startDate: dateRange.from.toISOString().split('T')[0],
         endDate: dateRange.to.toISOString().split('T')[0]

@@ -39,31 +39,15 @@ export default function DisbursementRequestDetail() {
     const [isReasonEmpty, setIsReasonEmpty] = useState(false);
     const { data: disbursementRequest, isLoading: isRequestLoading, error, refetch } = useGetDisbursementRequestByIdQuery(id);
     const { data: commonFund, isLoading: isFundLoading } = useGetCommonFundsQuery();
-    // const {
-    //     data: disbursementStage,
-    //     isLoading: isStageLoading
-    // } = useGetDisbursementStageByIdQuery(
-    //     disbursementRequest?.disbursementStage?.stageID || '',
-    //     {
-    //         skip: !disbursementRequest?.disbursementStage?.stageID
-    //     }
-    // );
     const [updateDisbursementRequest] = useUpdateDisbursementRequestMutation();
     const { user } = useSelector((state) => state.auth);
-
-    // if (isRequestLoading || isStageLoading || isFundLoading) {
-    //     return <LoadingScreen />;
-    // }
     if (isRequestLoading || isFundLoading) {
         return <LoadingScreen />;
     }
-
-
     if (error) {
         return <div className="text-center py-4 text-red-500">Đã có lỗi khi tải dữ liệu</div>;
     }
     const amountToDeduct = disbursementRequest?.disbursementStage?.expectedDisbursementAmount - disbursementRequest?.disbursementStage?.remainingAmount;
-
     const handleAction = async (actionType, isCommonFundApproved = false) => {
         if (actionType === 'reject' || actionType === 'edit') {
             if (!reason.trim()) {
@@ -324,17 +308,15 @@ export default function DisbursementRequestDetail() {
                                     </div>
                                     <div className="grid grid-cols-2 gap-6 rounded-b-lg">
                                         <div className="space-y-4">
-                                            <div className="flex flex-col items-end">
+                                            <div className="flex flex-col items-end relative">
                                                 <div className="flex items-center justify-between w-full">
-                                                    <p className="text-gray-700 font-medium">ST chưa được giải ngân:</p>
+                                                    <p className="text-gray-700 font-medium">ST chưa giải ngân:</p>
                                                     <span className="text-teal-600 font-semibold">
                                                         {disbursementRequest?.disbursementStage?.totalUndisbursedAmount?.toLocaleString('vi-VN')} VNĐ
                                                     </span>
                                                 </div>
-                                                <div className="flex justify-center w-full">
-                                                    <span className="text-gray-800 font-semibold text-xl">+</span>
-                                                </div>
-                                                <div className="flex items-center justify-between w-full mb-3">
+                                                <span className="text-teal-600 font-semibold text-xl absolute right-36 top-2 py-1">+</span>
+                                                <div className="flex items-center justify-between w-full py-3">
                                                     <p className="text-gray-700 font-medium">ST giải ngân đợt {disbursementRequest?.disbursementStage?.stageNumber}:</p>
                                                     <div className="flex flex-col items-end">
                                                         <span className="text-teal-600 font-semibold border-b border-gray-400">
@@ -352,17 +334,15 @@ export default function DisbursementRequestDetail() {
                                             </div>
                                         </div>
                                         <div className="space-y-4">
-                                            <div className="flex flex-col items-end">
+                                            <div className="flex flex-col items-end relative">
                                                 <div className="flex items-center justify-between w-full">
-                                                    <p className="text-gray-700 font-medium">ST gây quỹ được:</p>
+                                                    <p className="text-gray-700 font-medium">ST đã gây quỹ:</p>
                                                     <span className="text-teal-600 font-semibold">
                                                         {disbursementRequest?.disbursementStage?.presentRaisedAmount?.toLocaleString('vi-VN')} VNĐ
                                                     </span>
                                                 </div>
-                                                <div className="flex justify-center w-full">
-                                                    <span className="text-gray-800 font-black text-xl">-</span>
-                                                </div>
-                                                <div className="flex items-center justify-between w-full mb-3">
+                                                <span className="text-teal-600 font-semibold text-xl absolute right-36 top-2 py-1">-</span>
+                                                <div className="flex items-center justify-between w-full py-3">
                                                     <p className="text-gray-700 font-medium">ST đã giải ngân đợt trước:</p>
                                                     <div className="flex flex-col items-end">
                                                         <span className="text-teal-600 font-semibold border-b border-gray-400">
@@ -405,6 +385,17 @@ export default function DisbursementRequestDetail() {
                                         <p className={`w-1/2 font-medium ${getStatusColorClass(disbursementRequest.requestStatus, 'request')}`}>
                                             {getStatusLabel(disbursementRequest.requestStatus, disbursementRequestStatus)}
                                         </p>
+                                        {needsCommonFund && (
+                                            <div className="flex justify-end">
+                                                <Button
+                                                    variant="secondary"
+                                                    onClick={() => setIsCommonFundDialogOpen(true)}
+                                                    className="bg-blue-500 text-white hover:bg-blue-600"
+                                                >
+                                                    Trích quỹ chung
+                                                </Button>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -534,15 +525,6 @@ export default function DisbursementRequestDetail() {
                             >
                                 Đồng ý giải ngân
                             </Button>
-                            {needsCommonFund && (
-                                <Button
-                                    variant="secondary"
-                                    onClick={() => setIsCommonFundDialogOpen(true)}
-                                    className="bg-blue-500 text-white hover:bg-blue-600"
-                                >
-                                    Giải ngân dùng quỹ chung
-                                </Button>
-                            )}
                             <Button
                                 variant="warning"
                                 onClick={() => setIsEditRequestDialogOpen(true)}

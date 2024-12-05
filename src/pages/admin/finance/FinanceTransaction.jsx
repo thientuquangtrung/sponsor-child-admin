@@ -1,5 +1,4 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
     flexRender,
@@ -9,12 +8,6 @@ import {
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Download, Eye, MoreHorizontal } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -25,7 +18,7 @@ import { transactionType, transactionStatus } from '@/config/combobox';
 import { useGetTransactionQuery } from '@/redux/transaction/transactionApi';
 import ToolbarForTransaction from '@/components/datatable/ToolbarForTransaction';
 import * as XLSX from 'xlsx';
-
+import LoadingScreen from '@/components/common/LoadingScreen';
 const getTransactionTypeLabel = (value) => {
     const type = transactionType.find((t) => t.value === value);
     return type ? type.label : 'Không xác định';
@@ -40,7 +33,7 @@ const columns = [
     {
         accessorKey: 'transactionName',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Tên giao dịch" />,
-        cell: ({ row }) => <div>{row.getValue('transactionName')}</div>,
+        cell: ({ row }) => <div className="max-w-[300px] truncate">{row.getValue('transactionName')}</div>,
     },
     {
         accessorKey: 'description',
@@ -55,7 +48,7 @@ const columns = [
     {
         accessorKey: 'amount',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Số tiền" />,
-        cell: ({ row }) => <div className="font-medium">{row.getValue('amount').toLocaleString('vi-VN')} ₫</div>,
+        cell: ({ row }) => <div className="font-medium text-right">{row.getValue('amount').toLocaleString('vi-VN')} ₫</div>,
     },
     {
         accessorKey: 'type',
@@ -120,34 +113,10 @@ const columns = [
             return value.includes(status);
         },
     },
-    // {
-    //     id: 'actions',
-    //     cell: ({ row }) => <ActionMenu row={row} />,
-    // },
+
 ];
 
-// const ActionMenu = ({ row }) => {
-//     const navigate = useNavigate();
-//     return (
-//         <DropdownMenu>
-//             <DropdownMenuTrigger asChild>
-//                 <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-normal">
-//                     <span className="sr-only">Mở menu</span>
-//                     <MoreHorizontal className="h-4 w-4" />
-//                 </Button>
-//             </DropdownMenuTrigger>
-//             <DropdownMenuContent align="end">
-//                 <DropdownMenuItem onClick={() => navigate(`/disbursement-requests/${row.original.id}`)}>
-//                     <Eye className="mr-2 h-4 w-4" />
-//                     Xem chi tiết
-//                 </DropdownMenuItem>
-//             </DropdownMenuContent>
-//         </DropdownMenu>
-//     );
-// };
-
 export function FinanceTransaction() {
-    const navigate = useNavigate();
     const { data: transactionData = [], isLoading } = useGetTransactionQuery();
     const [sorting, setSorting] = React.useState([{ id: 'transactionDate', desc: true }]);
     const [columnFilters, setColumnFilters] = React.useState([]);
@@ -178,26 +147,66 @@ export function FinanceTransaction() {
         },
     });
 
-    if (isLoading) return <div>Loading...</div>;
+    if (isLoading) return <div><LoadingScreen /></div>;
     const handleExportExcel = () => {
         const dataToExport = transactionData.map((item) => ({
             'Tên giao dịch': item.transactionName,
+            'Nội dung': item.description,
             'Ngày giao dịch': new Date(item.transactionDate).toLocaleDateString('vi-VN'),
-            'Số tiền': item.amount.toLocaleString('vi-VN'),
+            'Số tiền': item.amount.toLocaleString('vi-VN') + ' ₫',
             'Loại giao dịch': getTransactionTypeLabel(item.type),
             'Trạng thái': getTransactionStatusLabel(item.status),
         }));
+
         const ws = XLSX.utils.json_to_sheet(dataToExport);
 
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Transactions');
+        const headerStyle = {
+            font: { bold: true, color: { rgb: "FFFFFF" } },
+            fill: { fgColor: { rgb: "25A5A7" } },
+            alignment: { horizontal: "center", vertical: "center" },
+            border: {
+                top: { style: "thin" },
+                bottom: { style: "thin" },
+                left: { style: "thin" },
+                right: { style: "thin" }
+            }
+        };
 
-        const colWidths = Object.keys(dataToExport[0]).map((key) => ({
-            wch: Math.max(key.length, ...dataToExport.map((item) => String(item[key]).length)),
-        }));
+        const wb = XLSX.utils.book_new();
+
+        XLSX.utils.book_append_sheet(wb, ws, 'Danh sách giao dịch');
+
+        const colWidths = [
+            { wch: 30 },
+            { wch: 40 },
+            { wch: 15 },
+            { wch: 20 },
+            { wch: 15 },
+            { wch: 15 },
+        ];
         ws['!cols'] = colWidths;
 
-        XLSX.writeFile(wb, `Transactions_${new Date().toLocaleDateString()}.xlsx`);
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        const headerRange = {
+            s: { r: 0, c: 0 },
+            e: { r: 0, c: range.e.c }
+        };
+
+        for (let C = headerRange.s.c; C <= headerRange.e.c; ++C) {
+            const address = XLSX.utils.encode_cell({ r: 0, c: C });
+            if (!ws[address]) continue;
+            ws[address].s = headerStyle;
+        }
+
+        const timestamp = new Date().toISOString().split('T')[0];
+        const fileName = `Danh_sach_giao_dich_${timestamp}.xlsx`;
+
+        XLSX.writeFile(wb, fileName, {
+            bookType: 'xlsx',
+            bookSST: false,
+            type: 'binary',
+            cellStyles: true
+        });
     };
 
     return (
