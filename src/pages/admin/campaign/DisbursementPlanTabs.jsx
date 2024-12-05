@@ -238,24 +238,20 @@ const DisbursementPlanTabs = ({ disbursementPlans, navigate }) => {
 
     const allPlans = [currentPlan, ...oldPlans].filter(Boolean);
     return (
-        <Card className="shadow-lg border-0 mb-6">
-            <CardHeader className="bg-teal-600 text-white">
-                <CardTitle className="text-2xl font-semibold">Kế hoạch giải ngân</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-                <Tabs
-                    defaultValue={currentPlan ? formatPlanName(currentPlan.plannedStartDate) : ''}
-                    className="w-full"
-                >
 
-                    <TabsList className="flex max-w-[800px]  bg-transparent justify-start" style={{
-                        gridTemplateColumns: `repeat(${allPlans.length}, minmax(0, 1fr))`
-                    }}>
-                        {allPlans.map((plan) => (
-                            <TabsTrigger
-                                key={plan.plannedStartDate}
-                                value={formatPlanName(plan.plannedStartDate)}
-                                className="relative px-4 py-2 rounded-none transition-colors duration-200
+        <Tabs
+            defaultValue={currentPlan ? formatPlanName(currentPlan.plannedStartDate) : ''}
+            className="w-full"
+        >
+
+            <TabsList className="flex max-w-[800px]  bg-transparent justify-start" style={{
+                gridTemplateColumns: `repeat(${allPlans.length}, minmax(0, 1fr))`
+            }}>
+                {allPlans.map((plan) => (
+                    <TabsTrigger
+                        key={plan.plannedStartDate}
+                        value={formatPlanName(plan.plannedStartDate)}
+                        className="relative px-4 py-2 rounded-none transition-colors duration-200
                                 data-[state=active]:bg-transparent
                                 data-[state=active]:text-teal-500
                                 hover:text-teal-500
@@ -271,28 +267,26 @@ const DisbursementPlanTabs = ({ disbursementPlans, navigate }) => {
                                 after:transition-transform
                                 after:duration-300
                                 whitespace-nowrap"
-                            >
-                                {formatPlanName(plan.plannedStartDate)}
-                                {plan.isCurrent && (
-                                    <span className="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded">
-                                        Hiện tại
-                                    </span>
-                                )}
-                            </TabsTrigger>
-                        ))}
-                    </TabsList>
+                    >
+                        {formatPlanName(plan.plannedStartDate)}
+                        {plan.isCurrent && (
+                            <span className="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded">
+                                Hiện tại
+                            </span>
+                        )}
+                    </TabsTrigger>
+                ))}
+            </TabsList>
 
-                    {allPlans.map((plan) => (
-                        <TabsContent
-                            key={plan.plannedStartDate}
-                            value={formatPlanName(plan.plannedStartDate)}
-                        >
-                            <DisbursementPlanContent plan={plan} navigate={navigate} />
-                        </TabsContent>
-                    ))}
-                </Tabs>
-            </CardContent>
-        </Card>
+            {allPlans.map((plan) => (
+                <TabsContent
+                    key={plan.plannedStartDate}
+                    value={formatPlanName(plan.plannedStartDate)}
+                >
+                    <DisbursementPlanContent plan={plan} navigate={navigate} />
+                </TabsContent>
+            ))}
+        </Tabs>
     );
 };
 

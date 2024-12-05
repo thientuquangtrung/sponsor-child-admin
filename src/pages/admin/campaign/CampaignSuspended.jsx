@@ -60,24 +60,6 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
                 path: ["plannedEndDate"]
             }
         ).superRefine((data, ctx) => {
-            const firstStage = data.stages[0];
-            if (firstStage && firstStage.scheduledDate.getTime() !== data.plannedStartDate.getTime()) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "Ngày giải ngân đầu tiên phải trùng với ngày bắt đầu",
-                    path: ["stages", 0, "scheduledDate"]
-                });
-            }
-
-            const lastStage = data.stages[data.stages.length - 1];
-            if (lastStage && lastStage.scheduledDate.getTime() !== data.plannedEndDate.getTime()) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "Ngày giải ngân cuối cùng phải trùng với ngày kết thúc",
-                    path: ["stages", data.stages.length - 1, "scheduledDate"]
-                });
-            }
-
             const totalDisbursementAmount = data.stages.reduce((sum, stage) => sum + stage.disbursementAmount, 0);
             if (Math.abs(totalDisbursementAmount - totalPlannedAmount) > 0.01) {
                 ctx.addIssue({
@@ -98,7 +80,7 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
                 if (daysDifference < 30) {
                     ctx.addIssue({
                         code: z.ZodIssueCode.custom,
-                        message: "Khoảng cách giữa các ngày giải ngân phải ít nhất 30 ngày",
+                        message: "Khoảng cách giữa  ngày giải ngân sau phải lớn hơn ngày giải ngân trước 30 ngày ",
                         path: ["stages", i, "scheduledDate"]
                     });
                 }
@@ -183,7 +165,11 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
 
         return () => subscription.unsubscribe();
     }, [watch, reset, checkFormValidity]);
-
+    const calculateTotalDisbursement = React.useMemo(() => {
+        return (stages) => {
+            return stages.reduce((sum, stage) => sum + (stage.disbursementAmount || 0), 0);
+        };
+    }, []);
     const onSubmitForm = async (data) => {
         try {
             const formattedData = {
@@ -198,13 +184,15 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
                 campaignStatus: 9,
                 userID: userID
             };
-
             await createPlan(formattedData).unwrap();
             toast.success('Kế hoạch giải ngân đã được cập nhật thành công');
             onSuccess();
         } catch (error) {
-            console.error('Error:', error);
-            toast.error('Có lỗi xảy ra khi cập nhật kế hoạch giải ngân');
+            if (error.status === 400) {
+                toast.error('Bạn không thể tạm ngưng chiến dịch vì Yêu cầu giải ngân chưa được giải quyết');
+            } else {
+                toast.error('Có lỗi xảy ra khi cập nhật kế hoạch giải ngân');
+            }
         }
     };
 
@@ -283,6 +271,12 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
 
                         <div className="space-y-6">
                             <h3 className="text-xl font-semibold">Các giai đoạn giải ngân</h3>
+                            <div className="text-lg font-medium">
+                                Tổng số tiền:
+                                <span className={`ml-2 ${calculateTotalDisbursement(watch('stages')) !== watch('totalPlannedAmount') ? 'text-red-500' : 'text-green-600'}`}>
+                                    {formatNumber(calculateTotalDisbursement(watch('stages')))} / {formatNumber(watch('totalPlannedAmount'))}
+                                </span>
+                            </div>
                             {errors.stages && (
                                 <p className="text-red-500 text-sm">{errors.stages.message}</p>
                             )}
