@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Pencil, Loader2 } from "lucide-react";
+import { Pencil, Loader2, ChevronDown } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {
     AlertDialog,
@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import Breadcrumb from '@/pages/admin/Breadcrumb';
 import { useGetCampaignByIdQuery, useUpdateCampaignMutation } from '@/redux/campaign/campaignApi';
-import { campaignStatus, campaignTypes, guaranteeTypes } from '@/config/combobox';
+import { campaignStatus, campaignTypes, contractStatus, contractType, guaranteeTypes } from '@/config/combobox';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import { toast } from 'sonner';
 import FileViewer from '@/pages/admin/campaign/FileViewer';
@@ -31,7 +31,33 @@ import CampaignSuspended from '@/pages/admin/campaign/CampaignSuspended';
 import CancelCampaign from '@/pages/admin/campaign/CancelCampaign';
 import DonateFromFund from './DonateFromFund';
 import ExtendCampaignDuration from './ExtendCampaignDuration';
+import { Badge } from '@/components/ui/badge';
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+const CollapsibleSection = ({ title, children }) => {
+    const [isOpen, setIsOpen] = useState(true);
 
+    return (
+        <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
+            <Card className="shadow-lg border-0">
+                <CollapsibleTrigger className="w-full">
+                    <CardHeader className="bg-teal-600 text-white flex flex-row items-center justify-between cursor-pointer">
+                        <CardTitle className="text-2xl font-semibold">{title}</CardTitle>
+                        <ChevronDown
+                            className={`w-6 h-6 transition-transform ${isOpen ? "transform rotate-180" : ""}`}
+                        />
+                    </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                    <CardContent className="p-6">{children}</CardContent>
+                </CollapsibleContent>
+            </Card>
+        </Collapsible>
+    );
+};
 const DetailCampaign = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -89,7 +115,12 @@ const DetailCampaign = () => {
             setIsLoading(false);
         }
     };
-
+    const getContractStatusLabel = (status) => {
+        return contractStatus.find((s) => s.value === status)?.label || 'Không xác định';
+    };
+    const getContractTypeLabel = (type) => {
+        return contractType.find((t) => t.value === type)?.label || 'Không xác định';
+    };
     const handleAccept = () => updateCampaignStatus(1);
     const handleReject = () => updateCampaignStatus(3, rejectionReason);
 
@@ -117,20 +148,14 @@ const DetailCampaign = () => {
 
                 <div className="space-y-6 max-w-7xl mx-auto">
                     <ChildSearch />
-                    <Card className="shadow-lg border-0 overflow-hidden">
-                        <CardContent className="p-0">
-                            <ImageGallery
-                                thumbnailUrl={campaignData.thumbnailUrl}
-                                imagesFolderUrl={campaignData.imagesFolderUrl}
-                            />
-                        </CardContent>
-                    </Card>
-
-                    <Card className="shadow-lg border-0 mb-6">
-                        <CardHeader className="bg-teal-600 text-white">
-                            <CardTitle className="text-2xl font-semibold">Thông tin trẻ em</CardTitle>
-                        </CardHeader>
-                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+                    <CollapsibleSection title="Hình ảnh chiến dịch">
+                        <ImageGallery
+                            thumbnailUrl={campaignData.thumbnailUrl}
+                            imagesFolderUrl={campaignData.imagesFolderUrl}
+                        />
+                    </CollapsibleSection>
+                    <CollapsibleSection title="Thông tin trẻ emh">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
                             <div className="md:col-span-2 flex justify-center mb-4">
                                 <FileViewer fileUrl={campaignData.childIdentificationInformationFile} />
                             </div>
@@ -162,14 +187,11 @@ const DetailCampaign = () => {
                                     className="h-12 text-lg bg-gray-50"
                                 />
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </CollapsibleSection>
 
-                    <Card className="shadow-lg border-0">
-                        <CardHeader className="bg-teal-600 text-white">
-                            <CardTitle className="text-2xl font-semibold">Thông tin chiến dịch</CardTitle>
-                        </CardHeader>
-                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+                    <CollapsibleSection title="Thông tin chiến dịch">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
                             <div className="space-y-2 md:col-span-2">
                                 <Label htmlFor="title" className="text-lg font-medium text-gray-700">Tiêu đề:</Label>
                                 <Input id="title" value={campaignData.title} readOnly className="h-12 text-lg bg-gray-50" />
@@ -243,75 +265,111 @@ const DetailCampaign = () => {
                                     className="h-12 text-lg bg-gray-50"
                                 />
                             </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="shadow-lg border-0">
-                        <CardHeader className="bg-teal-600 text-white">
-                            <CardTitle className="text-2xl font-semibold">Thông tin bảo lãnh</CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                            {campaignData.guaranteeName ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="guaranteeName" className="text-lg font-medium text-gray-700">
-                                            Tên đơn vị bảo lãnh:
-                                        </Label>
-                                        <Input
-                                            id="guaranteeName"
-                                            value={campaignData.guaranteeName}
-                                            readOnly
-                                            className="h-12 text-lg bg-gray-50"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="guaranteeType" className="text-lg font-medium text-gray-700">
-                                            Loại đơn vị bảo lãnh:
-                                        </Label>
-                                        <Input
-                                            id="guaranteeType"
-                                            value={guaranteeTypeObj?.label || ''}
-                                            readOnly
-                                            className="h-12 text-lg bg-gray-50"
-                                        />
+                        </div>
+                    </CollapsibleSection>
+                    <CollapsibleSection title="Thông tin bảo lãnh">
+                        {campaignData.guaranteeName ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="guaranteeName" className="text-lg font-medium text-gray-700">
+                                        Tên đơn vị bảo lãnh:
+                                    </Label>
+                                    <Input
+                                        id="guaranteeName"
+                                        value={campaignData.guaranteeName}
+                                        readOnly
+                                        className="h-12 text-lg bg-gray-50"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="guaranteeType" className="text-lg font-medium text-gray-700">
+                                        Loại đơn vị bảo lãnh:
+                                    </Label>
+                                    <Input
+                                        id="guaranteeType"
+                                        value={guaranteeTypeObj?.label || ''}
+                                        readOnly
+                                        className="h-12 text-lg bg-gray-50"
+                                    />
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-center py-4">
+                                <p className="text-lg text-gray-600">Chưa có Bảo Lãnh</p>
+                            </div>
+                        )}
+                    </CollapsibleSection>
+                    <CollapsibleSection title="Câu chuyện">
+                        <div
+                            className="prose max-w-none text-lg bg-white rounded-lg p-6"
+                            dangerouslySetInnerHTML={{ __html: campaignData.story }}
+                        />
+                    </CollapsibleSection>
+                    <CollapsibleSection title="Kế hoạch giải ngân">
+                        <DetailDisbursementPlan disbursementPlans={disbursementPlans} />
+                    </CollapsibleSection>
+                    <CollapsibleSection title="Thông tin hợp đồng">
+                        {campaignData.contracts && campaignData.contracts.length > 0 ? (
+                            campaignData.contracts.map((contract, index) => (
+                                <div key={index} className="p-4 bg-gray-50 rounded-xl space-y-4">
+                                    <div className="grid grid-cols-3 gap-4 text-sm">
+                                        <div className="space-y-2">
+                                            <div>
+                                                <span className="font-medium text-gray-700">Loại hợp đồng:</span>{' '}
+                                                <Badge variant="outline">{getContractTypeLabel(contract.contractType)}</Badge>
+                                            </div>
+                                            <div>
+                                                <span className="font-medium text-gray-700">Trạng thái:</span>{' '}
+                                                <Badge
+                                                    variant={
+                                                        contract.status === 2
+                                                            ? 'success'
+                                                            : contract.status === 0 || contract.status === 1
+                                                                ? 'secondary'
+                                                                : 'warning'
+                                                    }
+                                                >
+                                                    {getContractStatusLabel(contract.status)}
+                                                </Badge>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <div>
+                                                <span className="font-medium text-gray-700">Ngày bắt đầu:</span>{' '}
+                                                <span className="text-gray-600">
+                                                    {new Date(contract.startDate).toLocaleDateString('vi-VN')}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span className="font-medium text-gray-700">Ngày kết thúc:</span>{' '}
+                                                <span className="text-gray-600">
+                                                    {new Date(contract.endDate).toLocaleDateString('vi-VN')}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-center">
+                                            <Button
+                                                className="bg-teal-500 hover:bg-teal-600 text-white"
+                                                onClick={() => navigate(`/center/contracts/${contract.contractID}`)}
+                                            >
+                                                Xem chi tiết hợp đồng
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
-                            ) : (
-                                <div className="text-center py-4">
-                                    <p className="text-lg text-gray-600">Chưa có Bảo Lãnh</p>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                    <Card className="shadow-lg border-0">
-                        <CardHeader className="bg-teal-600 text-white">
-                            <CardTitle className="text-2xl font-semibold">Câu chuyện</CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                            <div
-                                className="prose max-w-none text-lg bg-white rounded-lg p-6"
-                                dangerouslySetInnerHTML={{ __html: campaignData.story }}
-                            />
-                        </CardContent>
-                    </Card>
+                            ))
+                        ) : (
+                            <div className="text-gray-600 text-center">Chưa có hợp đồng</div>
+                        )}
 
-                    <DetailDisbursementPlan disbursementPlans={disbursementPlans} />
-
+                    </CollapsibleSection>
                     {campaignData.rejectionReason && (
-                        <Card className="shadow-lg border-0">
-                            <CardHeader className="bg-teal-600 text-white">
-                                <CardTitle className="text-2xl font-semibold">Lý do từ chối</CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-6">
-                                <div className="bg-red-50 text-red-800 p-4 rounded-lg whitespace-pre-line">
-                                    {campaignData.rejectionReason}
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <CollapsibleSection title="Lý do từ chối">
+                            <div className="bg-red-50 text-red-800 p-4 rounded-lg whitespace-pre-line">
+                                {campaignData.rejectionReason}
+                            </div>
+                        </CollapsibleSection>
                     )}
-
-
-
                     {showExtendForm ? (
                         <ExtendCampaignDuration
                             id={id}
