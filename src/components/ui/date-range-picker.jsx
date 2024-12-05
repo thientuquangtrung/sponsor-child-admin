@@ -137,16 +137,18 @@ function Calendar({ mode = 'single', selected, onSelect, className, numberOfMont
 }
 
 function DateRangePicker({ className, onRangeChange }) {
-    const [date, setDate] = useState({
-        from: new Date(2024, 0, 1),
-        to: new Date(),
-    });
+    const today = new Date();
+    const oneYearAgo = new Date(today);
+    oneYearAgo.setFullYear(today.getFullYear() - 1);
 
+    const [date, setDate] = useState({
+        from: oneYearAgo,
+        to: today,
+    });
     const handleSelect = (range) => {
         setDate(range);
         onRangeChange?.(range);
     };
-
     return (
         <div className={cn('grid gap-2 place-items-center', className)}>
             <Popover>

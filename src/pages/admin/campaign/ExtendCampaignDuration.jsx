@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react";
 import { DatePicker } from "@/components/ui/date-picker";
 import { toast } from 'sonner';
 import { useGetCampaignEstimatedDisbursementPlanQuery, useCreateCampaignDisbursementPlanMutation } from '@/redux/campaign/campaignApi';
-import { formatNumber, parseNumber } from '@/lib/utils';
+import { formatNumber } from '@/lib/utils';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -22,19 +22,18 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import * as z from 'zod';
+
 const adjustDate = (date) => {
     if (!date) return null;
     const newDate = new Date(date);
     newDate.setMinutes(newDate.getMinutes() - newDate.getTimezoneOffset());
     return newDate;
 };
-const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
+const ExtendCampaignDuration = ({ onCancel, onSuccess, id, userID }) => {
     const { data: estimatedPlan, isLoading: isLoadingPlan } = useGetCampaignEstimatedDisbursementPlanQuery(id);
     const [createPlan] = useCreateCampaignDisbursementPlanMutation();
     const [isValidForm, setIsValidForm] = React.useState(false);
-
-    const createDisbursementSchema = React.useMemo(() => {
-        const totalPlannedAmount = estimatedPlan?.totalPlannedAmount || 0;
+    const createExtensionSchema = React.useMemo(() => {
         return z.object({
             plannedStartDate: z.date({
                 required_error: "Vui lòng chọn ngày bắt đầu",
@@ -46,11 +45,9 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
             stages: z.array(
                 z.object({
                     stageNumber: z.number(),
-                    disbursementAmount: z.number()
-                        .min(1, "Số tiền giải ngân phải lớn hơn 0")
-                        .max(totalPlannedAmount * 0.5, "Số tiền giải ngân của một giai đoạn không được vượt quá 50% tổng số tiền dự kiến"),
+                    disbursementAmount: z.number(),
                     scheduledDate: z.date(),
-                    description: z.string().min(1, "Vui lòng nhập hoạt động")
+                    description: z.string().min(1, "Vui lòng nhập hoạt động"),
                 })
             )
         }).refine(
@@ -68,7 +65,6 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
                     path: ["stages", 0, "scheduledDate"]
                 });
             }
-
             const lastStage = data.stages[data.stages.length - 1];
             if (lastStage && lastStage.scheduledDate.getTime() !== data.plannedEndDate.getTime()) {
                 ctx.addIssue({
@@ -77,16 +73,6 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
                     path: ["stages", data.stages.length - 1, "scheduledDate"]
                 });
             }
-
-            const totalDisbursementAmount = data.stages.reduce((sum, stage) => sum + stage.disbursementAmount, 0);
-            if (Math.abs(totalDisbursementAmount - totalPlannedAmount) > 0.01) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "Tổng số tiền giải ngân phải bằng tổng số tiền dự kiến",
-                    path: ["stages"]
-                });
-            }
-
             for (let i = 1; i < data.stages.length; i++) {
                 const prevDate = data.stages[i - 1].scheduledDate;
                 const currentDate = data.stages[i].scheduledDate;
@@ -112,7 +98,7 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
                 }
             }
         });
-    }, [estimatedPlan?.totalPlannedAmount]);
+    }, []);
 
     const {
         control,
@@ -122,7 +108,7 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
         watch,
         trigger
     } = useForm({
-        resolver: zodResolver(createDisbursementSchema),
+        resolver: zodResolver(createExtensionSchema),
         mode: 'onChange',
         reValidateMode: 'onChange',
         defaultValues: {
@@ -132,7 +118,6 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
             stages: []
         }
     });
-
     const checkFormValidity = React.useCallback(async () => {
         const isValid = await trigger();
         setIsValidForm(isValid);
@@ -195,16 +180,16 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
                     scheduledDate: adjustDate(stage.scheduledDate).toISOString(),
                     description: stage.description
                 })),
-                campaignStatus: 9,
+                campaignStatus: 1,
                 userID: userID
             };
 
             await createPlan(formattedData).unwrap();
-            toast.success('Kế hoạch giải ngân đã được cập nhật thành công');
+            toast.success('Gia hạn chiến dịch thành công');
             onSuccess();
         } catch (error) {
             console.error('Error:', error);
-            toast.error('Có lỗi xảy ra khi cập nhật kế hoạch giải ngân');
+            toast.error('Có lỗi xảy ra khi gia hạn chiến dịch');
         }
     };
 
@@ -219,8 +204,8 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
     return (
         <div className="mt-6">
             <Card className="shadow-lg border-0">
-                <CardHeader className="bg-yellow-600 text-white">
-                    <CardTitle className="text-2xl font-semibold">Tạm Ngưng Chiến Dịch</CardTitle>
+                <CardHeader className="bg-teal-600 text-white">
+                    <CardTitle className="text-2xl font-semibold">Gia Hạn Chiến Dịch</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
                     <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-6">
@@ -304,27 +289,11 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <div className="space-y-1">
-                                                        <Controller
-                                                            name={`stages.${index}.disbursementAmount`}
-                                                            control={control}
-                                                            render={({ field }) => (
-                                                                <Input
-                                                                    value={formatNumber(field.value)}
-                                                                    onChange={(e) => {
-                                                                        const value = parseNumber(e.target.value);
-                                                                        field.onChange(value);
-                                                                        trigger(`stages.${index}.disbursementAmount`);
-                                                                        trigger('stages');
-                                                                    }}
-                                                                    className={`h-10 ${errors.stages?.[index]?.disbursementAmount ? 'border-red-500' : ''}`}
-                                                                />
-                                                            )}
+                                                        <Input
+                                                            value={formatNumber(stage.disbursementAmount)}
+                                                            disabled
+                                                            className="h-10"
                                                         />
-                                                        {errors.stages?.[index]?.disbursementAmount && (
-                                                            <p className="text-red-500 text-xs">
-                                                                {errors.stages[index].disbursementAmount.message}
-                                                            </p>
-                                                        )}
                                                     </div>
                                                 </td>
                                                 <td className="px-4 py-3">
@@ -389,23 +358,23 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
                                     <AlertDialogTrigger asChild>
                                         <Button
                                             type="button"
-                                            className="bg-yellow-600 hover:bg-yellow-700 text-white h-12"
+                                            className="bg-blue-600 hover:bg-blue-700 text-white h-12"
                                         >
-                                            Tạm Ngưng
+                                            Gia Hạn
                                         </Button>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent className="bg-white p-6 rounded-lg shadow-lg">
                                         <AlertDialogHeader className="border-b pb-2 mb-4">
                                             <AlertDialogTitle className="text-xl font-semibold text-gray-800">
-                                                Xác nhận Tạm Ngưng Chiến Dịch
+                                                Xác nhận Gia Hạn Chiến Dịch
                                             </AlertDialogTitle>
                                         </AlertDialogHeader>
                                         <AlertDialogDescription className="space-y-4">
                                             <p className="text-gray-700">
-                                                - Hành động này sẽ tạm ngưng chiến dịch.
+                                                - Hành động này sẽ gia hạn thời gian chiến dịch.
                                             </p>
                                             <p className="text-gray-700">
-                                                - Chiến dịch này sẽ tạm thời không có người bảo lãnh cho đến khi có người bảo lãnh mới.
+                                                - Các giai đoạn giải ngân sẽ được điều chỉnh theo thời gian mới.
                                             </p>
                                         </AlertDialogDescription>
 
@@ -413,7 +382,7 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
                                             <AlertDialogCancel>Hủy</AlertDialogCancel>
                                             <AlertDialogAction
                                                 onClick={handleSubmit(onSubmitForm)}
-                                                className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                                                className="bg-blue-600 hover:bg-blue-700 text-white"
                                             >
                                                 {isSubmitting ? (
                                                     <>
@@ -421,7 +390,7 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
                                                         Đang xử lý
                                                     </>
                                                 ) : (
-                                                    'Xác nhận Tạm Ngưng'
+                                                    'Xác nhận Gia Hạn'
                                                 )}
                                             </AlertDialogAction>
                                         </AlertDialogFooter>
@@ -433,7 +402,7 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
                                     disabled
                                     className="bg-gray-400 text-white h-12 cursor-not-allowed"
                                 >
-                                    Tạm ngưng
+                                    Gia Hạn
                                 </Button>
                             )}
                         </div>
@@ -444,4 +413,4 @@ const CampaignSuspended = ({ onCancel, onSuccess, id, userID }) => {
     );
 };
 
-export default CampaignSuspended;
+export default ExtendCampaignDuration;

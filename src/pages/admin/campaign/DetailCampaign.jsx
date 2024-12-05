@@ -30,6 +30,7 @@ import DetailDisbursementPlan from '@/pages/admin/campaign/DetailDisbursementPla
 import CampaignSuspended from '@/pages/admin/campaign/CampaignSuspended';
 import CancelCampaign from '@/pages/admin/campaign/CancelCampaign';
 import DonateFromFund from './DonateFromFund';
+import ExtendCampaignDuration from './ExtendCampaignDuration';
 
 const DetailCampaign = () => {
     const { id } = useParams();
@@ -40,6 +41,8 @@ const DetailCampaign = () => {
     const [updateStatus] = useUpdateCampaignMutation();
     const { user } = useSelector((state) => state.auth);
     const [showSuspendForm, setShowSuspendForm] = useState(false);
+    const [showExtendForm, setShowExtendForm] = useState(false);
+
 
     if (campaignLoading) {
         return <LoadingScreen />;
@@ -93,8 +96,9 @@ const DetailCampaign = () => {
 
     const showAcceptButton = campaignData.status === 0;
     const showRejectButton = campaignData.status === 0;
-    const showCancelButton = [7, 8, 9].includes(campaignData.status);
-    const showPauseButton = campaignData.status === 8;
+    const showCancelButton = [7, 8, 9, 4].includes(campaignData.status);
+    const showPauseButton = [8, 4].includes(campaignData.status);
+    const showExtendButton = campaignData.status === 7;
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -306,7 +310,19 @@ const DetailCampaign = () => {
                         </Card>
                     )}
 
-                    {showSuspendForm ? (
+
+
+                    {showExtendForm ? (
+                        <ExtendCampaignDuration
+                            id={id}
+                            userID={user.userID}
+                            onCancel={() => setShowExtendForm(false)}
+                            onSuccess={() => {
+                                setShowExtendForm(false);
+                                refetch();
+                            }}
+                        />
+                    ) : showSuspendForm ? (
                         <CampaignSuspended
                             id={id}
                             userID={user.userID}
@@ -319,7 +335,14 @@ const DetailCampaign = () => {
                     ) : (
                         <div className="mt-6 flex justify-end space-x-4">
                             {campaignData?.guaranteeName && (
-                                <>
+                                <>  {showExtendButton && (
+                                    <Button
+                                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                                        onClick={() => setShowExtendForm(true)}
+                                    >
+                                        Gia hạn chiến dịch
+                                    </Button>
+                                )}
                                     {showAcceptButton && (
                                         <Button
                                             onClick={handleAccept}
@@ -407,6 +430,7 @@ const DetailCampaign = () => {
                                             Tạm ngưng chiến dịch
                                         </Button>
                                     )}
+
                                 </>
                             )}
                         </div>

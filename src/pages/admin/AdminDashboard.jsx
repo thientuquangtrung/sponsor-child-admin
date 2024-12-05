@@ -10,9 +10,13 @@ import LoadingScreen from '@/components/common/LoadingScreen';
 import FundLineChart from '@/pages/admin/charts/FundLineChart';
 
 const AdminDashboard = () => {
+    const today = new Date();
+    const oneYearAgo = new Date(today);
+    oneYearAgo.setFullYear(today.getFullYear() - 1);
+
     const [dateRange, setDateRange] = useState({
-        from: new Date(2024, 0, 1),
-        to: new Date()
+        from: oneYearAgo,
+        to: today
     });
 
     const { data: dashboardData, isLoading, isError } = useGetAdminDashboardQuery({
@@ -25,8 +29,10 @@ const AdminDashboard = () => {
             setDateRange(newRange);
         }
     };
+
     if (isLoading) return <div><LoadingScreen /></div>;
     if (isError) return <div>Có lỗi xảy ra</div>;
+
     return (
         <>
             <div className="flex justify-end mb-4">
@@ -35,30 +41,26 @@ const AdminDashboard = () => {
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7">
                 <CardDataStats
-                    title="Tổng số người dùng"
+                    title="Số người dùng đăng kí mới"
                     total={dashboardData.totalUsers.toString()}
-
                 >
                     <Users className="text-indigo-700 dark:fill-white" size={22} />
                 </CardDataStats>
                 <CardDataStats
                     title="Số lượng chiến dịch"
                     total={dashboardData.totalCampaigns.toString()}
-
                 >
                     <ClipboardList className="text-green-600 dark:fill-white" size={22} />
                 </CardDataStats>
                 <CardDataStats
                     title="Tổng số tiền đã gây quỹ"
                     total={formatCurrency(dashboardData.totalRaisedAmount)}
-
                 >
                     <PiggyBank className="fill-yellow-300 dark:fill-white" size={22} />
                 </CardDataStats>
                 <CardDataStats
                     title="Chiến dịch đang hoạt động"
                     total={dashboardData.totalActiveCampaigns.toString()}
-
                 >
                     <Target className="text-red-500 dark:fill-white" size={22} />
                 </CardDataStats>
@@ -72,7 +74,6 @@ const AdminDashboard = () => {
                         emergencyFundraisingCampaigns={dashboardData.totalEmergencyFundraisingCampaigns}
                         longTermChildSponsorshipCampaigns={dashboardData.totalLongTermChildSponsorshipCampaigns}
                     />
-
                 </div>
             </div>
 
