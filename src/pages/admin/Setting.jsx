@@ -90,10 +90,8 @@ export default function SettingsPage() {
 
             try {
                 await updateAdminConfig(updatedConfig).unwrap();
-                console.log(`Config updated successfully`, updatedConfig);
                 toast.success('Cập nhật thành công!');
             } catch (error) {
-                console.error(`Failed to update config:`, error);
                 toast.error('Có lỗi xảy ra khi cập nhật');
             }
         }

@@ -115,7 +115,6 @@ export default function AddAsset() {
         }
 
         dispatch(RemoveUpload(uploadId));
-        console.log('All files uploaded successfully');
     };
 
     const uploadChunkHandler = async ({
