@@ -560,19 +560,19 @@ export default function DisbursementRequestDetail() {
                             <div className="flex justify-between items-center">
                                 <span className="text-gray-600">Số tiền còn lại trong chiến dịch:</span>
                                 <span className="font-semibold text-teal-600 text-lg">
-                                    {disbursementRequest?.disbursementStage?.remainingAmount.toLocaleString('vi-VN')} VNĐ
+                                    {disbursementRequest?.disbursementStage?.remainingAmount?.toLocaleString('vi-VN')} VNĐ
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-gray-600">Số tiền giải ngân mong đợi:</span>
                                 <span className="font-semibold text-rose-600 text-lg">
-                                    {disbursementRequest?.disbursementStage?.expectedDisbursementAmount.toLocaleString('vi-VN')} VNĐ
+                                    {disbursementRequest?.disbursementStage?.expectedDisbursementAmount?.toLocaleString('vi-VN')} VNĐ
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-gray-600">Số tiền trong quỹ chung:</span>
                                 <span className="font-semibold text-blue-600 text-lg">
-                                    {commonFundAmount.toLocaleString('vi-VN')} VNĐ
+                                    {commonFundAmount?.toLocaleString('vi-VN')} VNĐ
                                 </span>
                             </div>
                         </div>
