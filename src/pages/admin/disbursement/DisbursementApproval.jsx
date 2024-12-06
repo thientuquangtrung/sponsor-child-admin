@@ -46,7 +46,7 @@ const DisbursementApproval = ({ disbursementRequest, parentRefetch }) => {
         try {
             const uploadResult = await uploadFile({
                 file,
-                folder: UPLOAD_FOLDER.getDisbursementFolder(disbursementRequest.campaigns.campaignID),
+                folder: UPLOAD_FOLDER.getDisbursementFolder(disbursementRequest.campaigns.id),
                 customFilename: `${UPLOAD_NAME.DISBURSEMENT_RECEIPT}_${disbursementRequest.disbursementStage.stageNumber}`,
             });
 
