@@ -71,6 +71,13 @@ const addCampaignSchema = z.object({
             path: ["targetAmount"]
         });
     }
+    if (data.endDate && data.endDate <= data.startDate) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Ngày kết thúc phải sau ngày bắt đầu",
+            path: ["endDate"]
+        });
+    }
     if (data.plannedStartDate <= data.startDate) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
