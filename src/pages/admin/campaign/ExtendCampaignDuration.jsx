@@ -57,22 +57,6 @@ const ExtendCampaignDuration = ({ onCancel, onSuccess, id, userID }) => {
                 path: ["plannedEndDate"]
             }
         ).superRefine((data, ctx) => {
-            const firstStage = data.stages[0];
-            if (firstStage && firstStage.scheduledDate.getTime() !== data.plannedStartDate.getTime()) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "Ngày giải ngân đầu tiên phải trùng với ngày bắt đầu",
-                    path: ["stages", 0, "scheduledDate"]
-                });
-            }
-            const lastStage = data.stages[data.stages.length - 1];
-            if (lastStage && lastStage.scheduledDate.getTime() !== data.plannedEndDate.getTime()) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "Ngày giải ngân cuối cùng phải trùng với ngày kết thúc",
-                    path: ["stages", data.stages.length - 1, "scheduledDate"]
-                });
-            }
             for (let i = 1; i < data.stages.length; i++) {
                 const prevDate = data.stages[i - 1].scheduledDate;
                 const currentDate = data.stages[i].scheduledDate;

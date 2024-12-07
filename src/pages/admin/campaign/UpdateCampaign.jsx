@@ -2,19 +2,20 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useDropzone } from 'react-dropzone';
+import { useSelector } from 'react-redux';
+import { Loader2, Upload, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Upload, X, Loader2 } from 'lucide-react';
-import QuillEditor from '@/pages/admin/campaign/QuillEditor';
 import Breadcrumb from '@/pages/admin/Breadcrumb';
-import { useGetCampaignByIdQuery, useUpdateCampaignMutation } from '@/redux/campaign/campaignApi';
+import QuillEditor from '@/pages/admin/campaign/QuillEditor';
 import LoadingScreen from '@/components/common/LoadingScreen';
-import { toast } from 'sonner';
-import { useSelector } from 'react-redux';
+import { useGetCampaignByIdQuery, useUpdateCampaignMutation } from '@/redux/campaign/campaignApi';
+import { UPLOAD_FOLDER, UPLOAD_NAME, uploadFile, uploadMultipleFiles } from '@/lib/cloudinary';
+import * as z from 'zod';
+import CustomDropzone from '@/pages/children-manager/campaign/CustomDropzone';
 
 const updateCampaignSchema = z.object({
     title: z.string().min(1, "Bạn vui lòng nhập Tiêu Đề chiến dịch"),
@@ -22,27 +23,6 @@ const updateCampaignSchema = z.object({
     thumbnailUrl: z.any(),
     imagesFolderUrl: z.array(z.any()).optional(),
 });
-
-const useCustomDropzone = (onDrop, isMultiple) => {
-    return useDropzone({
-        onDrop,
-        accept: {
-            'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.bmp', '.webp']
-        },
-        multiple: isMultiple
-    });
-};
-
-const CustomDropzone = ({ onDrop, multiple, children }) => {
-    const { getRootProps, getInputProps } = useCustomDropzone(onDrop, multiple);
-
-    return (
-        <div {...getRootProps()}>
-            <input {...getInputProps()} />
-            {children}
-        </div>
-    );
-};
 
 const UpdateCampaign = () => {
     const { id } = useParams();
@@ -53,6 +33,7 @@ const UpdateCampaign = () => {
 
     const [imagesFolderUrl, setImagesFolderUrl] = useState([]);
     const [thumbnail, setThumbnail] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
 
     const form = useForm({
         resolver: zodResolver(updateCampaignSchema),
@@ -64,12 +45,8 @@ const UpdateCampaign = () => {
         }
     });
 
-
-
     useEffect(() => {
         if (campaignData && !isLoading) {
-            console.log('Setting form data:', campaignData);
-
             form.reset({
                 title: campaignData.title || '',
                 story: campaignData.story || '',
@@ -93,83 +70,51 @@ const UpdateCampaign = () => {
         }
     }, [campaignData, form, isLoading]);
 
-    const uploadToCloudinary = async (file, folder) => {
-        if (!file) return null;
-
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', import.meta.env.VITE_UPLOAD_PRESET_NAME);
-        formData.append('folder', folder);
-
-        try {
-            const response = await fetch(
-                `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUD_NAME}/image/upload`,
-                {
-                    method: 'POST',
-                    body: formData,
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error(`Upload failed: ${response.statusText}`);
-            }
-
-            const data = await response.json();
-            return data.secure_url;
-        } catch (error) {
-            console.error('Error uploading to Cloudinary:', error);
-            throw error;
-        }
-    };
-
     const onDropThumbnail = useCallback((acceptedFiles) => {
-        if (acceptedFiles?.length > 0) {
-            const file = acceptedFiles[0];
-            setThumbnail(Object.assign(file, {
-                preview: URL.createObjectURL(file)
-            }));
-            form.setValue('thumbnailUrl', file);
+        const file = acceptedFiles[0];
+        if (!file.type.startsWith('image/')) {
+            toast.error('Vui lòng chỉ tải lên tệp hình ảnh');
+            return;
         }
+
+        setThumbnail(
+            Object.assign(file, {
+                preview: URL.createObjectURL(file),
+            })
+        );
+        form.setValue('thumbnailUrl', file);
+        form.clearErrors('thumbnailUrl');
     }, [form]);
 
-    const onDrop = useCallback((acceptedFiles) => {
-        const newImagesFolderUrl = acceptedFiles.map(file => Object.assign(file, {
-            preview: URL.createObjectURL(file)
-        }));
+    const onDropImagesFolder = useCallback((acceptedFiles) => {
+        const newImagesFolderUrl = acceptedFiles.map((file) =>
+            Object.assign(file, {
+                preview: URL.createObjectURL(file),
+            })
+        );
 
-        setImagesFolderUrl(prev => {
-            const updated = [...prev, ...newImagesFolderUrl];
-            form.setValue('imagesFolderUrl', updated);
-            return updated;
+        setImagesFolderUrl((prevImagesFolderUrl) => {
+            const updatedImagesFolderUrl = [...prevImagesFolderUrl, ...newImagesFolderUrl];
+            form.setValue('imagesFolderUrl', updatedImagesFolderUrl);
+            return updatedImagesFolderUrl;
         });
     }, [form]);
 
-    const removeImageFolder = useCallback((index) => {
-        setImagesFolderUrl(prev => {
-            const updated = [...prev];
-            if (updated[index]?.preview?.startsWith('blob:')) {
-                URL.revokeObjectURL(updated[index].preview);
-            }
-            updated.splice(index, 1);
-            form.setValue('imagesFolderUrl', updated);
-            return updated;
-        });
-    }, [form]);
-
-    const removeThumbnail = useCallback(() => {
+    const removeThumbnail = () => {
         if (thumbnail?.preview?.startsWith('blob:')) {
             URL.revokeObjectURL(thumbnail.preview);
         }
         setThumbnail(null);
         form.setValue('thumbnailUrl', null);
-    }, [thumbnail, form]);
+    };
 
-    const breadcrumbs = [
-        { name: 'Chiến dịch', path: '/campaigns' },
-        { name: 'Cập nhật chiến dịch', path: null },
-    ];
-
-
+    const removeImageFolder = (index) => {
+        const newImagesFolderUrl = [...imagesFolderUrl];
+        URL.revokeObjectURL(newImagesFolderUrl[index].preview);
+        newImagesFolderUrl.splice(index, 1);
+        setImagesFolderUrl(newImagesFolderUrl);
+        form.setValue('imagesFolderUrl', newImagesFolderUrl);
+    };
 
     const onSubmit = async (data) => {
         try {
@@ -177,26 +122,45 @@ const UpdateCampaign = () => {
                 throw new Error('Không có dữ liệu chiến dịch');
             }
 
+            setIsUploading(true);
+
+            const campaignFolder = UPLOAD_FOLDER.getCampaignFolder(id);
+            const campaignMediaFolder = UPLOAD_FOLDER.getCampaignMediaFolder(id);
+
+            // Upload thumbnail
             let thumbnailUrl = data.thumbnailUrl;
             if (data.thumbnailUrl instanceof File) {
-                thumbnailUrl = await uploadToCloudinary(
-                    data.thumbnailUrl,
-                    `campaign/${id}`
-                );
-            } else if (thumbnail) {
-                thumbnailUrl = thumbnail.preview;
+                const thumbnailResponse = await uploadFile({
+                    file: data.thumbnailUrl,
+                    folder: campaignFolder,
+                    customFilename: UPLOAD_NAME.THUMBNAIL
+                });
+                thumbnailUrl = thumbnailResponse.secure_url;
             }
 
+            // Upload additional images
             let imageUrls = '';
             if (Array.isArray(data.imagesFolderUrl) && data.imagesFolderUrl.length > 0) {
-                const uploadPromises = data.imagesFolderUrl.map(file =>
-                    file instanceof File
-                        ? uploadToCloudinary(file, `campaign/${id}/images-supported`)
-                        : Promise.resolve(file.preview || file)
-                );
+                const filesToUpload = data.imagesFolderUrl.filter(file => file instanceof File);
 
-                const uploadedUrls = await Promise.all(uploadPromises);
-                imageUrls = uploadedUrls.filter(Boolean).join(',');
+                if (filesToUpload.length > 0) {
+                    const imageResponses = await uploadMultipleFiles({
+                        files: filesToUpload,
+                        folder: campaignMediaFolder,
+                        resourceType: 'auto'
+                    });
+
+                    const existingUrls = data.imagesFolderUrl
+                        .filter(file => !(file instanceof File))
+                        .map(file => file.preview || file);
+
+                    const newUploadedUrls = imageResponses.map(response => response.secure_url);
+                    imageUrls = [...existingUrls, ...newUploadedUrls].join(',');
+                } else {
+                    imageUrls = data.imagesFolderUrl
+                        .map(file => file.preview || file)
+                        .join(',');
+                }
             }
 
             const finalData = {
@@ -208,9 +172,7 @@ const UpdateCampaign = () => {
                 imagesFolderUrl: imageUrls,
                 status: campaignData.status,
                 userID: user.userID,
-
             };
-
 
             await updateCampaign(finalData).unwrap();
             toast.success('Cập nhật chiến dịch thành công!');
@@ -218,8 +180,15 @@ const UpdateCampaign = () => {
         } catch (error) {
             console.error('Error updating campaign:', error);
             toast.error(error.message || 'Có lỗi xảy ra khi cập nhật chiến dịch.');
+        } finally {
+            setIsUploading(false);
         }
     };
+
+    const breadcrumbs = [
+        { name: 'Chiến dịch', path: '/campaigns' },
+        { name: 'Cập nhật chiến dịch', path: null },
+    ];
 
     if (error) return (
         <div className="p-6 text-center">
@@ -227,12 +196,9 @@ const UpdateCampaign = () => {
         </div>
     );
 
-
     if (isLoading) {
         return <LoadingScreen />;
     }
-
-
 
 
 
@@ -347,7 +313,7 @@ const UpdateCampaign = () => {
                                                     </FormLabel>
                                                     <FormControl>
                                                         <div className="w-fit">
-                                                            <CustomDropzone onDrop={onDrop} multiple={true}>
+                                                            <CustomDropzone onDrop={onDropImagesFolder} multiple={true}>
                                                                 <div className="flex items-center justify-center w-20 h-20 border border-dashed border-gray-300 rounded-lg hover:border-primary cursor-pointer">
                                                                     <Upload className="w-6 h-6 text-gray-400" />
                                                                 </div>
@@ -396,9 +362,9 @@ const UpdateCampaign = () => {
                                             <Button
                                                 type="submit"
                                                 className="bg-teal-600 hover:bg-teal-700 text-white h-12 px-6"
-                                                disabled={isUpdating}
+                                                disabled={isUploading || isUpdating}
                                             >
-                                                {isUpdating ? (
+                                                {(isUploading || isUpdating) ? (
                                                     <>
                                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                                         Đang cập nhật...
@@ -408,7 +374,6 @@ const UpdateCampaign = () => {
                                                 )}
                                             </Button>
                                         </div>
-
                                     </form>
                                 </Form>
                             </CardContent>
