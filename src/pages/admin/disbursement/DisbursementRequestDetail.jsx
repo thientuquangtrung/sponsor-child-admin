@@ -27,7 +27,6 @@ import DisbursementApproval from '@/pages/admin/disbursement/DisbursementApprova
 import { disbursementStageStatus, disbursementRequestStatus, activityStatus } from '@/config/combobox';
 import DisbursementReport from '@/pages/admin/disbursement/DisbursementReport';
 import { useSelector } from 'react-redux';
-import { useGetDisbursementStageByIdQuery } from '@/redux/guarantee/disbursementStageApi';
 
 export default function DisbursementRequestDetail() {
     const { id } = useParams();
@@ -385,7 +384,7 @@ export default function DisbursementRequestDetail() {
                                         <p className={`w-1/2 font-medium ${getStatusColorClass(disbursementRequest.requestStatus, 'request')}`}>
                                             {getStatusLabel(disbursementRequest.requestStatus, disbursementRequestStatus)}
                                         </p>
-                                        {needsCommonFund && (
+                                        {needsCommonFund && disbursementRequest.requestStatus === 0 && (
                                             <div className="flex justify-end">
                                                 <Button
                                                     variant="secondary"
