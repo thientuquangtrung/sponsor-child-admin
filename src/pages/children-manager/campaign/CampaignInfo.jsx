@@ -57,12 +57,12 @@ const CampaignInfo = () => {
             title: '',
             story: '',
             targetAmount: '',
-            startDate: new Date(),
+            startDate: new Date(new Date().setDate(new Date().getDate() + 1)),
             endDate: null,
             thumbnailUrl: null,
             imagesFolderUrl: [],
             campaignType: 0,
-            plannedStartDate: new Date(),
+            plannedStartDate: new Date(new Date().setDate(new Date().getDate() + 1)),
             plannedEndDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
             disbursementStages: [
                 {
