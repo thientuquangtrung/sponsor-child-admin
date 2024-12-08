@@ -13,8 +13,14 @@ import { useLoginMutation } from '@/redux/auth/authApi';
 import { UpdateAuthentication } from '@/redux/auth/authActionCreators';
 
 const formSchema = z.object({
-    email: z.string().email(),
-    password: z.string().min(2).max(50),
+    email: z.string()
+        .min(1, "Vui lòng nhập email.")
+        .email({ message: "Email không hợp lệ" }),
+    password: z.string()
+        .min(6, { message: "Mật khẩu phải dài từ 6-32 ký tự" })
+        .max(32, { message: "Mật khẩu phải dài từ 6-32 ký tự" })
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/,
+            { message: "Mật khẩu phải chứa ít nhất 1 chữ thường, 1 chữ hoa, 1 chữ số và 1 ký tự đặc biệt" }),
 });
 
 export default function LoginForm() {
@@ -42,7 +48,7 @@ export default function LoginForm() {
             })
             .catch((err) => {
                 console.log(err);
-                toast.error(err.error || err.data?.error?.message || 'Vui lòng thử lại!');
+                toast.error(err.error || err.data?.error?.message || 'Email hoặc mật khẩu không đúng. Vui lòng thử lại!');
             });
     }
 

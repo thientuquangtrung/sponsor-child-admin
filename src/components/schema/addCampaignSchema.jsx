@@ -71,6 +71,19 @@ const addCampaignSchema = z.object({
             path: ["targetAmount"]
         });
     }
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    const startDate = new Date(data.startDate);
+    startDate.setHours(0, 0, 0, 0);
+
+    if (startDate <= currentDate) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Ngày bắt đầu chiến dịch phải sau ngày hiện tại ít nhất 1 ngày",
+            path: ["startDate"]
+        });
+    }
+
     if (data.endDate && data.endDate <= data.startDate) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
@@ -97,4 +110,5 @@ const addCampaignSchema = z.object({
         }
     }
 });
+
 export default addCampaignSchema;

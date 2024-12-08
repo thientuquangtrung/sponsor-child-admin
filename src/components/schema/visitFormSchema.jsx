@@ -64,13 +64,26 @@ export const visitFormSchema = z.object({
     imagesFolderUrl: z.array(z.any()).optional(),
 })
     .superRefine((data, ctx) => {
-        if (data.registrationEndDate <= data.registrationStartDate) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const minRegistrationStartDate = new Date(today);
+        minRegistrationStartDate.setDate(today.getDate() + 1);
+
+        if (data.registrationStartDate < minRegistrationStartDate) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Ngày bắt đầu mở đăng ký phải sau ngày hiện tại ít nhất 1 ngày",
+                path: ["registrationStartDate"]
+            });
+        }
+        if (data.registrationEndDate && data.registrationEndDate <= data.registrationStartDate) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 message: "Ngày kết thúc đăng ký phải sau ngày bắt đầu đăng ký",
                 path: ["registrationEndDate"]
             });
         }
+
 
         const registrationEndDate = new Date(data.registrationEndDate);
         const visitStartDate = new Date(data.startDate);
