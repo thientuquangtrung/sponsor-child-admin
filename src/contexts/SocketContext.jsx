@@ -1,24 +1,27 @@
-import { createContext, useContext, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { socket, connectSocket } from '@/lib/socket';
+import { createContext, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
-const SocketContext = createContext({
+import { socket, connectSocket } from '@/lib/socket';
+import { NewNotification } from '@/redux/notification/notificationActionCreators';
+
+export const SocketContext = createContext({
     socket: null,
 });
 
-export const useSocket = () => {
-    return useContext(SocketContext);
-};
-
 export function SocketProvider({ children }) {
-    const { user } = useSelector((state) => state.auth);
+    const { user, accessToken } = useSelector((state) => state.auth);
+    const dispatch = useDispatch();
 
     useEffect(() => {
         if (user) {
             // logged in
             if (!socket) {
-                connectSocket(user.id, user.token);
+                connectSocket(user.userID, accessToken);
             }
+
+            socket.on('NOTIFICATION', (newNotification) => {
+                dispatch(NewNotification(newNotification));
+            });
 
             socket.on('error', (data) => {
                 // dispatch(showSnackbar({ severity: 'error', message: data.message }));
@@ -32,6 +35,9 @@ export function SocketProvider({ children }) {
 
         // Remove event listener on component unmount
         return () => {
+            socket?.off('NOTIFICATION');
+
+            // remove error listener
             socket?.off('error');
             socket?.off('connect_error');
         };

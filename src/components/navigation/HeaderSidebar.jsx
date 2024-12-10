@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { useDispatch, useSelector } from 'react-redux';
 import { LogoutUser } from '@/redux/auth/authActionCreators';
 import { useLogoutMutation } from '@/redux/auth/authApi';
-import DropdownNotification from '@/pages/admin/DropdownNotification';
+import Notification from '@/pages/admin/Notification';
 import { Logo } from '@/components/logo';
 
 const HeaderSidebar = () => {
@@ -44,7 +44,7 @@ const HeaderSidebar = () => {
                     <div className="hidden md:block">
                         <ModeToggle />
                     </div>
-                    <DropdownNotification />
+                    <Notification />
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
