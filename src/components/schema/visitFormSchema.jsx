@@ -116,5 +116,16 @@ export const visitFormSchema = z.object({
                     path: ["travelItineraryDetails", index, "date"]
                 });
             }
+
+            if (index > 0) {
+                const previousDate = new Date(data.travelItineraryDetails[index - 1].date);
+                if (itineraryDate <= previousDate) {
+                    ctx.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message: "Ngày trong lịch trình phải sau ngày trước đó",
+                        path: ["travelItineraryDetails", index, "date"]
+                    });
+                }
+            }
         });
     });
