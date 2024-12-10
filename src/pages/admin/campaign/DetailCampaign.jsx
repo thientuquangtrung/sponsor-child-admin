@@ -68,8 +68,6 @@ const DetailCampaign = () => {
     const { user } = useSelector((state) => state.auth);
     const [showSuspendForm, setShowSuspendForm] = useState(false);
     const [showExtendForm, setShowExtendForm] = useState(false);
-
-
     if (campaignLoading) {
         return <LoadingScreen />;
     }
@@ -137,15 +135,18 @@ const DetailCampaign = () => {
 
             <div className="p-6">
                 <div className="flex justify-end items-center mb-6">
-                    <Button
-                        className="bg-teal-600 hover:bg-teal-700 text-white"
-                        onClick={() => navigate(`/campaign/edit/${id}`)}
-                    >
-                        <Pencil className="w-4 h-4 mr-2" />
-                        Cập nhật Chiến dịch
-                    </Button>
+                    {user.role !== 'ChildManager' && (
+                        <>
+                            <Button
+                                className="bg-teal-600 hover:bg-teal-700 text-white"
+                                onClick={() => navigate(`/campaign/edit/${id}`)}
+                            >
+                                <Pencil className="w-4 h-4 mr-2" />
+                                Cập nhật Chiến dịch
+                            </Button>
+                        </>
+                    )}
                 </div>
-
                 <div className="space-y-6 max-w-7xl mx-auto">
                     <ChildSearch />
                     <CollapsibleSection title="Hình ảnh chiến dịch">
@@ -392,7 +393,7 @@ const DetailCampaign = () => {
                         />
                     ) : (
                         <div className="mt-6 flex justify-end space-x-4">
-                            {campaignData?.guaranteeName && (
+                            {user.role !== 'ChildManager' && campaignData?.guaranteeName && (
                                 <>  {showExtendButton && (
                                     <Button
                                         className="bg-blue-600 hover:bg-blue-700 text-white"

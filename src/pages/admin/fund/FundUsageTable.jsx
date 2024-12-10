@@ -48,21 +48,29 @@ const columns = [
     {
         accessorKey: 'campaignTitle',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Tên chiến dịch" />,
-        cell: ({ row }) => <div className="font-medium">{row.getValue('campaignTitle')}</div>,
+        cell: ({ row }) => <div className="font-medium max-w-[400px] truncate">{row.getValue('campaignTitle')}</div>,
+    },
+    {
+        accessorKey: 'visitTitle',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Tên chuyến thăm" />,
+        cell: ({ row }) => <div className="font-medium max-w-[400px] truncate">{row.getValue('visitTitle')}</div>,
     },
     {
         accessorKey: 'amountUsed',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Số tiền sử dụng" className="justify-end" />,
-        cell: ({ row }) => (
-            <div className="text-right">{row.getValue('amountUsed').toLocaleString('vi-VN')} ₫</div>
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Số tiền" className="justify-end" />,
+        cell: ({ row }) => <div className="text-right font-medium">{row.getValue('amountUsed').toLocaleString('vi-VN')} ₫</div>,
+    },
+    {
+        accessorKey: 'commonFundTotal',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="ST Quỹ chung" className="justify-end" />,
+        cell: ({ row }) => <div className="text-right font-medium">{row.getValue('commonFundTotal').toLocaleString('vi-VN')} ₫</div>,
     },
     {
         accessorKey: 'dateUsed',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Ngày sử dụng" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Ngày" />,
         cell: ({ row }) => {
-            const date = parseISO(row.getValue('dateUsed'));
-            return <div>{format(date, 'dd/MM/yyyy', { locale: vi })}</div>;
+            const date = new Date(row.getValue('dateUsed'));
+            return <div className="whitespace-nowrap w-32 text-center">{format(date, 'dd/MM/yyyy HH:mm')}</div>;
         },
     },
     {

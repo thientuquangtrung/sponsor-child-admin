@@ -190,17 +190,20 @@ const VisitDetail = () => {
                 </AlertDialog>
                 <div className="p-6">
                     <div className="flex justify-end items-center space-x-4 mb-6">
+                        {user.role !== 'ChildManager' && (
+                            <>
+                                {visitData.status === 0 && (
+                                    <Button
+                                        className="bg-teal-600 hover:bg-teal-700 text-white"
+                                        onClick={() => navigate(`/visit/edit/${id}`)}
+                                    >
+                                        <Pencil className="w-4 h-4 mr-2" />
+                                        Cập nhật Chuyến thăm
+                                    </Button>
+                                )}
 
-                        {visitData.status === 0 && (
-                            <Button
-                                className="bg-teal-600 hover:bg-teal-700 text-white"
-                                onClick={() => navigate(`/visit/edit/${id}`)}
-                            >
-                                <Pencil className="w-4 h-4 mr-2" />
-                                Cập nhật Chuyến thăm
-                            </Button>
+                            </>
                         )}
-
                     </div>
 
                     <div className="space-y-6 max-w-7xl mx-auto">
@@ -378,70 +381,72 @@ const VisitDetail = () => {
                     </div>
 
                 </div>
-                <div className="flex justify-end items-center space-x-4 mb-6">
+                {user.role !== 'ChildManager' && (
+                    <div className="flex justify-end items-center space-x-4 mb-6">
 
-                    {showStartButton && (
-                        <Button
-                            className="bg-green-600 hover:bg-green-700 text-white"
-                            onClick={handleStartVisit}
-                            disabled={isLoading}
-                        >
-                            {isLoading ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Đang xử lý
-                                </>
-                            ) : (
-                                'Bắt đầu chuyến thăm'
-                            )}
-                        </Button>
-                    )}
+                        {showStartButton && (
+                            <Button
+                                className="bg-green-600 hover:bg-green-700 text-white"
+                                onClick={handleStartVisit}
+                                disabled={isLoading}
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Đang xử lý
+                                    </>
+                                ) : (
+                                    'Bắt đầu chuyến thăm'
+                                )}
+                            </Button>
+                        )}
 
-                    {showCancelButton && (
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button className="bg-red-600 hover:bg-red-700 text-white">
-                                    Hủy chuyến thăm
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Xác nhận hủy chuyến thăm</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        Vui lòng nhập lý do hủy chuyến thăm này.
-                                        Hành động này không thể hoàn tác.
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <div className="my-4">
-                                    <Textarea
-                                        placeholder="Nhập lý do hủy..."
-                                        value={cancellationReason}
-                                        onChange={(e) => setCancellationReason(e.target.value)}
-                                        className="min-h-[100px]"
-                                    />
-                                </div>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel className="bg-gray-800 hover:bg-gray-900 text-white hover:text-white">
-                                        Hủy</AlertDialogCancel>
-                                    <AlertDialogAction
-                                        onClick={handleCancelVisit}
-                                        disabled={isLoading || !cancellationReason.trim()}
-                                        className="bg-red-600 hover:bg-red-700 text-white"
-                                    >
-                                        {isLoading ? (
-                                            <>
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                Đang xử lý
-                                            </>
-                                        ) : (
-                                            'Xác nhận hủy'
-                                        )}
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                    )}
-                </div>
+                        {showCancelButton && (
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button className="bg-red-600 hover:bg-red-700 text-white">
+                                        Hủy chuyến thăm
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Xác nhận hủy chuyến thăm</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Vui lòng nhập lý do hủy chuyến thăm này.
+                                            Hành động này không thể hoàn tác.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <div className="my-4">
+                                        <Textarea
+                                            placeholder="Nhập lý do hủy..."
+                                            value={cancellationReason}
+                                            onChange={(e) => setCancellationReason(e.target.value)}
+                                            className="min-h-[100px]"
+                                        />
+                                    </div>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel className="bg-gray-800 hover:bg-gray-900 text-white hover:text-white">
+                                            Hủy</AlertDialogCancel>
+                                        <AlertDialogAction
+                                            onClick={handleCancelVisit}
+                                            disabled={isLoading || !cancellationReason.trim()}
+                                            className="bg-red-600 hover:bg-red-700 text-white"
+                                        >
+                                            {isLoading ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Đang xử lý
+                                                </>
+                                            ) : (
+                                                'Xác nhận hủy'
+                                            )}
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        )}
+                    </div>
+                )}
             </div>
         </>
     );

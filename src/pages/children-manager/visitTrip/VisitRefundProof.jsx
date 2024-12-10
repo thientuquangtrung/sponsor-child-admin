@@ -12,6 +12,7 @@ import {
 } from '@/redux/visitTripRegistration/visitTripRegistrationApi';
 import { bankName, visitRegistrationStatus } from '@/config/combobox';
 import LoadingScreen from '@/components/common/LoadingScreen';
+import { useSelector } from 'react-redux';
 
 const VisitRefundProof = () => {
     const { userID, visitID } = useParams();
@@ -29,6 +30,7 @@ const VisitRefundProof = () => {
     const [uploadSuccess, setUploadSuccess] = useState(null);
     const [showBackButton, setShowBackButton] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const { user } = useSelector((state) => state.auth);
 
     useEffect(() => {
         if (refundData?.visitTripRegistration?.transferProofImageUrl) {
@@ -238,49 +240,52 @@ const VisitRefundProof = () => {
                     Tổng số tiền hoàn: {refundData?.totalRefundAmount.toLocaleString('vi-VN')} VNĐ
                 </h3>
             </div>
-            <Label htmlFor="upload" className="mt-4 font-medium">
-                {isSubmitted ? 'Minh chứng đã tải lên:' : 'Tải ảnh chuyển khoản:'}
-            </Label>
-            <div
-                className="relative w-full h-[200px] md:w-[300px] mt-2 border-dashed border-2 border-gray-300 rounded-lg p-4 flex items-center justify-center"
-                onClick={() => !isSubmitted && document.getElementById('upload').click()}
-            >
-                {fileUrl ? (
-                    <img
-                        src={fileUrl}
-                        alt="Selected"
-                        className="absolute inset-0 object-cover rounded-lg w-full h-full"
-                    />
-                ) : (
-                    <div className="flex items-center hover:cursor-pointer">
-                        <Upload className="text-gray-600 h-8 w-8" />
-                        <span className="ml-2">{file ? file.name : 'Chọn tệp...'}</span>
+            {user.role !== 'ChildManager' && (
+                <>
+                    <Label htmlFor="upload" className="mt-4 font-medium">
+                        {isSubmitted ? 'Minh chứng đã tải lên:' : 'Tải ảnh chuyển khoản:'}
+                    </Label>
+                    <div
+                        className="relative w-full h-[200px] md:w-[300px] mt-2 border-dashed border-2 border-gray-300 rounded-lg p-4 flex items-center justify-center"
+                        onClick={() => !isSubmitted && document.getElementById('upload').click()}
+                    >
+                        {fileUrl ? (
+                            <img
+                                src={fileUrl}
+                                alt="Selected"
+                                className="absolute inset-0 object-cover rounded-lg w-full h-full"
+                            />
+                        ) : (
+                            <div className="flex items-center hover:cursor-pointer">
+                                <Upload className="text-gray-600 h-8 w-8" />
+                                <span className="ml-2">{file ? file.name : 'Chọn tệp...'}</span>
+                            </div>
+                        )}
+                        {!isSubmitted && (
+                            <Input
+                                type="file"
+                                id="upload"
+                                className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                            />
+                        )}
                     </div>
-                )}
-                {!isSubmitted && (
-                    <Input
-                        type="file"
-                        id="upload"
-                        className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                    />
-                )}
-            </div>
 
-            {uploadError && <p className="text-red-500 mt-2">{uploadError}</p>}
-            {uploadSuccess && <p className="text-green-500 mt-2">{uploadSuccess}</p>}
+                    {uploadError && <p className="text-red-500 mt-2">{uploadError}</p>}
+                    {uploadSuccess && <p className="text-green-500 mt-2">{uploadSuccess}</p>}
 
-            {!isSubmitted && (
-                <Button
-                    className={`mt-4 bg-teal-600 text-white font-semibold py-2 px-4 rounded hover:bg-teal-700 transition duration-200 ${uploading || !file ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    onClick={handleUpload}
-                    disabled={uploading || !file}
-                >
-                    {uploading ? 'Đang tải...' : 'Gửi minh chứng'}
-                </Button>
+                    {!isSubmitted && (
+                        <Button
+                            className={`mt-4 bg-teal-600 text-white font-semibold py-2 px-4 rounded hover:bg-teal-700 transition duration-200 ${uploading || !file ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            onClick={handleUpload}
+                            disabled={uploading || !file}
+                        >
+                            {uploading ? 'Đang tải...' : 'Gửi minh chứng'}
+                        </Button>
+                    )}
+                </>
             )}
-
             {showBackButton && (
                 <Button
                     variant="outline"

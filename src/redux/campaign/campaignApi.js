@@ -65,7 +65,8 @@ export const campaignApi = baseApi.injectEndpoints({
                 params: {
                     childName: params.childName,
                     childLocation: params.childLocation,
-                    childBirthYear: params.childBirthYear
+                    childBirthYear: params.childBirthYear,
+                    childIdentificationCode: params.childIdentificationCode
                 }
             }),
         }),

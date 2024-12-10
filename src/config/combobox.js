@@ -147,9 +147,7 @@ export const visitRegistrationStatus = [
 export const giftDeliveryMethod = [
     { label: 'Giao tận nơi', value: 0 },
     { label: 'Dịch vụ bưu chính', value: 1 },
-    { label: 'Tình nguyện viên lấy', value: 2 },
-    { label: 'Đối tác địa phương', value: 3 },
-    { label: 'Phân phát sự kiện', value: 4 },
+    { label: 'Mua quà hộ', value: 2 },
 ];
 export const giftStatus = [
     { label: 'Chờ xử lý', value: 0 },
