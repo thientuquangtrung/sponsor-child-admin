@@ -33,7 +33,7 @@ const formatNotification = (notification) => {
         id: notification.id,
         message: notification.message,
         time: formatTime(
-            new Date(new Date(notification.createdAt).getTime() + 7 * 60 * 60 * 1000).toLocaleString('en-US'),
+            notification.createdAt
         ),
         isRead: notification.isRead,
         type: notification.type,
