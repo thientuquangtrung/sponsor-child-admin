@@ -11,7 +11,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileText, FileSignature, UserCheck } from 'lucide-react';
 import Breadcrumb from '@/pages/admin/Breadcrumb';
 import { useGetAdminSummaryQuery } from '@/redux/admin/adminApi';
+import { useGetNotificationsByUserIdQuery } from '@/redux/notification/notificationApi';
 import LoadingScreen from '@/components/common/LoadingScreen';
+import { useSelector } from 'react-redux';
 
 const StatusCard = ({ title, count, icon, color, to }) => (
     <Link to={to}>
@@ -44,21 +46,35 @@ const RecentNotification = ({ icon, title, description, date }) => (
 );
 
 const AdminCenter = () => {
-    const { data: summaryData, isLoading, error } = useGetAdminSummaryQuery();
-
-    const recentNotifications = [
-        { id: 1, type: 'report', title: 'Báo cáo mới từ Quản lý trẻ em', description: 'Báo cáo hàng tháng về tình trạng trẻ em', date: '1 giờ trước' },
-        { id: 2, type: 'guarantee-requests', title: 'Yêu cầu trở thành Người bảo lãnh', description: 'Nguyễn Văn A đã gửi yêu cầu', date: '3 giờ trước' },
-        { id: 3, type: 'contract', title: 'Hợp đồng mới cần duyệt', description: 'Hợp đồng giải ngân cho dự án A', date: '1 ngày trước' },
-        { id: 4, type: 'report', title: 'Báo cáo Giải ngân của Người bảo lãnh', description: 'Báo cáo chi tiết về việc giải ngân tháng 9', date: '2 ngày trước' },
-    ];
+    const { user } = useSelector((state) => state.auth);
+    const { data: summaryData, isLoading: isSummaryLoading, error: summaryError } = useGetAdminSummaryQuery();
+    const {
+        data: notifications = [],
+        isLoading: isNotificationsLoading,
+        error: notificationsError
+    } = useGetNotificationsByUserIdQuery(user?.userID, {
+        skip: !user?.userID,
+    });
 
     const breadcrumbs = [
         { name: 'Bảng điều khiển', path: '/' },
         { name: 'Trung tâm Quản trị', path: null },
     ];
 
-    if (isLoading) {
+    const getNotificationIcon = (type) => {
+        switch (type) {
+            case 'report':
+                return <FileText className="h-6 w-6 text-blue-500" />;
+            case 'guarantee-requests':
+                return <UserCheck className="h-6 w-6 text-green-500" />;
+            case 'contract':
+                return <FileSignature className="h-6 w-6 text-purple-500" />;
+            default:
+                return <FileText className="h-6 w-6 text-gray-500" />;
+        }
+    };
+
+    if (isSummaryLoading || isNotificationsLoading) {
         return (
             <div>
                 <LoadingScreen />
@@ -66,10 +82,12 @@ const AdminCenter = () => {
         );
     }
 
-    if (error) {
+    if (summaryError || notificationsError) {
         return (
             <div className="w-full h-screen flex items-center justify-center">
-                <div className="text-lg text-red-500">Đã có lỗi xảy ra khi tải dữ liệu</div>
+                <div className="text-lg text-red-500">
+                    Đã có lỗi xảy ra khi tải dữ liệu
+                </div>
             </div>
         );
     }
@@ -105,19 +123,21 @@ const AdminCenter = () => {
 
                 <h2 className="text-xl font-semibold mb-4">Thông báo gần đây</h2>
                 <ScrollArea className="h-[400px] pr-4">
-                    {recentNotifications.map(notification => (
-                        <RecentNotification
-                            key={notification.id}
-                            icon={
-                                notification.type === 'report' ? <FileText className="h-6 w-6 text-blue-500" /> :
-                                    notification.type === 'guarantee-requests' ? <UserCheck className="h-6 w-6 text-green-500" /> :
-                                        <FileSignature className="h-6 w-6 text-purple-500" />
-                            }
-                            title={notification.title}
-                            description={notification.description}
-                            date={notification.date}
-                        />
-                    ))}
+                    {notifications.length > 0 ? (
+                        notifications.map(notification => (
+                            <RecentNotification
+                                key={notification.id}
+                                icon={getNotificationIcon(notification.type)}
+                                title={notification.title}
+                                description={notification.message}
+                                date={notification.time}
+                            />
+                        ))
+                    ) : (
+                        <div className="text-center text-gray-500 italic">
+                            Không có thông báo mới
+                        </div>
+                    )}
                 </ScrollArea>
             </div>
         </>
