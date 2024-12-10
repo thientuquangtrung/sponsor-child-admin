@@ -45,11 +45,9 @@ export default function Router() {
         { element: <Visit />, path: 'visits' },
         { element: <VisitDetail />, path: 'visit/:id' },
         { element: <VisitForm />, path: 'visit/create-visit-trip' },
-        { element: <VisitRefundProof />, path: 'visit-refund/:id' },
+        { element: <VisitRefundProof />, path: 'visit-refund/:userID/:visitID' },
         { element: <UpdateVisitForm />, path: 'visit/edit/:id' },
-
-
-
+        { element: <PhysicalDonationDetail />, path: 'physical-donation/:id' },
     ];
     return useRoutes([
         {

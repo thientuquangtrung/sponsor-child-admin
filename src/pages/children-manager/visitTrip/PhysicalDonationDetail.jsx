@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Label } from '@/components/ui/label';
 import { useCalculateRefundVisitQuery } from '@/redux/visitTripRegistration/visitTripRegistrationApi';
+import { useSelector } from 'react-redux';
 
 const getMethodDisplay = (method) => {
     const methodItem = giftDeliveryMethod.find(item => item.value === method);
@@ -72,6 +73,7 @@ const PhysicalDonationDetail = () => {
             skip: !shouldFetchRefund
         }
     );
+    const { user } = useSelector((state) => state.auth);
 
     const [updatePhysicalDonation] = useUpdatePhysicalDonationMutation();
     const [file, setFile] = useState(null);
@@ -631,14 +633,16 @@ const PhysicalDonationDetail = () => {
                 </Card>
             )}
 
-            <div className="flex flex-col space-y-4">
-                {donation.giftStatus !== 2 &&
-                    donation.giftStatus !== 3 &&
-                    donation.giftStatus !== 5 &&
-                    donation.giftStatus !== 1 &&
-                    donation.giftStatus !== 6 &&
-                    renderActionButtons()}
-            </div>
+            {user.role !== 'ChildManager' && (
+                <div className="flex flex-col space-y-4">
+                    {donation.giftStatus !== 2 &&
+                        donation.giftStatus !== 3 &&
+                        donation.giftStatus !== 5 &&
+                        donation.giftStatus !== 1 &&
+                        donation.giftStatus !== 6 &&
+                        renderActionButtons()}
+                </div>
+            )}
         </div>
     );
 };

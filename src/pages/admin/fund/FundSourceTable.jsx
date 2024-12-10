@@ -25,7 +25,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DataTableViewOptions } from '@/components/datatable/DataTableViewOptions';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
-import { vi } from 'date-fns/locale';
 import { formatNumber } from '@/lib/utils';
 import useDebounce from '@/hooks/useDebounce';
 const columns = [
@@ -91,22 +90,25 @@ const columns = [
     {
         accessorKey: 'amountAdded',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Số tiền" className="justify-end" />,
-        cell: ({ row }) => <div className="text-right">{row.getValue('amountAdded').toLocaleString('vi-VN')} ₫</div>,
+        cell: ({ row }) => <div className="font-medium text-right">{row.getValue('amountAdded').toLocaleString('vi-VN')} ₫</div>,
     },
-    // {
-    //     accessorKey: 'commonFundTotal',
-    //     header: ({ column }) => <DataTableColumnHeader column={column} title="Tổng tiền quỹ chung" className="justify-end" />,
-    //     cell: ({ row }) => <div className="text-right">{row.getValue('commonFundTotal').toLocaleString('vi-VN')} ₫</div>,
-    // },
+    {
+        accessorKey: 'commonFundTotal',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="ST quỹ chung" className="justify-end" />,
+        cell: ({ row }) => <div className="font-medium text-right">{row.getValue('commonFundTotal').toLocaleString('vi-VN')} ₫</div>,
+    },
     {
         accessorKey: 'dateAdded',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Ngày thêm" />,
-        cell: ({ row }) => <div>{new Date(row.getValue('dateAdded')).toLocaleDateString('vi-VN')}</div>,
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Ngày" />,
+        cell: ({ row }) => {
+            const date = new Date(row.getValue('dateAdded'));
+            return <div className="whitespace-nowrap w-32 text-center">{format(date, 'dd/MM/yyyy HH:mm')}</div>;
+        },
     },
     {
         accessorKey: 'description',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Mô tả" />,
-        cell: ({ row }) => <div className="max-w-[200px] truncate">{row.getValue('description')}</div>,
+        cell: ({ row }) => <div className="font-medium max-w-[200px] truncate">{row.getValue('description')}</div>,
     },
     {
         id: 'actions',
