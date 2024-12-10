@@ -7,6 +7,7 @@ import { encryptTransform } from 'redux-persist-transform-encrypt';
 import appReducer from './app/appReducer';
 import authReducer from './auth/authReducer';
 import baseApi from './baseApi';
+import notificationReducer from './notification/notificationReducer';
 
 // ----------------------------------------------------------------------
 
@@ -32,6 +33,8 @@ const rootReducer = combineReducers({
     [baseApi.reducerPath]: baseApi.reducer,
     app: appReducer,
     auth: authReducer,
+    notification: notificationReducer,
+
 });
 
 const rootMiddleware = (getDefaultMiddleware) =>
