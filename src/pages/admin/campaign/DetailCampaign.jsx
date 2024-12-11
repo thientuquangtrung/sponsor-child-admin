@@ -155,7 +155,7 @@ const DetailCampaign = () => {
                             imagesFolderUrl={campaignData.imagesFolderUrl}
                         />
                     </CollapsibleSection>
-                    <CollapsibleSection title="Thông tin trẻ emh">
+                    <CollapsibleSection title="Thông tin trẻ em">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
                             <div className="md:col-span-2 flex justify-center mb-4">
                                 <FileViewer fileUrl={campaignData.childIdentificationInformationFile} />

@@ -36,7 +36,10 @@ export const visitFormSchema = z.object({
     maxParticipants: z.string()
         .min(1, "Vui lòng nhập số lượng người tham gia")
         .refine((val) => !isNaN(val) && parseInt(val) > 0, {
-            message: "Số lượng người tham gia phải là số dương",
+            message: "Số lượng người tham gia phải lớn hơn 0",
+        })
+        .refine((val) => parseInt(val) <= 500, {
+            message: "Số lượng người tham gia tối đa là 500",
         }),
     travelItineraryDetails: z.array(z.object({
         date: z.date({
@@ -115,6 +118,17 @@ export const visitFormSchema = z.object({
                     message: "Ngày trong lịch trình phải nằm trong khoảng từ ngày bắt đầu đến ngày kết thúc",
                     path: ["travelItineraryDetails", index, "date"]
                 });
+            }
+
+            if (index > 0) {
+                const previousDate = new Date(data.travelItineraryDetails[index - 1].date);
+                if (itineraryDate <= previousDate) {
+                    ctx.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message: "Ngày trong lịch trình phải sau ngày trước đó",
+                        path: ["travelItineraryDetails", index, "date"]
+                    });
+                }
             }
         });
     });
