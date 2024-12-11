@@ -132,7 +132,7 @@ export const visitStatus = [
     { label: 'Đang mở đăng ký', value: 1 },
     { label: 'Đã đóng đăng ký', value: 2 },
     { label: 'Đang diễn ra', value: 3 },
-    { label: 'Đã hoàn thành', value: 4 },
+    { label: 'Đã kết thúc', value: 4 },
     { label: 'Đã hủy', value: 5 },
     { label: 'Đã hoãn', value: 6 },
 ];
