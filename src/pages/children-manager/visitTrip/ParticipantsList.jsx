@@ -46,27 +46,39 @@ const ActionMenu = ({ row }) => {
     const handleRefund = async () => {
         navigate(`/visit-refund/${row.original.userID}/${row.original.visitID}`);
     };
-
-    if (row.original.status !== 2) {
-        return null;
+    const handleViewTransferProof = async () => {
+        navigate(`/transfer-proof/${row.original.id}`);
+    };
+    if (row.original.status === 2 ||
+        (row.original.status === 3 && row.original.transferProofImageUrl)) {
+        return (
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-normal">
+                        <span className="sr-only">Mở menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    {row.original.status === 2 && (
+                        <DropdownMenuItem onClick={handleRefund}>
+                            Hoàn tiền
+                        </DropdownMenuItem>
+                    )}
+                    {row.original.status === 3 && row.original.transferProofImageUrl && (
+                        <DropdownMenuItem onClick={handleViewTransferProof}>
+                            Xem minh chứng
+                        </DropdownMenuItem>
+                    )}
+                </DropdownMenuContent>
+            </DropdownMenu>
+        );
     }
 
-    return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-normal">
-                    <span className="sr-only">Mở menu</span>
-                    <MoreHorizontal className="h-4 w-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleRefund}>
-                    Hoàn tiền
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-    );
+    return null;
 };
+
+
 
 
 const columns = [
@@ -145,6 +157,7 @@ export const ParticipantsList = ({ registrations, cost }) => {
             rowSelection,
         },
     });
+
 
     return (
         <div className="w-full space-y-4">

@@ -16,6 +16,7 @@ import VisitRefundProof from '@/pages/children-manager/visitTrip/VisitRefundProo
 import SettingsPage from '@/pages/admin/Setting';
 import PhysicalDonationDetail from '@/pages/children-manager/visitTrip/PhysicalDonationDetail';
 import { useSelector } from 'react-redux';
+import VisitTransferProof from '@/pages/children-manager/visitTrip/VisitTransferProof';
 
 const Loadable = (Component) => {
     const LoadableComponent = (props) => {
@@ -46,6 +47,7 @@ export default function Router() {
         { element: <VisitDetail />, path: 'visit/:id' },
         { element: <VisitForm />, path: 'visit/create-visit-trip' },
         { element: <VisitRefundProof />, path: 'visit-refund/:userID/:visitID' },
+        { element: <VisitTransferProof />, path: 'transfer-proof/:id' },
         { element: <UpdateVisitForm />, path: 'visit/edit/:id' },
         { element: <PhysicalDonationDetail />, path: 'physical-donation/:id' },
     ];
@@ -94,6 +96,7 @@ export default function Router() {
                         { element: <FundUsageDetail />, path: 'fund/usage/:id' },
                         { element: <UpdateVisitForm />, path: 'visit/edit/:id' },
                         { element: <VisitRefundProof />, path: 'visit-refund/:userID/:visitID' },
+                        { element: <VisitTransferProof />, path: 'transfer-proof/:id' },
                         { element: <PhysicalDonationDetail />, path: 'physical-donation/:id' },
                         { path: '404', element: <Page404 /> },
                     ]),
