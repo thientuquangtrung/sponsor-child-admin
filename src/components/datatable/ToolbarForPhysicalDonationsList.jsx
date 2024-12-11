@@ -20,13 +20,6 @@ export function ToolbarForPhysicalDonationsList({ table }) {
                     }
                     className="h-8 w-[150px] lg:w-[250px]"
                 />
-                {table.getColumn("giftType") && (
-                    <DataTableFacetedFilter
-                        column={table.getColumn("giftType")}
-                        title="Loại quà tặng"
-                        options={giftType}
-                    />
-                )}
                 {table.getColumn("giftDeliveryMethod") && (
                     <DataTableFacetedFilter
                         column={table.getColumn("giftDeliveryMethod")}

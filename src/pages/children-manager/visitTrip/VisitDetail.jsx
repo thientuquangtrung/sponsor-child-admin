@@ -63,6 +63,7 @@ const VisitDetail = () => {
     const [updateVisitStatus] = useUpdateChildrenVisitTripStatusMutation();
     const [isConfirmStartVisitOpen, setIsConfirmStartVisitOpen] = useState(false);
     const { user } = useSelector((state) => state.auth);
+    const [isConfirmEndVisitOpen, setIsConfirmEndVisitOpen] = useState(false);
 
 
     if (visitLoading) {
@@ -90,6 +91,22 @@ const VisitDetail = () => {
         }
 
         await performStartVisit();
+    };
+    const handleEndVisit = async () => {
+        try {
+            setIsLoading(true);
+            await updateVisitStatus({
+                id,
+                status: 4
+            }).unwrap();
+            toast.success('Kết thúc chuyến thăm thành công');
+            refetch();
+        } catch (error) {
+            toast.error('Có lỗi xảy ra khi kết thúc chuyến thăm');
+        } finally {
+            setIsLoading(false);
+            setIsConfirmEndVisitOpen(false);
+        }
     };
     const performStartVisit = async () => {
         try {
@@ -128,6 +145,7 @@ const VisitDetail = () => {
 
     const showStartButton = visitData.status === 2;
     const showCancelButton = [0, 1, 2].includes(visitData.status);
+    const showEndButton = visitData.status === 3;
 
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('vi-VN');
@@ -381,10 +399,37 @@ const VisitDetail = () => {
                     </div>
 
                 </div>
+                <AlertDialog
+                    open={isConfirmEndVisitOpen}
+                    onOpenChange={setIsConfirmEndVisitOpen}
+                >
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle className="text-orange-600">
+                                Xác nhận kết thúc chuyến thăm
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Bạn có chắc chắn muốn kết thúc chuyến thăm này không?
+                                Hành động này sẽ đánh dấu chuyến thăm là đã hoàn thành.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel
+                                className="bg-gray-800 hover:bg-gray-900 text-white hover:text-white">
+                                Hủy</AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={handleEndVisit}
+                                className="bg-orange-600 hover:bg-orange-700 text-white"
+                            >
+                                Xác nhận kết thúc
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
                 <div className="flex justify-end items-center space-x-4 mb-6">
                     {showStartButton && (
                         <Button
-                            className="bg-green-600 hover:bg-green-700 text-white"
+                            className="bg-green-500 hover:bg-green-700 text-white"
                             onClick={handleStartVisit}
                             disabled={isLoading}
                         >
@@ -442,6 +487,23 @@ const VisitDetail = () => {
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
+
+                    )}
+                    {showEndButton && (
+                        <Button
+                            className="bg-orange-600 hover:bg-orange-500 text-white"
+                            onClick={() => setIsConfirmEndVisitOpen(true)}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Đang xử lý
+                                </>
+                            ) : (
+                                'Kết thúc chuyến thăm'
+                            )}
+                        </Button>
                     )}
                 </div>
 

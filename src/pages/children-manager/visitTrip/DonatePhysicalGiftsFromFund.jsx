@@ -36,7 +36,7 @@ const DonatePhysicalGiftsFromFund = ({ visitId, giftRequestDetails, userId, onSu
 
     const handleDonate = async () => {
         if (!purpose.trim()) {
-            toast.error('Vui lòng nhập mục đích chuyển quà');
+            toast.error('Vui lòng nhập nội dung chuyển quà');
             return;
         }
 
@@ -108,7 +108,7 @@ const DonatePhysicalGiftsFromFund = ({ visitId, giftRequestDetails, userId, onSu
                                 </div>
                             )}
                             <div className="space-y-2">
-                                <Label htmlFor="purpose">Mục đích:</Label>
+                                <Label htmlFor="purpose">Nội dung:</Label>
                                 <Textarea
                                     id="purpose"
                                     placeholder="Nhập mục đích chuyển quà..."
