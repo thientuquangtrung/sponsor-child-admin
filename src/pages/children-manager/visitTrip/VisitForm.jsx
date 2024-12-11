@@ -143,7 +143,6 @@ const VisitForm = () => {
                 imagesFolderUrl: imageResponses.map(img => img.secure_url).join(','),
             };
 
-            console.log('Formatted data to submit:', formattedData);
             const response = await createVisitTrip(formattedData).unwrap();
 
             form.reset();
@@ -231,13 +230,12 @@ const VisitForm = () => {
                                                     </FormItem>
                                                 )}
                                             />
-
                                             <FormField
                                                 control={form.control}
                                                 name="maxParticipants"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Số lượng người tham gia tối đa</FormLabel>
+                                                        <FormLabel>Số lượng người tham gia</FormLabel>
                                                         <FormControl>
                                                             <Input
                                                                 type="number"
@@ -250,7 +248,8 @@ const VisitForm = () => {
                                                                     }
                                                                 }}
                                                                 onChange={(e) => {
-                                                                    const value = Math.max(1, parseInt(e.target.value) || 1);
+                                                                    const inputValue = e.target.value;
+                                                                    const value = inputValue === '' ? '' : Math.max(1, parseInt(inputValue) || 1);
                                                                     field.onChange(value.toString());
                                                                 }}
                                                             />

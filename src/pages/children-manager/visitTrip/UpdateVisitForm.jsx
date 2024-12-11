@@ -292,7 +292,7 @@ const UpdateVisitForm = () => {
                                                 name="maxParticipants"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Số lượng người tham gia tối đa</FormLabel>
+                                                        <FormLabel>Số lượng người tham gia</FormLabel>
                                                         <FormControl>
                                                             <Input
                                                                 type="number"
@@ -305,7 +305,8 @@ const UpdateVisitForm = () => {
                                                                     }
                                                                 }}
                                                                 onChange={(e) => {
-                                                                    const value = Math.max(1, parseInt(e.target.value) || 1);
+                                                                    const inputValue = e.target.value;
+                                                                    const value = inputValue === '' ? '' : Math.max(1, parseInt(inputValue) || 1);
                                                                     field.onChange(value.toString());
                                                                 }}
                                                             />
