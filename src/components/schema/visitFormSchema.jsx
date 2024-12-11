@@ -36,7 +36,10 @@ export const visitFormSchema = z.object({
     maxParticipants: z.string()
         .min(1, "Vui lòng nhập số lượng người tham gia")
         .refine((val) => !isNaN(val) && parseInt(val) > 0, {
-            message: "Số lượng người tham gia phải là số dương",
+            message: "Số lượng người tham gia phải lớn hơn 0",
+        })
+        .refine((val) => parseInt(val) <= 500, {
+            message: "Số lượng người tham gia tối đa là 500",
         }),
     travelItineraryDetails: z.array(z.object({
         date: z.date({
