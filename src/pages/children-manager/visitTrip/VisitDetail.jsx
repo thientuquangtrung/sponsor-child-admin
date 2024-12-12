@@ -406,11 +406,11 @@ const VisitDetail = () => {
                     <AlertDialogContent>
                         <AlertDialogHeader>
                             <AlertDialogTitle className="text-orange-600">
-                                Xác nhận kết thúc chuyến thăm
+                                Xác nhận hoàn thành chuyến thăm
                             </AlertDialogTitle>
                             <AlertDialogDescription>
-                                Bạn có chắc chắn muốn kết thúc chuyến thăm này không?
-                                Hành động này sẽ đánh dấu chuyến thăm là đã hoàn thành.
+                                Bạn có chắc chắn muốn hoàn thành chuyến thăm này không?
+                                Hành động này sẽ đánh dấu chuyến thăm là đã kết thúc.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -421,7 +421,7 @@ const VisitDetail = () => {
                                 onClick={handleEndVisit}
                                 className="bg-orange-600 hover:bg-orange-700 text-white"
                             >
-                                Xác nhận kết thúc
+                                Xác nhận hoàn thành
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
@@ -501,7 +501,7 @@ const VisitDetail = () => {
                                     Đang xử lý
                                 </>
                             ) : (
-                                'Kết thúc chuyến thăm'
+                                'Hoàn thành chuyến thăm'
                             )}
                         </Button>
                     )}

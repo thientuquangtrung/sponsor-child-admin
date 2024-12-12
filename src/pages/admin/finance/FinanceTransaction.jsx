@@ -19,6 +19,7 @@ import { useGetTransactionQuery } from '@/redux/transaction/transactionApi';
 import ToolbarForTransaction from '@/components/datatable/ToolbarForTransaction';
 import * as XLSX from 'xlsx';
 import LoadingScreen from '@/components/common/LoadingScreen';
+import { vietnameseFilter } from '@/lib/utils';
 const getTransactionTypeLabel = (value) => {
     const type = transactionType.find((t) => t.value === value);
     return type ? type.label : 'Không xác định';
@@ -34,6 +35,7 @@ const columns = [
         accessorKey: 'transactionName',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Tên giao dịch" />,
         cell: ({ row }) => <div className="max-w-[300px] truncate">{row.getValue('transactionName')}</div>,
+        filterFn: vietnameseFilter
     },
     {
         accessorKey: 'description',
@@ -48,8 +50,13 @@ const columns = [
     {
         accessorKey: 'amount',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Số tiền" />,
-        cell: ({ row }) => <div className="font-medium text-right">{row.getValue('amount').toLocaleString('vi-VN')} ₫</div>,
+        cell: ({ row }) => (
+            <div className="font-medium text-right whitespace-nowrap">
+                {row.getValue('amount').toLocaleString('vi-VN')} ₫
+            </div>
+        ),
     },
+
     {
         accessorKey: 'type',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Loại giao dịch" />,

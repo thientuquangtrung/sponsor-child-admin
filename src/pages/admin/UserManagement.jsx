@@ -41,6 +41,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import LoadingScreen from '@/components/common/LoadingScreen';
+import { vietnameseFilter } from '@/lib/utils';
 
 const roleColors = {
     Guarantee: 'bg-rose-100 text-rose-400',
@@ -81,6 +82,7 @@ const columns = [
         accessorKey: 'fullname',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Tên người dùng" />,
         cell: ({ row }) => <div className="font-medium">{row.getValue('fullname')}</div>,
+        filterFn: vietnameseFilter
     },
     {
         accessorKey: 'email',
