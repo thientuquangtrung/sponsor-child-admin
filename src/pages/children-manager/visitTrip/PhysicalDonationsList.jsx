@@ -23,6 +23,7 @@ import { format } from 'date-fns';
 import { ToolbarForPhysicalDonationsList } from '@/components/datatable/ToolbarForPhysicalDonationsList';
 import { giftDeliveryMethod, giftStatus, giftType } from '@/config/combobox';
 import { useNavigate } from 'react-router-dom';
+import { vietnameseFilter } from '@/lib/utils';
 
 const getMethodDisplay = (method) => {
     const methodItem = giftDeliveryMethod.find(item => item.value === method);
@@ -78,6 +79,7 @@ const columns = [
         accessorKey: 'userName',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Người quyên góp" />,
         cell: ({ row }) => <div className="font-medium">{row.getValue('userName')}</div>,
+        filterFn: vietnameseFilter
     },
     {
         accessorKey: 'visitTitle',

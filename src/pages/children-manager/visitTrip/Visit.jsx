@@ -26,6 +26,8 @@ import LoadingScreen from '@/components/common/LoadingScreen';
 import { useNavigate } from 'react-router-dom';
 import { useGetAllChildrenVisitTripsQuery } from '@/redux/childrenVisitTrips/childrenVisitTripsApi';
 import { visitStatus } from '@/config/combobox';
+import { ToolbarForVisit } from '@/components/datatable/ToolbarForVisit';
+import { vietnameseFilter } from '@/lib/utils';
 
 const statusColors = {
     0: 'text-blue-400',
@@ -72,6 +74,7 @@ const columns = [
                 {row.getValue('title')}
             </div>
         ),
+        filterFn: vietnameseFilter
     },
 
     {
@@ -106,6 +109,9 @@ const columns = [
     {
         accessorKey: 'status',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Trạng thái" />,
+        filterFn: (row, id, filterValue) => {
+            return filterValue.includes(row.getValue(id).toString())
+        },
         cell: ({ row }) => {
             const status = row.getValue('status');
             const statusInfo = visitStatus.find(s => s.value === status);
@@ -190,6 +196,7 @@ export function Visit() {
                     Tạo chuyến thăm
                 </Button>
             </div>
+            <ToolbarForVisit table={table} />
             <div className="rounded-md border">
                 <Table>
                     <TableHeader>

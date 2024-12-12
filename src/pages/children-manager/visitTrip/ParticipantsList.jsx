@@ -23,6 +23,7 @@ import { format } from 'date-fns';
 import { ToolbarForParticipantsList } from '@/components/datatable/ToolbarForParticipantsList';
 import { visitRegistrationStatus } from '@/config/combobox';
 import { useNavigate } from 'react-router-dom';
+import { vietnameseFilter } from '@/lib/utils';
 
 const statusColors = {
     0: 'bg-blue-100 text-blue-600',
@@ -49,7 +50,7 @@ const ActionMenu = ({ row }) => {
     const handleViewTransferProof = async () => {
         navigate(`/transfer-proof/${row.original.id}`);
     };
-    if (row.original.status === 2 ||
+    if (row.original.status === 2 || row.original.status === 5 ||
         (row.original.status === 3 && row.original.transferProofImageUrl)) {
         return (
             <DropdownMenu>
@@ -63,6 +64,11 @@ const ActionMenu = ({ row }) => {
                     {row.original.status === 2 && (
                         <DropdownMenuItem onClick={handleRefund}>
                             Hoàn tiền
+                        </DropdownMenuItem>
+                    )}
+                    {row.original.status === 5 && (
+                        <DropdownMenuItem onClick={handleViewTransferProof}>
+                            Xem minh chứng
                         </DropdownMenuItem>
                     )}
                     {row.original.status === 3 && row.original.transferProofImageUrl && (
@@ -79,13 +85,12 @@ const ActionMenu = ({ row }) => {
 };
 
 
-
-
 const columns = [
     {
         accessorKey: 'userName',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Tên người dùng" />,
         cell: ({ row }) => <div className="font-medium">{row.getValue('userName')}</div>,
+        filterFn: vietnameseFilter
     },
     {
         accessorKey: 'phoneNumber',
@@ -157,6 +162,7 @@ export const ParticipantsList = ({ registrations, cost }) => {
             rowSelection,
         },
     });
+
 
 
     return (

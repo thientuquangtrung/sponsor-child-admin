@@ -138,3 +138,20 @@ export const formatDateForServer = (date) => {
     const day = String(localDate.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}T00:00:00.000Z`;
 };
+
+/**
+ * Filters Vietnamese text by normalizing and comparing.
+ * @param {object} row - The table row.
+ * @param {string} columnId - The column ID to filter.
+ * @param {string} value - The search value.
+ * @returns {boolean} Whether the row matches the filter.
+ */
+export const vietnameseFilter = (row, columnId, value) => {
+    const content = row.getValue(columnId);
+    if (!content) return false;
+
+    const normalizedContent = content.toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const normalizedValue = value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    return normalizedContent.includes(normalizedValue);
+};

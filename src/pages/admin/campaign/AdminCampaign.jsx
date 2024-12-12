@@ -16,30 +16,20 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DataTablePagination } from '@/components/datatable/DataTablePagination';
 import { DataTableColumnHeader } from '@/components/datatable/DataTableColumnHeader';
 import Breadcrumb from '@/pages/admin/Breadcrumb';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+
 import { useGetAllCampaignsQuery, useDeleteCampaignMutation, useFilterAdminCampaignsQuery } from '@/redux/campaign/campaignApi';
 import { campaignTypes, campaignStatus, guaranteeTypes } from '@/config/combobox';
 import { ToolbarForCampaign } from '@/components/datatable/ToolbarForCampaign';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { vietnameseFilter } from '@/lib/utils';
 
 const columns = [
     {
@@ -85,6 +75,9 @@ const columns = [
                 </div>
             );
         },
+        enableSorting: true,
+        enableFiltering: true,
+        filterFn: vietnameseFilter
     },
     {
         accessorKey: 'status',
@@ -153,7 +146,6 @@ const columns = [
         cell: ({ row }) => <div>{new Date(row.getValue('endDate')).toLocaleDateString('vi-VN')}</div>,
     },
 
-
     {
         accessorKey: 'guaranteeName',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Tên bảo lãnh" />,
@@ -183,16 +175,7 @@ const ActionMenu = ({ row }) => {
     const [deleteCampaign] = useDeleteCampaignMutation();
     const navigate = useNavigate();
 
-    const handleDelete = async () => {
-        try {
-            await deleteCampaign(row.original.campaignID);
-            toast.success("Xóa chiến dịch thành công!");
-            onDeleteSuccess(row.original.campaignID);
-        } catch (error) {
-            console.error('Failed to delete campaign:', error);
-            toast.error("Xóa chiến dịch thất bại!");
-        }
-    };
+
 
     return (
         <DropdownMenu>
@@ -232,12 +215,7 @@ export function AdminCampaign() {
         skip: !isFiltering
     });
 
-    // React.useEffect(() => {
-    //     const currentData = isFiltering ? filteredCampaigns : allCampaigns;
-    //     if (currentData) {
-    //         setLocalData(currentData);
-    //     }
-    // }, [allCampaigns, filteredCampaigns, isFiltering]);
+
 
     const handleDeleteSuccess = React.useCallback((deletedId) => {
         setLocalData(prev => prev.filter(campaign => campaign.campaignID !== deletedId));
