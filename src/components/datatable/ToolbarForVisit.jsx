@@ -5,19 +5,31 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DataTableViewOptions } from '@/components/datatable/DataTableViewOptions';
 import { DataTableFacetedFilter } from '@/components/datatable/DataTableFacetedFilter';
-import { campaignStatus } from '@/config/combobox';
+import { visitStatus } from '@/config/combobox';
 
-export function ToolbarForCampaign({ table }) {
+export function ToolbarForVisit({ table }) {
+    const provinces = [...new Set(table.getRowModel().rows.map(row => row.original.province))].map(province => ({
+        value: province,
+        label: province
+    }));
+
+    const statusOptions = visitStatus.map(status => ({
+        value: status.value.toString(),
+        label: status.label,
+    }));
+
     const isFiltered = table.getState().columnFilters.length > 0;
     const filters = [
         {
             name: 'status',
-            options: campaignStatus.map(status => ({
-                value: status.value,
-                label: status.label,
-            })),
+            options: statusOptions,
         },
+        {
+            name: 'province',
+            options: provinces,
+        }
     ];
+
     const handleSearch = useCallback((value) => {
         table.getColumn('title')?.setFilterValue(value);
     }, [table]);
@@ -26,7 +38,7 @@ export function ToolbarForCampaign({ table }) {
         <div className="flex items-center justify-between w-full">
             <div className="flex flex-1 flex-col sm:flex-row gap-y-4 items-center space-x-2 w-full">
                 <Input
-                    placeholder="Tìm kiếm tên chiến dịch..."
+                    placeholder="Tìm kiếm tên chuyến thăm..."
                     value={table.getColumn('title')?.getFilterValue() ?? ''}
                     onChange={(event) => handleSearch(event.target.value)}
                     className="max-w-sm"
@@ -37,7 +49,13 @@ export function ToolbarForCampaign({ table }) {
                         <DataTableFacetedFilter
                             key={i}
                             column={table.getColumn(f.name)}
-                            title={f.name === 'status' ? 'Trạng thái' : 'Loại chiến dịch'}
+                            title={
+                                f.name === 'status'
+                                    ? 'Trạng thái'
+                                    : f.name === 'province'
+                                        ? 'Tỉnh thành'
+                                        : f.name
+                            }
                             options={f.options}
                         />
                     ))}
@@ -57,3 +75,5 @@ export function ToolbarForCampaign({ table }) {
         </div>
     );
 }
+
+export default ToolbarForVisit;

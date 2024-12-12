@@ -25,6 +25,7 @@ import Breadcrumb from '@/pages/admin/Breadcrumb';
 import { useGetContractsByStatusQuery, useGetAllContractsQuery } from '@/redux/contract/contractApi';
 import { contractStatus, contractType } from '@/config/combobox';
 import { ToolbarForContract } from '@/components/datatable/ToolbarForContract';
+import { vietnameseFilter } from '@/lib/utils';
 
 export function ContractManagement() {
     const navigate = useNavigate();
@@ -50,6 +51,9 @@ export function ContractManagement() {
     const columns = [
         {
             accessorKey: 'contractType',
+            filterFn: (row, id, filterValue) => {
+                return filterValue.includes(row.getValue(id).toString())
+            },
             header: ({ column }) => <DataTableColumnHeader column={column} title="Loại hợp đồng" />,
             cell: ({ row }) => {
                 const type = contractType.find(t => t.value === row.getValue('contractType'));
@@ -60,6 +64,7 @@ export function ContractManagement() {
             accessorKey: 'partyBName',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Bên B" />,
             cell: ({ row }) => <div>{row.getValue('partyBName')}</div>,
+            filterFn: vietnameseFilter
         },
         {
             accessorKey: 'startDate',
@@ -83,6 +88,9 @@ export function ContractManagement() {
         },
         {
             accessorKey: 'status',
+            filterFn: (row, id, filterValue) => {
+                return filterValue.includes(row.getValue(id).toString())
+            },
             header: ({ column }) => <DataTableColumnHeader column={column} title="Trạng thái" />,
             cell: ({ row }) => {
                 const status = contractStatus.find(s => s.value === row.getValue('status'));

@@ -8,15 +8,14 @@ import { visitRegistrationStatus } from '@/config/combobox';
 
 export function ToolbarForParticipantsList({ table }) {
     const isFiltered = table.getState().columnFilters.length > 0;
-
     const filters = [
         {
-            name: 'Trạng thái',
+            name: 'status',
             options: visitRegistrationStatus.map(status => ({
                 value: status.value.toString(),
-                label: status.label
-            }))
-        }
+                label: status.label,
+            })),
+        },
     ];
 
     return (
@@ -37,7 +36,7 @@ export function ToolbarForParticipantsList({ table }) {
                         <DataTableFacetedFilter
                             key={i}
                             column={table.getColumn(f.name)}
-                            title={f.name}
+                            title="Trạng thái"
                             options={f.options}
                         />
                     ))}
@@ -48,7 +47,7 @@ export function ToolbarForParticipantsList({ table }) {
                             onClick={() => table.resetColumnFilters()}
                             className="h-8 px-2 lg:px-3 hidden lg:flex"
                         >
-                            Đặt lại
+                            Đặt lại
                             <Cross2Icon className="ml-2 h-4 w-4" />
                         </Button>
                     )}

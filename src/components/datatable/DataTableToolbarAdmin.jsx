@@ -7,7 +7,6 @@ import { DataTableFacetedFilter } from '@/components/datatable/DataTableFacetedF
 
 export function DataTableToolbarAdmin({
     table,
-    type,
     userFilters = [
         {
             name: 'role',
@@ -29,18 +28,16 @@ export function DataTableToolbarAdmin({
 }) {
     const isFiltered = table.getState().columnFilters.length > 0;
 
-    const filters = type === 'Fundraising' ? fundraisingFilters : userFilters;
+    const filters = userFilters;
 
     return (
         <div className="flex items-center justify-between w-full">
             <div className="flex flex-1 flex-col sm:flex-row gap-y-4 items-center space-x-2 w-full">
                 <Input
-                    placeholder={type === 'Fundraising' ? 'Tìm kiếm...' : 'Tìm kiếm tên...'}
-                    value={table.getColumn(type === 'Fundraising' ? 'name' : 'fullname')?.getFilterValue() ?? ''}
+                    placeholder="Tìm kiếm tên..."
+                    value={table.getColumn('fullname')?.getFilterValue() ?? ''}
                     onChange={(event) =>
-                        table
-                            .getColumn(type === 'Fundraising' ? 'name' : 'fullname')
-                            ?.setFilterValue(event.target.value)
+                        table.getColumn('fullname')?.setFilterValue(event.target.value)
                     }
                     className="max-w-sm"
                     endIcon={<SearchIcon />}
