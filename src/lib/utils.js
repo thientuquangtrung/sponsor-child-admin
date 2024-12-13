@@ -2,6 +2,7 @@ import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+import html2canvasPro from 'html2canvas-pro';
 
 export function cn(...inputs) {
     return twMerge(clsx(inputs));
@@ -74,7 +75,54 @@ export const formatCurrency = (amount) => {
     }).format(amount);
 };
 
+/**
+ * Generates a PDF from an HTML element using html2canvas-pro
+ * @param {HTMLElement} element - The HTML element to convert to PDF
+ * @param {Object} [options={}] - Optional configuration for html2canvas-pro
+ * @returns {Promise<jsPDF>} A promise that resolves with the generated PDF document
+ */
+export const generatePDF2 = async (element, options = {}) => {
+    const defaultOptions = {
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        scrollY: -window.scrollY,
+    };
 
+    const mergedOptions = { ...defaultOptions, ...options };
+
+    try {
+        const canvas = await html2canvasPro(element, mergedOptions);
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4',
+            compress: true,
+        });
+
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        let heightLeft = pdfHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+        heightLeft -= pdf.internal.pageSize.getHeight();
+
+        while (heightLeft >= 0) {
+            position = heightLeft - pdfHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+            heightLeft -= pdf.internal.pageSize.getHeight();
+        }
+
+        return pdf;
+    } catch (error) {
+        console.error('Error generating PDF:', error);
+        throw error;
+    }
+};
 /**
  * Generates a PDF from an HTML element
  * @param {HTMLElement} element - The HTML element to convert to PDF

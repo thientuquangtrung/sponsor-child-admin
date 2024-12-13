@@ -20,7 +20,7 @@ import { useGetCampaignByIdQuery } from '@/redux/campaign/campaignApi';
 import ContractCampaignContent from '@/pages/admin/center/ContractCampaignContent';
 import ContractGuaranteeContent from '@/pages/admin/center/ContractGuaranteeContent';
 import { UPLOAD_FOLDER, UPLOAD_NAME, uploadFile } from '@/lib/cloudinary';
-import { generatePDF } from '@/lib/utils';
+import { generatePDF2 } from '@/lib/utils';
 
 const ContractSign = ({ contractID }) => {
     const { user } = useSelector((state) => state.auth);
@@ -72,7 +72,7 @@ const ContractSign = ({ contractID }) => {
                     let pdfUrl = contractDetails.softContractUrl;
 
                     if (status === 6) {
-                        const pdf = await generatePDF(contractRef.current);
+                        const pdf = await generatePDF2(contractRef.current);
                         const pdfBlob = pdf.output('blob');
                         const pdfData = await uploadFile({
                             file: pdfBlob,
