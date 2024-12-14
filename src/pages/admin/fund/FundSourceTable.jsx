@@ -140,74 +140,62 @@ const ActionMenu = ({ row }) => {
 };
 
 const Toolbar = ({ table, onFilterChange }) => {
-    const isFiltered = table.getState().columnFilters.length > 0;
     const [selectedDate, setSelectedDate] = React.useState(null);
     const [formattedAmount, setFormattedAmount] = React.useState('');
     const [searchTerm, setSearchTerm] = React.useState('');
-    const debouncedSearchTerm = useDebounce(searchTerm, 3000);
+    const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-    const unformatNumber = (value) => {
-        if (!value) return '';
-        return value.replace(/,/g, '');
-    };
+    const isFiltered = selectedDate || formattedAmount || searchTerm ||
+        table.getColumn('fundSourceType')?.getFilterValue() !== undefined;
+
     React.useEffect(() => {
-        if (debouncedSearchTerm !== undefined) {
-            table.getColumn('description')?.setFilterValue(debouncedSearchTerm);
-            onFilterChange({
-                ...table.getState().columnFilters.reduce((acc, filter) => ({
-                    ...acc,
-                    [filter.id]: filter.value,
-                }), {}),
-                description: debouncedSearchTerm || undefined
-            });
-        }
-    }, [debouncedSearchTerm]);
+        const filters = {};
 
-    const handleAmountChange = React.useCallback((e) => {
+        if (debouncedSearchTerm) {
+            filters.description = debouncedSearchTerm;
+        }
+
+        if (selectedDate) {
+            filters.dateAdded = format(selectedDate, 'yyyy-MM-dd');
+        }
+
+        if (formattedAmount) {
+            filters.amountAdded = parseInt(formattedAmount.replace(/,/g, ''), 10);
+        }
+
+        const sourceType = table.getColumn('fundSourceType')?.getFilterValue();
+        if (sourceType !== undefined) {
+            filters.fundSourceType = sourceType;
+        }
+
+        onFilterChange(filters);
+    }, [debouncedSearchTerm, selectedDate, formattedAmount, onFilterChange, table]);
+
+    const unformatNumber = (value) => value.replace(/,/g, '');
+
+    const handleAmountChange = (e) => {
         const value = unformatNumber(e.target.value);
         if (value === '' || /^\d+$/.test(value)) {
             setFormattedAmount(formatNumber(value));
-            const numericValue = value ? parseInt(value, 10) : undefined;
-            table.getColumn('amountAdded')?.setFilterValue(numericValue);
-            onFilterChange({
-                amountAdded: numericValue
-            });
         }
-    }, [table, onFilterChange]);
+    };
 
     const handleDateChange = (value) => {
         setSelectedDate(value);
-        if (value) {
-            const localDate = new Date(value.getFullYear(), value.getMonth(), value.getDate());
-            const formattedDate = format(localDate, 'yyyy-MM-dd');
-            table.getColumn('dateAdded')?.setFilterValue(formattedDate);
-            onFilterChange({
-                dateAdded: formattedDate
-            });
-        } else {
-            table.getColumn('dateAdded')?.setFilterValue(undefined);
-            onFilterChange({
-                dateAdded: undefined
-            });
-        }
     };
+
     const handleSourceTypeChange = (value) => {
         if (value === "all") {
             table.getColumn('fundSourceType')?.setFilterValue(undefined);
-            onFilterChange({
-                fundSourceType: undefined
-            });
-            return;
+        } else {
+            const numericValue = parseInt(value, 10);
+            table.getColumn('fundSourceType')?.setFilterValue(numericValue);
         }
-
-        const numericValue = parseInt(value, 10);
-        table.getColumn('fundSourceType')?.setFilterValue(numericValue);
-        onFilterChange({
-            fundSourceType: numericValue
-        });
     };
+
     const handleResetFilters = () => {
         setSelectedDate(null);
+        setSearchTerm('');
         setFormattedAmount('');
         table.resetColumnFilters();
         onFilterChange({});
@@ -268,30 +256,52 @@ const Toolbar = ({ table, onFilterChange }) => {
 
 const FundSourceTable = ({ data, onFilterChange }) => {
     const [sorting, setSorting] = React.useState([{ id: 'dateAdded', desc: true }]);
-
-    const [columnFilters, setColumnFilters] = React.useState([]);
-    const [columnVisibility, setColumnVisibility] = React.useState({});
     const [rowSelection, setRowSelection] = React.useState({});
-
+    const [filteredData, setFilteredData] = React.useState(data);
     const table = useReactTable({
-        data: data || [],
+        data: filteredData || [],
         columns,
         onSortingChange: setSorting,
-        onColumnFiltersChange: setColumnFilters,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        onColumnVisibilityChange: setColumnVisibility,
         onRowSelectionChange: setRowSelection,
         state: {
             sorting,
-            columnFilters,
-            columnVisibility,
             rowSelection,
         },
     });
 
+    React.useEffect(() => {
+        let result = [...data];
+        const currentFilters = table.getState().columnFilters;
+
+        currentFilters.forEach(filter => {
+            if (filter.id === 'description') {
+                result = result.filter(row =>
+                    row.description.toLowerCase().includes(filter.value.toLowerCase())
+                );
+            }
+            if (filter.id === 'dateAdded') {
+                result = result.filter(row =>
+                    row.dateAdded.startsWith(filter.value)
+                );
+            }
+            if (filter.id === 'amountAdded') {
+                result = result.filter(row =>
+                    row.amountAdded === filter.value
+                );
+            }
+            if (filter.id === 'fundSourceType') {
+                result = result.filter(row =>
+                    row.fundSourceType === filter.value
+                );
+            }
+        });
+
+        setFilteredData(result);
+    }, [data, table?.getState().columnFilters]);
 
     return (
         <div className="space-y-4">
