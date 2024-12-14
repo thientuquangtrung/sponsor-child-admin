@@ -340,7 +340,7 @@ export default function DisbursementRequestDetail() {
                                                         {disbursementRequest?.disbursementStage?.presentRaisedAmount?.toLocaleString('vi-VN')} ₫
                                                     </span>
                                                 </div>
-                                                <span className="text-teal-600 font-semibold text-xl absolute right-28 top-2 py-1">-</span>
+                                                {/* <span className="text-teal-600 font-semibold text-xl absolute right-28 top-2 py-1">-</span> */}
                                                 <div className="flex items-center justify-between w-full py-3">
                                                     <p className="text-gray-700 font-medium">Tổng ST đã giải ngân đợt trước:</p>
                                                     <div className="flex flex-col items-end">
@@ -349,15 +349,22 @@ export default function DisbursementRequestDetail() {
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <div className="flex justify-end -mt-2 mb-2">
-                                                    <div className="border-t border-gray-500 w-1/4"></div>
-                                                </div>
                                                 <div className="flex items-center justify-between w-full">
+                                                    <p className="text-blue-500 font-medium">ST giải ngân mong đợi đợt này:</p>
+                                                    <span className="text-blue-500 font-semibold">
+                                                        {disbursementRequest?.disbursementStage?.expectedDisbursementAmount?.toLocaleString('vi-VN')} ₫
+                                                    </span>
+                                                </div>
+
+                                                {/* <div className="flex justify-end -mt-2 mb-2">
+                                                    <div className="border-t border-gray-500 w-1/4"></div>
+                                                </div> */}
+                                                {/* <div className="flex items-center justify-between w-full">
                                                     <p className="text-gray-700 font-medium">ST còn lại của chiến dịch:</p>
                                                     <span className="text-teal-600 font-semibold">
                                                         {disbursementRequest?.disbursementStage?.remainingAmount?.toLocaleString('vi-VN')} ₫
                                                     </span>
-                                                </div>
+                                                </div> */}
                                             </div>
 
                                         </div>
@@ -371,12 +378,21 @@ export default function DisbursementRequestDetail() {
                                             </span>
                                         </div>
                                     )}
-                                    <div className="flex items-center justify-between w-full">
-                                        <p className="text-orange-700 font-medium">ST thực tế có thể giải ngân:</p>
-                                        <span className="text-orange-600 font-semibold">
-                                            {disbursementRequest?.disbursementStage?.actualDisbursementAmount?.toLocaleString('vi-VN')} ₫
-                                        </span>
-                                    </div>
+                                    {(disbursementRequest.requestStatus === 4 || disbursementRequest.requestStatus === 5) ? (
+                                        <div className="flex items-center justify-between w-full">
+                                            <p className="text-orange-700 font-medium">ST thực tế đã giải ngân đợt này:</p>
+                                            <span className="text-orange-600 font-semibold">
+                                                {disbursementRequest?.disbursementStage?.actualDisbursementAmount?.toLocaleString('vi-VN')} ₫
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center justify-between w-full">
+                                            <p className="text-orange-700 font-medium">ST thực tế có thể giải ngân:</p>
+                                            <span className="text-orange-600 font-semibold">
+                                                {disbursementRequest?.disbursementStage?.actualDisbursementAmount?.toLocaleString('vi-VN')} ₫
+                                            </span>
+                                        </div>
+                                    )}
                                     {/* <div className="flex gap-4 items-center">
                                         <div className="flex items-center  w-1/2">
                                             <p className="text-blue-700 font-medium">ST Nhà Bảo Lãnh yêu cầu giải ngân:</p>

@@ -19,11 +19,9 @@ import { Input } from '@/components/ui/input';
 import { Eye, MoreHorizontal, Search } from 'lucide-react';
 import { DataTableViewOptions } from '@/components/datatable/DataTableViewOptions';
 import { DatePicker } from '@/components/ui/date-picker';
-import { format, parseISO } from 'date-fns';
-import { vi } from 'date-fns/locale';
+import { format } from 'date-fns';
 import { formatNumber } from '@/lib/utils';
 import useDebounce from '@/hooks/useDebounce';
-
 const columns = [
     {
         id: 'select',
@@ -52,7 +50,7 @@ const columns = [
     },
     {
         accessorKey: 'visitTitle',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Tên chuyến thăm" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Tên chuyến thăm" />,
         cell: ({ row }) => <div className="font-medium max-w-[400px] truncate">{row.getValue('visitTitle')}</div>,
     },
     {
@@ -62,7 +60,7 @@ const columns = [
     },
     {
         accessorKey: 'commonFundTotal',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="ST Quỹ chung" className="justify-end" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} title="ST Quỹ chung" className="justify-end" />,
         cell: ({ row }) => <div className="text-right font-medium">{row.getValue('commonFundTotal').toLocaleString('vi-VN')} ₫</div>,
     },
     {
@@ -91,7 +89,6 @@ const columns = [
 
 const ActionMenu = ({ row }) => {
     const navigate = useNavigate();
-
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -110,73 +107,49 @@ const ActionMenu = ({ row }) => {
         </DropdownMenu>
     );
 };
-
 const Toolbar = ({ table, onFilterChange }) => {
-    const isFiltered = table.getState().columnFilters.length > 0;
     const [selectedDate, setSelectedDate] = React.useState(null);
     const [formattedAmount, setFormattedAmount] = React.useState('');
     const [purposeSearch, setPurposeSearch] = React.useState('');
-
-    const debouncedPurposeSearch = useDebounce(purposeSearch, 1000);
-
+    const isFiltered = selectedDate || formattedAmount || purposeSearch;
+    const debouncedPurposeSearch = useDebounce(purposeSearch, 500);
     React.useEffect(() => {
-        handlePurposeChange(debouncedPurposeSearch);
-    }, [debouncedPurposeSearch]);
+        const filters = {};
+
+        if (debouncedPurposeSearch) {
+            filters.purpose = debouncedPurposeSearch;
+        }
+
+        if (selectedDate) {
+            filters.dateUsed = format(selectedDate, 'yyyy-MM-dd');
+        }
+
+        if (formattedAmount) {
+            filters.amountUsed = parseInt(formattedAmount.replace(/,/g, ''), 10);
+        }
+
+        onFilterChange(filters);
+    }, [debouncedPurposeSearch, selectedDate, formattedAmount, onFilterChange]);
 
     const handlePurposeInputChange = (e) => {
         setPurposeSearch(e.target.value);
     };
-
-    const handlePurposeChange = React.useCallback((value) => {
-        onFilterChange({
-            ...table.getState().columnFilters.reduce((acc, filter) => {
-                if (filter.id !== 'purpose') {
-                    acc[filter.id] = filter.value;
-                }
-                return acc;
-            }, {}),
-            purpose: value || undefined
-        });
-    }, [onFilterChange]);
-
     const unformatNumber = (value) => value.replace(/,/g, '');
-
-    const handleAmountChange = React.useCallback((e) => {
+    const handleAmountChange = (e) => {
         const value = unformatNumber(e.target.value);
         if (value === '' || /^\d+$/.test(value)) {
             setFormattedAmount(formatNumber(value));
-            const numericValue = value ? parseInt(value, 10) : undefined;
-            onFilterChange({
-                ...table.getState().columnFilters.reduce((acc, filter) => {
-                    if (filter.id !== 'amountUsed') {
-                        acc[filter.id] = filter.value;
-                    }
-                    return acc;
-                }, {}),
-                amountUsed: numericValue
-            });
         }
-    }, [onFilterChange]);
-
+    };
     const handleDateChange = (value) => {
         setSelectedDate(value);
-        const formattedDate = value ? format(value, 'yyyy-MM-dd') : undefined;
-        onFilterChange({
-            ...table.getState().columnFilters.reduce((acc, filter) => {
-                if (filter.id !== 'dateUsed') {
-                    acc[filter.id] = filter.value;
-                }
-                return acc;
-            }, {}),
-            dateUsed: formattedDate
-        });
     };
-
     const handleResetFilters = () => {
         setSelectedDate(null);
         setPurposeSearch('');
         setFormattedAmount('');
         onFilterChange({});
+        table.resetColumnFilters();
     };
 
     return (
@@ -218,23 +191,46 @@ const Toolbar = ({ table, onFilterChange }) => {
 
 const FundUsageTable = ({ data, onFilterChange }) => {
     const [sorting, setSorting] = React.useState([{ id: 'dateUsed', desc: true }]);
-    const [columnFilters, setColumnFilters] = React.useState([]);
-
+    const [rowSelection, setRowSelection] = React.useState({});
+    const [filteredData, setFilteredData] = React.useState(data);
     const table = useReactTable({
-        data: data || [],
+        data: filteredData || [],
         columns,
         onSortingChange: setSorting,
-        onColumnFiltersChange: setColumnFilters,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
+        onRowSelectionChange: setRowSelection,
         state: {
             sorting,
-            columnFilters,
+            rowSelection,
         },
     });
+    React.useEffect(() => {
+        let result = [...data];
+        const currentFilters = table.getState().columnFilters;
 
+        currentFilters.forEach(filter => {
+            if (filter.id === 'purpose') {
+                result = result.filter(row =>
+                    row.purpose.toLowerCase().includes(filter.value.toLowerCase())
+                );
+            }
+            if (filter.id === 'dateUsed') {
+                result = result.filter(row =>
+                    row.dateUsed.startsWith(filter.value)
+                );
+            }
+            if (filter.id === 'amountUsed') {
+                result = result.filter(row =>
+                    row.amountUsed === filter.value
+                );
+            }
+        });
+
+        setFilteredData(result);
+    }, [data, table?.getState().columnFilters]);
     return (
         <div className="space-y-4">
             <Toolbar table={table} onFilterChange={onFilterChange} />
@@ -244,7 +240,7 @@ const FundUsageTable = ({ data, onFilterChange }) => {
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id} className="bg-slate-50 hover:bg-slate-50">
                                 {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id} className="h-10  text-slate-600">
+                                    <TableHead key={header.id} className="h-10 text-slate-600">
                                         {header.isPlaceholder
                                             ? null
                                             : flexRender(header.column.columnDef.header, header.getContext())}
@@ -262,7 +258,7 @@ const FundUsageTable = ({ data, onFilterChange }) => {
                                     className="hover:bg-slate-50"
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} >
+                                        <TableCell key={cell.id}>
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
