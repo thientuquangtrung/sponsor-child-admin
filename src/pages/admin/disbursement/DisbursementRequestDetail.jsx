@@ -36,7 +36,12 @@ export default function DisbursementRequestDetail() {
     const [isEditRequestDialogOpen, setIsEditRequestDialogOpen] = useState(false);
     const [isCommonFundDialogOpen, setIsCommonFundDialogOpen] = useState(false);
     const [isReasonEmpty, setIsReasonEmpty] = useState(false);
-    const { data: disbursementRequest, isLoading: isRequestLoading, error, refetch } = useGetDisbursementRequestByIdQuery(id);
+    const {
+        data: disbursementRequest,
+        isLoading: isRequestLoading,
+        error,
+        refetch,
+    } = useGetDisbursementRequestByIdQuery(id);
     const { data: commonFund, isLoading: isFundLoading } = useGetCommonFundsQuery();
     const [updateDisbursementRequest] = useUpdateDisbursementRequestMutation();
     const { user } = useSelector((state) => state.auth);
@@ -46,7 +51,9 @@ export default function DisbursementRequestDetail() {
     if (error) {
         return <div className="text-center py-4 text-red-500">Đã có lỗi khi tải dữ liệu</div>;
     }
-    const amountToDeduct = disbursementRequest?.disbursementStage?.expectedDisbursementAmount - disbursementRequest?.disbursementStage?.remainingAmount;
+    const amountToDeduct =
+        disbursementRequest?.disbursementStage?.expectedDisbursementAmount -
+        disbursementRequest?.disbursementStage?.remainingAmount;
     const handleAction = async (actionType, isCommonFundApproved = false) => {
         if (actionType === 'reject' || actionType === 'edit') {
             if (!reason.trim()) {
@@ -78,10 +85,15 @@ export default function DisbursementRequestDetail() {
                 body: {
                     requestStatus: requestStatus,
                     userID: user.userID,
-                    rejectionReason: actionType === 'approveWithCommonFund'
-                        ? `Giai đoạn giải ngân này đã được Quản trị viên trích thêm ${amountToDeduct.toLocaleString('vi-VN')} ₫ từ quỹ chung`
-                        : (actionType !== 'approve' ? reason : ''),
-                }
+                    rejectionReason:
+                        actionType === 'approveWithCommonFund'
+                            ? `Giai đoạn giải ngân này đã được Quản trị viên trích thêm ${amountToDeduct.toLocaleString(
+                                  'vi-VN',
+                              )} ₫ từ quỹ chung`
+                            : actionType !== 'approve'
+                            ? reason
+                            : '',
+                },
             };
 
             if (isCommonFundApproved) {
@@ -115,7 +127,7 @@ export default function DisbursementRequestDetail() {
         }
     };
     const getStatusLabel = (status, options) => {
-        const option = options.find(o => o.value === status);
+        const option = options.find((o) => o.value === status);
         return option ? option.label : 'Không xác định';
     };
 
@@ -123,38 +135,59 @@ export default function DisbursementRequestDetail() {
         switch (type) {
             case 'stage':
                 switch (status) {
-                    case 0: return 'text-yellow-600';
-                    case 1: return 'text-blue-600';
-                    case 2: return 'text-green-600';
-                    case 3: return 'text-red-600';
-                    case 4: return 'text-gray-600';
-                    case 5: return 'text-purple-600';
-                    default: return 'text-gray-600';
+                    case 0:
+                        return 'text-yellow-600';
+                    case 1:
+                        return 'text-blue-600';
+                    case 2:
+                        return 'text-green-600';
+                    case 3:
+                        return 'text-red-600';
+                    case 4:
+                        return 'text-gray-600';
+                    case 5:
+                        return 'text-purple-600';
+                    default:
+                        return 'text-gray-600';
                 }
             case 'request':
                 switch (status) {
-                    case 0: return 'text-yellow-600';
-                    case 1: return 'text-green-600';
-                    case 2: return 'text-red-600';
-                    case 3: return 'text-orange-600';
-                    case 4: return 'text-blue-600';
-                    case 5: return 'text-teal-600';
-                    default: return 'text-gray-600';
+                    case 0:
+                        return 'text-yellow-600';
+                    case 1:
+                        return 'text-green-600';
+                    case 2:
+                        return 'text-red-600';
+                    case 3:
+                        return 'text-orange-600';
+                    case 4:
+                        return 'text-blue-600';
+                    case 5:
+                        return 'text-teal-600';
+                    default:
+                        return 'text-gray-600';
                 }
             case 'activity':
                 switch (status) {
-                    case 0: return 'text-yellow-600';
-                    case 1: return 'text-blue-600';
-                    case 2: return 'text-green-600';
-                    case 3: return 'text-red-600';
-                    default: return 'text-gray-600';
+                    case 0:
+                        return 'text-yellow-600';
+                    case 1:
+                        return 'text-blue-600';
+                    case 2:
+                        return 'text-green-600';
+                    case 3:
+                        return 'text-red-600';
+                    default:
+                        return 'text-gray-600';
                 }
             default:
                 return 'text-gray-600';
         }
     };
     const commonFundAmount = commonFund?.totalAmount || 0;
-    const needsCommonFund = disbursementRequest?.disbursementStage?.expectedDisbursementAmount > disbursementRequest?.disbursementStage?.remainingAmount;
+    const needsCommonFund =
+        disbursementRequest?.disbursementStage?.expectedDisbursementAmount >
+        disbursementRequest?.disbursementStage?.remainingAmount;
     return (
         <div className="space-y-4">
             <div>
@@ -178,7 +211,9 @@ export default function DisbursementRequestDetail() {
                         .map((stage, index) => (
                             <div
                                 key={stage.stageID}
-                                className={`flex justify-between items-center w-full mb-8 ${index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'}`}
+                                className={`flex justify-between items-center w-full mb-8 ${
+                                    index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'
+                                }`}
                             >
                                 <div className="w-5/12">
                                     <div className="bg-white p-6 rounded shadow-lg">
@@ -194,7 +229,12 @@ export default function DisbursementRequestDetail() {
                                         </p>
                                         <p className="mt-2 text-black">
                                             Trạng thái:{' '}
-                                            <span className={`font-semibold ${getStatusColorClass(stage.status, 'stage')}`}>
+                                            <span
+                                                className={`font-semibold ${getStatusColorClass(
+                                                    stage.status,
+                                                    'stage',
+                                                )}`}
+                                            >
                                                 {getStatusLabel(stage.status, disbursementStageStatus)}
                                             </span>
                                         </p>
@@ -208,77 +248,112 @@ export default function DisbursementRequestDetail() {
                         ))}
                 </div>
             </div>
-            {disbursementRequest?.disbursementStage?.undisbursedStagesInfo && disbursementRequest?.disbursementStage?.undisbursedStagesInfo.length > 0 && (
-                <div className="space-y-4 flex flex-col border rounded-lg shadow-lg">
-                    <div className="flex space-x-2 justify-center items-center bg-gradient-to-r from-rose-100 to-gray-100 p-2 rounded-t-lg">
-                        <h4 className="text-xl font-semibold text-gray-700">Thông tin các đợt giải ngân</h4>
-                    </div>
-                    <div className="space-y-6 p-6 rounded-b-lg">
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full bg-white rounded-lg">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Đợt</th>
-                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">ST giải ngân dự kiến</th>
-                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Ngày dự kiến</th>
-                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">ST giải ngân thực tế</th>
-                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">ST chưa giải ngân</th>
-                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Trạng thái</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-200">
-                                    {[...disbursementRequest.disbursementStage.undisbursedStagesInfo]
-                                        .sort((a, b) => a.stageNumber - b.stageNumber)
-                                        .map((stage) => (
-                                            <tr key={stage.stageID} className="hover:bg-gray-50">
-                                                <td className="px-4 py-3">
-                                                    <div className="flex items-center">
-                                                        <Badge className="w-6 h-6 p-2 text-white bg-teal-500 rounded-full shadow-inner">
-                                                            {stage.stageNumber}
-                                                        </Badge>
-                                                    </div>
-                                                </td>
-                                                <td className="px-4 py-3 text-sm text-gray-700">
-                                                    {stage.disbursementAmount?.toLocaleString('vi-VN')} ₫
-                                                </td>
-                                                <td className="px-4 py-3 text-sm text-gray-700">
-                                                    <div className="flex items-center">
-                                                        <Calendar className="mr-2 h-4 w-4 text-teal-400" />
-                                                        {new Date(stage.scheduledDate).toLocaleDateString('vi-VN')}
-                                                    </div>
-                                                </td>
-                                                <td className="px-4 py-3 text-sm text-gray-700">
-                                                    {stage.actualDisbursementAmount
-                                                        ? `${stage.actualDisbursementAmount.toLocaleString('vi-VN')} ₫`
-                                                        : '0 ₫'}
-                                                </td>
+            {disbursementRequest?.disbursementStage?.undisbursedStagesInfo &&
+                disbursementRequest?.disbursementStage?.undisbursedStagesInfo.length > 0 && (
+                    <div className="space-y-4 flex flex-col border rounded-lg shadow-lg">
+                        <div className="flex space-x-2 justify-center items-center bg-gradient-to-r from-rose-100 to-gray-100 p-2 rounded-t-lg">
+                            <h4 className="text-xl font-semibold text-gray-700">Thông tin các đợt giải ngân</h4>
+                        </div>
+                        <div className="space-y-6 p-6 rounded-b-lg">
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full bg-white rounded-lg">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
+                                                Đợt
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
+                                                ST giải ngân dự kiến
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
+                                                Ngày giải ngân dự kiến
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
+                                                ST giải ngân thực tế
+                                            </th>
+                                            {/* <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
+                                                ST chưa giải ngân
+                                            </th> */}
+                                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
+                                                Ngày giải ngân thực tế
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
+                                                Trạng thái
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-200">
+                                        {[...disbursementRequest.disbursementStage.undisbursedStagesInfo]
+                                            .sort((a, b) => a.stageNumber - b.stageNumber)
+                                            .map((stage) => (
+                                                <tr key={stage.stageID} className="hover:bg-gray-50">
+                                                    <td className="px-4 py-3">
+                                                        <div className="flex items-center">
+                                                            <Badge className="w-6 h-6 p-2 text-white bg-teal-500 rounded-full shadow-inner">
+                                                                {stage.stageNumber}
+                                                            </Badge>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-700">
+                                                        {stage.disbursementAmount?.toLocaleString('vi-VN')} ₫
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-700">
+                                                        <div className="flex items-center">
+                                                            <Calendar className="mr-2 h-4 w-4 text-teal-400" />
+                                                            {new Date(stage.scheduledDate).toLocaleDateString('vi-VN')}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-700">
+                                                        {stage.actualDisbursementAmount
+                                                            ? `${stage.actualDisbursementAmount.toLocaleString(
+                                                                  'vi-VN',
+                                                              )} ₫`
+                                                            : '--'}
+                                                    </td>
 
-                                                <td className="px-4 py-3 text-sm font-medium text-teal-600">
-                                                    {stage.totalUndisbursedAmount?.toLocaleString('vi-VN')} ₫
-                                                </td>
+                                                    {/* <td className="px-4 py-3 text-sm font-medium text-teal-600">
+                                                        {stage.totalUndisbursedAmount?.toLocaleString('vi-VN')} ₫
+                                                    </td> */}
 
-                                                <td className="px-4 py-3">
-                                                    <span className={`text-sm font-medium ${getStatusColorClass(stage.status, 'stage')}`}>
-                                                        {getStatusLabel(stage.status, disbursementStageStatus)}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                </tbody>
-                            </table>
+                                                    <td className="px-4 py-3 text-sm text-gray-700">
+                                                        <div className="flex items-center">
+                                                            <Calendar className="mr-2 h-4 w-4 text-teal-400" />
+                                                            {stage.actualDisbursementDate
+                                                                ? new Date(
+                                                                      stage.actualDisbursementDate,
+                                                                  ).toLocaleDateString('vi-VN')
+                                                                : '--'}
+                                                        </div>
+                                                    </td>
+
+                                                    <td className="px-4 py-3">
+                                                        <span
+                                                            className={`text-sm font-medium ${getStatusColorClass(
+                                                                stage.status,
+                                                                'stage',
+                                                            )}`}
+                                                        >
+                                                            {getStatusLabel(stage.status, disbursementStageStatus)}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-
+                )}
 
             <div>
                 <div className="my-10 border rounded-lg shadow-sm bg-gray-50">
                     <h3 className="text-2xl text-center bg-gradient-to-l from-rose-200 to-teal-100 py-4 font-semibold text-gray-800 rounded-tl-lg rounded-tr-lg">
                         {disbursementRequest.isEarlyRequest
-                            ? `${getStatusLabel(disbursementRequest.requestStatus, disbursementRequestStatus)} (Giải ngân sớm)`
-                            : getStatusLabel(disbursementRequest.requestStatus, disbursementRequestStatus)
-                        }
+                            ? `${getStatusLabel(
+                                  disbursementRequest.requestStatus,
+                                  disbursementRequestStatus,
+                              )} (Giải ngân sớm)`
+                            : getStatusLabel(disbursementRequest.requestStatus, disbursementRequestStatus)}
                     </h3>
 
                     {disbursementRequest.isEarlyRequest && (
@@ -293,7 +368,9 @@ export default function DisbursementRequestDetail() {
                         <div className="col-span-5 space-y-4 p-4 rounded-lg shadow-sm">
                             <h4 className="text-2xl font-semibold text-gray-900 mb-4">
                                 Đợt {disbursementRequest.disbursementStage.stageNumber} - Ngày{' '}
-                                {new Date(disbursementRequest.disbursementStage.scheduledDate).toLocaleDateString('vi-VN')}
+                                {new Date(disbursementRequest.disbursementStage.scheduledDate).toLocaleDateString(
+                                    'vi-VN',
+                                )}
                             </h4>
                             <div className="space-y-4">
                                 <div className="flex flex-col gap-4">
@@ -301,7 +378,7 @@ export default function DisbursementRequestDetail() {
                                         <div className="flex items-center w-full">
                                             <p className="text-gray-700 font-medium">Ngày yêu cầu:</p>
                                         </div>
-                                        <p className="text-teal-500 font-medium">
+                                        <p className="text-teal-500 font-semibold">
                                             {new Date(disbursementRequest?.requestDate).toLocaleDateString('vi-VN')}
                                         </p>
                                     </div>
@@ -337,22 +414,35 @@ export default function DisbursementRequestDetail() {
                                                 <div className="flex items-center justify-between w-full">
                                                     <p className="text-gray-700 font-medium">ST đã gây quỹ:</p>
                                                     <span className="text-teal-600 font-semibold">
-                                                        {disbursementRequest?.disbursementStage?.presentRaisedAmount?.toLocaleString('vi-VN')} ₫
+                                                        {disbursementRequest?.disbursementStage?.presentRaisedAmount?.toLocaleString(
+                                                            'vi-VN',
+                                                        )}{' '}
+                                                        ₫
                                                     </span>
                                                 </div>
                                                 {/* <span className="text-teal-600 font-semibold text-xl absolute right-28 top-2 py-1">-</span> */}
                                                 <div className="flex items-center justify-between w-full py-3">
-                                                    <p className="text-gray-700 font-medium">Tổng ST đã giải ngân đợt trước:</p>
+                                                    <p className="text-gray-700 font-medium">
+                                                        Tổng ST đã giải ngân đợt trước:
+                                                    </p>
                                                     <div className="flex flex-col items-end">
                                                         <span className="text-teal-600 font-semibold">
-                                                            {disbursementRequest?.disbursementStage?.totalActualDisbursementAmount?.toLocaleString('vi-VN')} ₫
+                                                            {disbursementRequest?.disbursementStage?.totalActualDisbursementAmount?.toLocaleString(
+                                                                'vi-VN',
+                                                            )}{' '}
+                                                            ₫
                                                         </span>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center justify-between w-full">
-                                                    <p className="text-blue-500 font-medium">ST giải ngân mong đợi đợt này:</p>
+                                                    <p className="text-blue-500 font-medium">
+                                                        ST giải ngân mong đợi đợt này:
+                                                    </p>
                                                     <span className="text-blue-500 font-semibold">
-                                                        {disbursementRequest?.disbursementStage?.expectedDisbursementAmount?.toLocaleString('vi-VN')} ₫
+                                                        {disbursementRequest?.disbursementStage?.expectedDisbursementAmount?.toLocaleString(
+                                                            'vi-VN',
+                                                        )}{' '}
+                                                        ₫
                                                     </span>
                                                 </div>
 
@@ -366,30 +456,42 @@ export default function DisbursementRequestDetail() {
                                                     </span>
                                                 </div> */}
                                             </div>
-
                                         </div>
-
                                     </div>
                                     {disbursementRequest?.disbursementStage?.commonFundAmount && (
                                         <div className="flex items-center justify-between w-full">
-                                            <p className="text-teal-700 font-medium">ST được trích thêm từ quỹ chung:</p>
+                                            <p className="text-teal-700 font-medium">
+                                                ST được trích thêm từ quỹ chung:
+                                            </p>
                                             <span className="text-teal-600 font-semibold">
-                                                {disbursementRequest.disbursementStage.commonFundAmount.toLocaleString('vi-VN')} ₫
+                                                {disbursementRequest.disbursementStage.commonFundAmount.toLocaleString(
+                                                    'vi-VN',
+                                                )}{' '}
+                                                ₫
                                             </span>
                                         </div>
                                     )}
-                                    {(disbursementRequest.requestStatus === 4 || disbursementRequest.requestStatus === 5) ? (
+                                    {disbursementRequest.requestStatus === 4 ||
+                                    disbursementRequest.requestStatus === 5 ? (
                                         <div className="flex items-center justify-between w-full">
-                                            <p className="text-orange-700 font-medium">ST thực tế đã giải ngân đợt này:</p>
+                                            <p className="text-orange-700 font-medium">
+                                                ST thực tế đã giải ngân đợt này:
+                                            </p>
                                             <span className="text-orange-600 font-semibold">
-                                                {disbursementRequest?.disbursementStage?.actualDisbursementAmount?.toLocaleString('vi-VN')} ₫
+                                                {disbursementRequest?.disbursementStage?.actualDisbursementAmount?.toLocaleString(
+                                                    'vi-VN',
+                                                )}{' '}
+                                                ₫
                                             </span>
                                         </div>
                                     ) : (
                                         <div className="flex items-center justify-between w-full">
                                             <p className="text-orange-700 font-medium">ST thực tế có thể giải ngân:</p>
                                             <span className="text-orange-600 font-semibold">
-                                                {disbursementRequest?.disbursementStage?.actualDisbursementAmount?.toLocaleString('vi-VN')} ₫
+                                                {disbursementRequest?.disbursementStage?.actualDisbursementAmount?.toLocaleString(
+                                                    'vi-VN',
+                                                )}{' '}
+                                                ₫
                                             </span>
                                         </div>
                                     )}
@@ -401,12 +503,18 @@ export default function DisbursementRequestDetail() {
                                             {disbursementRequest?.offeredAmount?.toLocaleString('vi-VN')} ₫
                                         </span>
                                     </div> */}
-                                    <div className="flex gap-4 items-center">
-                                        <p className="text-gray-700 font-medium flex items-center w-1/2">
-                                            Trạng thái:
-                                        </p>
-                                        <p className={`w-1/2 font-medium ${getStatusColorClass(disbursementRequest.requestStatus, 'request')}`}>
-                                            {getStatusLabel(disbursementRequest.requestStatus, disbursementRequestStatus)}
+                                    <div className="flex gap-4 items-center justify-between w-full">
+                                        <p className="text-gray-700 font-medium flex items-center">Trạng thái:</p>
+                                        <p
+                                            className={`font-medium ${getStatusColorClass(
+                                                disbursementRequest.requestStatus,
+                                                'request',
+                                            )}`}
+                                        >
+                                            {getStatusLabel(
+                                                disbursementRequest.requestStatus,
+                                                disbursementRequestStatus,
+                                            )}
                                         </p>
                                         {needsCommonFund && disbursementRequest.requestStatus === 0 && (
                                             <div className="flex justify-end">
@@ -441,18 +549,29 @@ export default function DisbursementRequestDetail() {
                                         </div>
                                         <div className="flex items-center mb-2">
                                             <p className="text-gray-700 font-medium flex items-center w-1/2">
-                                                <CalendarDays className="mr-2 h-5 w-5 text-teal-500" /> Ngày hoạt động dự kiến:
+                                                <CalendarDays className="mr-2 h-5 w-5 text-teal-500" /> Ngày hoạt động
+                                                dự kiến:
                                             </p>
                                             <p className="text-teal-500 font-medium w-1/2">
-                                                {new Date(disbursementRequest.disbursementStage.stageActivity.activityDate).toLocaleDateString('vi-VN')}
+                                                {new Date(
+                                                    disbursementRequest.disbursementStage.stageActivity.activityDate,
+                                                ).toLocaleDateString('vi-VN')}
                                             </p>
                                         </div>
                                         <div className="flex items-center font-medium">
                                             <p className="text-gray-700 flex items-center w-1/2">
                                                 <PieChart className="mr-2 h-5 w-5 text-teal-500" /> Trạng thái:
                                             </p>
-                                            <p className={`w-1/2 ${getStatusColorClass(disbursementRequest.disbursementStage.stageActivity.status, 'activity')}`}>
-                                                {getStatusLabel(disbursementRequest.disbursementStage.stageActivity.status, activityStatus)}
+                                            <p
+                                                className={`w-1/2 ${getStatusColorClass(
+                                                    disbursementRequest.disbursementStage.stageActivity.status,
+                                                    'activity',
+                                                )}`}
+                                            >
+                                                {getStatusLabel(
+                                                    disbursementRequest.disbursementStage.stageActivity.status,
+                                                    activityStatus,
+                                                )}
                                             </p>
                                         </div>
                                     </div>
@@ -486,20 +605,18 @@ export default function DisbursementRequestDetail() {
                                             <Landmark className="mr-2 h-5 w-5 text-teal-500" />
                                             Ngân hàng:
                                         </p>
-                                        <p className="text-teal-500 font-medium w-1/2">{disbursementRequest.bankName}</p>
+                                        <p className="text-teal-500 font-medium w-1/2">
+                                            {disbursementRequest.bankName}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                {
-                    disbursementRequest && (
-                        <DisbursementReport
-                            disbursementReports={disbursementRequest.disbursementReports}
-                        />
-                    )
-                }
+                {disbursementRequest && (
+                    <DisbursementReport disbursementReports={disbursementRequest.disbursementReports} />
+                )}
                 <div>
                     {disbursementRequest.requestStatus === 1 ? (
                         disbursementRequest.disbursementStage.transferReceiptUrl ? (
@@ -521,25 +638,27 @@ export default function DisbursementRequestDetail() {
                                         </p>
                                     </div>
 
-                                    <div className='text-md'>
+                                    <div className="text-md">
                                         Xem minh chứng giải ngân
                                         <a
                                             href={disbursementRequest.disbursementStage.transferReceiptUrl}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="text-blue-500 underline ml-2"
-                                        >tại đây</a>
+                                        >
+                                            tại đây
+                                        </a>
                                     </div>
                                 </div>
                             </div>
                         ) : (
-                            <DisbursementApproval
-                                disbursementRequest={disbursementRequest}
-                                parentRefetch={refetch} />
+                            <DisbursementApproval disbursementRequest={disbursementRequest} parentRefetch={refetch} />
                         )
                     ) : disbursementRequest.requestStatus === 2 ? (
-                        <div className="text-red-500 font-semibold">Yêu cầu giải ngân đã bị từ chối!</div>
-                    ) : disbursementRequest.requestStatus !== 3 && disbursementRequest.requestStatus !== 4 && disbursementRequest.requestStatus !== 5 ? (
+                        <div className="text-red-500 font-semibold mt-4 text-end">Yêu cầu giải ngân đã bị từ chối!</div>
+                    ) : disbursementRequest.requestStatus !== 3 &&
+                      disbursementRequest.requestStatus !== 4 &&
+                      disbursementRequest.requestStatus !== 5 ? (
                         <div className="flex space-x-4 justify-end pt-5">
                             <Button
                                 variant="success"
@@ -564,9 +683,8 @@ export default function DisbursementRequestDetail() {
                             </Button>
                         </div>
                     ) : null}
-
                 </div>
-            </div >
+            </div>
             <Dialog open={isCommonFundDialogOpen} onOpenChange={setIsCommonFundDialogOpen}>
                 <DialogContent className="sm:max-w-[600px] p-6">
                     <DialogHeader className="mb-4">
@@ -589,7 +707,10 @@ export default function DisbursementRequestDetail() {
                             <div className="flex justify-between items-center">
                                 <span className="text-gray-600">Số tiền giải ngân mong đợi:</span>
                                 <span className="font-semibold text-rose-600 text-lg">
-                                    {disbursementRequest?.disbursementStage?.expectedDisbursementAmount?.toLocaleString('vi-VN')} ₫
+                                    {disbursementRequest?.disbursementStage?.expectedDisbursementAmount?.toLocaleString(
+                                        'vi-VN',
+                                    )}{' '}
+                                    ₫
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
@@ -602,7 +723,11 @@ export default function DisbursementRequestDetail() {
                         <p className="text-gray-700 text-base">
                             Bạn có muốn trích thêm{' '}
                             <span className="font-semibold text-indigo-600">
-                                {(disbursementRequest?.disbursementStage?.expectedDisbursementAmount - disbursementRequest?.disbursementStage?.remainingAmount).toLocaleString('vi-VN')} ₫
+                                {(
+                                    disbursementRequest?.disbursementStage?.expectedDisbursementAmount -
+                                    disbursementRequest?.disbursementStage?.remainingAmount
+                                ).toLocaleString('vi-VN')}{' '}
+                                ₫
                             </span>{' '}
                             từ quỹ chung để giải ngân cho chiến dịch này không?
                         </p>
@@ -646,9 +771,7 @@ export default function DisbursementRequestDetail() {
                             className="w-full p-2 border rounded"
                             placeholder="Nhập lý do từ chối..."
                         />
-                        {isReasonEmpty && (
-                            <div className="text-red-500 mt-2">Vui lòng nhập lý do từ chối.</div>
-                        )}
+                        {isReasonEmpty && <div className="text-red-500 mt-2">Vui lòng nhập lý do từ chối.</div>}
                     </div>
                     <DialogFooter>
                         <Button
@@ -757,6 +880,6 @@ export default function DisbursementRequestDetail() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </div >
+        </div>
     );
 }
