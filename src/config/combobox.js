@@ -207,6 +207,7 @@ export const fundSourceType = [
     { label: 'Cá nhân', value: 0 },
     { label: 'Chiến dịch', value: 1 },
     { label: 'Sự kiện', value: 2 },
+    { label: 'Quà tặng', value: 3 },
 ];
 
 export const configCategory = [
