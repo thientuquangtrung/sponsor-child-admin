@@ -25,12 +25,12 @@ const getAddCampaignSchema = () => {
         targetAmount: z.string()
             .refine((val) => {
                 const numericValue = parseFloat(val.replace(/,/g, ''));
-                return !isNaN(numericValue) && numericValue >= 10000000;
-            }, { message: "Số tiền mục tiêu tối thiểu là 10,000,000đ" })
+                return !isNaN(numericValue) && numericValue >= adminConfig.Campaign_MinimumTargetAmount;
+            }, { message: `Số tiền mục tiêu tối thiểu là ${adminConfig.Campaign_MinimumTargetAmount}đ` })
             .refine((val) => {
                 const numericValue = parseFloat(val.replace(/,/g, ''));
-                return !isNaN(numericValue) && numericValue <= 50000000000;
-            }, { message: "Số tiền mục tiêu tối đa là 50,000,000,000đ" }),
+                return !isNaN(numericValue) && numericValue <= adminConfig.Campaign_MaximumTarget;
+            }, { message: `Số tiền mục tiêu tối đa là ${adminConfig.Campaign_MinimumTargetAmount}đ` }),
         startDate: z.date({
             required_error: "Vui lòng chọn ngày bắt đầu",
         }),
