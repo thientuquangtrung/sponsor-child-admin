@@ -29,8 +29,8 @@ const getAddCampaignSchema = () => {
             }, { message: `Số tiền mục tiêu tối thiểu là ${adminConfig.Campaign_MinimumTargetAmount}đ` })
             .refine((val) => {
                 const numericValue = parseFloat(val.replace(/,/g, ''));
-                return !isNaN(numericValue) && numericValue <= adminConfig.Campaign_MaximumTarget;
-            }, { message: `Số tiền mục tiêu tối đa là ${adminConfig.Campaign_MinimumTargetAmount}đ` }),
+                return !isNaN(numericValue) && numericValue <= adminConfig.Campaign_MaximumTargetAmount;
+            }, { message: `Số tiền mục tiêu tối đa là ${adminConfig.Campaign_MaximumTargetAmount}đ` }),
         startDate: z.date({
             required_error: "Vui lòng chọn ngày bắt đầu",
         }),
