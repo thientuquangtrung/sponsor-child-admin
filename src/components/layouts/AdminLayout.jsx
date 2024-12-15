@@ -3,10 +3,30 @@ import { Navigate, Outlet } from 'react-router-dom';
 import SidebarAdmin from '@/components/navigation/SidebarAdmin';
 import HeaderSidebar from '@/components/navigation/HeaderSidebar';
 import { useSelector } from 'react-redux';
+import { useGetAdminConfigQuery } from '@/redux/adminConfig/adminConfigApi';
+import FETCH_ADMIN_CONFIGS from '@/config/adminConfig';
 
 export function AdminLayout() {
     const { user } = useSelector((state) => state.auth);
-
+    const { data } = useGetAdminConfigQuery();
+    if (data && data.length > 0) {
+        const adminConfigs = data.reduce((acc, val) => {
+            return {
+                ...acc,
+                [val.configKey]: +val.configValue
+            }
+        }, {})
+        localStorage.setItem("adminConfigs", JSON.stringify(adminConfigs));
+    }
+    else {
+        const adminConfigs = FETCH_ADMIN_CONFIGS.reduce((acc, val) => {
+            return {
+                ...acc,
+                [val.configKey]: +val.configValue
+            }
+        }, {})
+        localStorage.setItem("adminConfigs", JSON.stringify(adminConfigs));
+    }
     const allowedRoles = ['admin', 'childmanager'];
     if (!allowedRoles.includes(user?.role.toLowerCase())) {
         return <Navigate to="/auth/login" />;
