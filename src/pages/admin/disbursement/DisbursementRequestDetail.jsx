@@ -308,7 +308,7 @@ export default function DisbursementRequestDetail() {
                                                             ? `${stage.actualDisbursementAmount.toLocaleString(
                                                                   'vi-VN',
                                                               )} ₫`
-                                                            : '0 ₫'}
+                                                            : '--'}
                                                     </td>
 
                                                     {/* <td className="px-4 py-3 text-sm font-medium text-teal-600">
@@ -318,9 +318,11 @@ export default function DisbursementRequestDetail() {
                                                     <td className="px-4 py-3 text-sm text-gray-700">
                                                         <div className="flex items-center">
                                                             <Calendar className="mr-2 h-4 w-4 text-teal-400" />
-                                                            {new Date(stage.actualDisbursementDate).toLocaleDateString(
-                                                                'vi-VN',
-                                                            )}
+                                                            {stage.actualDisbursementDate
+                                                                ? new Date(
+                                                                      stage.actualDisbursementDate,
+                                                                  ).toLocaleDateString('vi-VN')
+                                                                : '--'}
                                                         </div>
                                                     </td>
 
