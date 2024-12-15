@@ -5,30 +5,26 @@ import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useCreateCampaignMutation } from '@/redux/campaign/campaignApi';
 import useLocationVN from '@/hooks/useLocationVN';
-
-import addCampaignSchema from '@/components/schema/addCampaignSchema';
 import { formatNumber } from '@/lib/utils';
 import ChildInfo from '@/pages/children-manager/campaign/ChildInfo';
 import CampaignDetailInfo from '@/pages/children-manager/campaign/CampaignDetailInfo';
 import DisbursementInfo from '@/pages/children-manager/campaign/DisbursementInfo';
 import { UPLOAD_FOLDER, UPLOAD_NAME, uploadFile, uploadMultipleFiles } from '@/lib/cloudinary';
 import { v4 as uuidv4 } from 'uuid';
+import getAddCampaignSchema from '@/components/schema/addCampaignSchema';
 
 const CampaignInfo = () => {
     const navigate = useNavigate();
     const { user } = useSelector((state) => state.auth);
-
     const [imagesFolderUrl, setImagesFolderUrl] = useState([]);
     const [childFile, setChildFile] = useState(null);
     const [thumbnail, setThumbnail] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
-
     const [createCampaign, { isLoading: isCreatingCampaign }] = useCreateCampaignMutation();
     const {
         provinces,
@@ -43,7 +39,7 @@ const CampaignInfo = () => {
     } = useLocationVN();
 
     const form = useForm({
-        resolver: zodResolver(addCampaignSchema),
+        resolver: zodResolver(getAddCampaignSchema()),
         defaultValues: {
             childName: '',
             childIdentificationCode: '',
