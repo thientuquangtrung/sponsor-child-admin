@@ -273,6 +273,7 @@ const PhysicalDonationDetail = () => {
 
     const renderActionButtons = () => {
         if (donation.giftStatus === 4) {
+            if (user.role === 'ChildManager') return null;
             return (
                 <div className="flex justify-end space-x-4">
 
@@ -497,6 +498,10 @@ const PhysicalDonationDetail = () => {
                             value={`${refundData.totalRefundAmount.toLocaleString()} VNĐ`}
                         />
                         <InfoRow
+                            label="Tổng số tiền hoàn"
+                            value={`${refundData.totalRefundAmount.toLocaleString()} VNĐ`}
+                        />
+                        <InfoRow
                             label="Tên tài khoản"
                             value={bankInfo.bankAccountName}
                         />
@@ -523,10 +528,10 @@ const PhysicalDonationDetail = () => {
                         <CardTitle className="text-2xl font-semibold">Thông tin hoàn tiền</CardTitle>
                     </CardHeader>
                     <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-                        {/* <InfoRow
-                            label="Tổng số tiền hoàn"
-                            value={`${donation.refundAmount.toLocaleString()} VNĐ`}
-                        /> */}
+                        <InfoRow
+                            label="Số tiền hoàn"
+                            value={`${donation?.refundAmount?.toLocaleString()} VNĐ`}
+                        />
                         <InfoRow
                             label="Tên tài khoản"
                             value={donation.bankAccountName}
@@ -633,16 +638,14 @@ const PhysicalDonationDetail = () => {
                 </Card>
             )}
 
-            {user.role !== 'ChildManager' && (
-                <div className="flex flex-col space-y-4">
-                    {donation.giftStatus !== 2 &&
-                        donation.giftStatus !== 3 &&
-                        donation.giftStatus !== 5 &&
-                        donation.giftStatus !== 1 &&
-                        donation.giftStatus !== 6 &&
-                        renderActionButtons()}
-                </div>
-            )}
+            <div className="flex flex-col space-y-4">
+                {donation.giftStatus !== 2 &&
+                    donation.giftStatus !== 3 &&
+                    donation.giftStatus !== 5 &&
+                    donation.giftStatus !== 6 &&
+                    renderActionButtons()}
+            </div>
+
         </div>
     );
 };
